@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_WarehouseImportExport
+ *
+ * @category  XML
+ * @package   Pratech\WarehouseImportExport
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_ImportExport:etc/import.xsd">
+    <entity name="serviceable_pincodes" label="Pincodes"
+            model="Pratech\WarehouseImportExport\Model\Import\Pincodes"
+            behaviorModel="Magento\ImportExport\Model\Source\Import\Behavior\Basic"/>
+    <entity name="warehouse_sla" label="Warehouse SLA"
+            model="Pratech\WarehouseImportExport\Model\Import\WarehouseSla"
+            behaviorModel="Magento\ImportExport\Model\Source\Import\Behavior\Basic"/>
+</config>

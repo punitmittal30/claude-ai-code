@@ -1,0 +1,108 @@
+# Copyright © Magento, Inc. All rights reserved.
+# See COPYING.txt for license details.
+
+interface ProductInterface {
+    estimated_delivery_time(
+    pincode: String! @doc(description: "Customer pincode for delivery estimation")
+    ): EstimatedDeliveryTime @doc(description: "Estimated delivery time information") @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\EstimatedDeliveryTime")
+}
+
+type EstimatedDeliveryTime @doc(description: "Represents estimated delivery time") {
+    warehouse_code: String @doc(description: "Warehouse code.")
+    delivery_time: Int @doc(description: "Delivery time taken for the product.")
+    quantity: Int @doc(description: "The quantity of the product.")
+}
+
+# New GraphQL types for warehouse products
+type Query {
+    warehouseProducts(
+        warehouseCode: String! @doc(description: "Warehouse code to filter products by")
+        pageSize: Int = 20 @doc(description: "How many items should be shown on the page")
+        currentPage: Int = 1 @doc(description: "Current page")
+        sort: ProductAttributeSortInput @doc(description: "Specifies the sorting field and direction")
+        filter: ProductAttributeFilterInput @doc(description: "Specifies the filters to apply to the product list")
+    ): WarehouseProductsOutput @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\WarehouseProducts")
+
+    darkStoreProducts(
+        pincode: String! @doc(description: "Customer pincode to find nearest dark store")
+        pageSize: Int = 20 @doc(description: "How many items should be shown on the page")
+        currentPage: Int = 1 @doc(description: "Current page")
+        sort: ProductAttributeSortInput @doc(description: "Specifies the sorting field and direction")
+        filter: ProductAttributeFilterInput @doc(description: "Specifies the filters to apply to the product list")
+    ): WarehouseProductsOutput @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\DarkStoreProducts")
+
+    warehouseFilters(
+        warehouseCode: String! @doc(description: "Warehouse code to get available filters for")
+        categoryId: Int @doc(description: "Optional category ID to filter by")
+    ): AvailableFiltersOutput @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\AvailableFilters")
+
+    darkStoreFilters(
+        pincode: String! @doc(description: "Customer pincode to find nearest dark store")
+        categoryId: Int @doc(description: "Optional category ID to filter by")
+    ): AvailableFiltersOutput @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\DarkStoreFilters")
+}
+
+input ProductAttributeFilterInput {
+    category_id: FilterEqualTypeInput @doc(description: "Filter by category ID")
+    name: FilterMatchTypeInput @doc(description: "Filter by product name")
+    price: FilterRangeTypeInput @doc(description: "Filter by price range")
+    brand: FilterEqualTypeInput @doc(description: "Filter by brand attribute")
+    color: FilterEqualTypeInput @doc(description: "Filter by color attribute")
+    size: FilterEqualTypeInput @doc(description: "Filter by size attribute")
+    # Additional product attributes can be added here
+}
+
+input FilterEqualTypeInput {
+    eq: String @doc(description: "Equal")
+    in: [String] @doc(description: "In")
+}
+
+input FilterMatchTypeInput {
+    match: String @doc(description: "Match keyword")
+}
+
+input FilterRangeTypeInput {
+    from: String @doc(description: "From value")
+    to: String @doc(description: "To value")
+}
+
+type WarehouseProductsOutput @doc(description: "The output of the warehouseProducts query") {
+    items: [ProductInterface] @doc(description: "An array of products")
+    page_info: SearchResultPageInfo @doc(description: "Pagination information")
+    total_count: Int @doc(description: "The total number of products matching the criteria")
+    warehouse_code: String @doc(description: "Warehouse code")
+    warehouse_name: String @doc(description: "Warehouse name")
+}
+
+type AvailableFiltersOutput @doc(description: "Available filters for warehouse products") {
+    price_ranges: [PriceRange] @doc(description: "Available price ranges")
+    categories: [CategoryFilter] @doc(description: "Available category filters")
+    attributes: [AttributeFilter] @doc(description: "Available attribute filters")
+    warehouse_code: String @doc(description: "Warehouse code")
+    warehouse_name: String @doc(description: "Warehouse name")
+}
+
+type PriceRange @doc(description: "Price range filter") {
+    from: Float @doc(description: "From price")
+    to: Float @doc(description: "To price")
+    label: String @doc(description: "Price range label")
+}
+
+type CategoryFilter @doc(description: "Category filter") {
+    id: Int @doc(description: "Category ID")
+    label: String @doc(description: "Category name")
+    count: Int @doc(description: "Number of products in this category")
+}
+
+type AttributeFilter @doc(description: "Attribute filter") {
+    attribute_id: Int @doc(description: "Attribute ID")
+    attribute_code: String @doc(description: "Attribute code")
+    attribute_label: String @doc(description: "Attribute label")
+    options: [AttributeOption] @doc(description: "Available options for this attribute")
+}
+
+type AttributeOption @doc(description: "Attribute option") {
+    value: String @doc(description: "Option value")
+    label: String @doc(description: "Option label")
+    count: Int @doc(description: "Number of products with this option")
+}
