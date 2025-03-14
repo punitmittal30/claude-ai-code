@@ -1,4 +1,15 @@
 <?php
+/**
+ * Pratech_Warehouse
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Warehouse
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 
 declare(strict_types=1);
 
@@ -8,12 +19,14 @@ interface WarehouseProductResultInterface
 {
     /**
      * Get warehouse code
+     *
      * @return string|null
      */
     public function getWarehouseCode();
 
     /**
      * Set warehouse code
+     *
      * @param string $warehouseCode
      * @return $this
      */
@@ -21,12 +34,14 @@ interface WarehouseProductResultInterface
 
     /**
      * Get warehouse name
+     *
      * @return string|null
      */
     public function getWarehouseName();
 
     /**
      * Set warehouse name
+     *
      * @param string $warehouseName
      * @return $this
      */
@@ -34,12 +49,14 @@ interface WarehouseProductResultInterface
 
     /**
      * Get items
+     *
      * @return array
      */
     public function getItems();
 
     /**
      * Set items
+     *
      * @param array $items
      * @return $this
      */
@@ -47,12 +64,14 @@ interface WarehouseProductResultInterface
 
     /**
      * Get total count
+     *
      * @return int
      */
     public function getTotalCount();
 
     /**
      * Set total count
+     *
      * @param int $totalCount
      * @return $this
      */
@@ -60,12 +79,14 @@ interface WarehouseProductResultInterface
 
     /**
      * Get available filters
+     *
      * @return array
      */
     public function getAvailableFilters();
 
     /**
      * Set available filters
+     *
      * @param array $filters
      * @return $this
      */

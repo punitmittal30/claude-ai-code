@@ -6,16 +6,16 @@
  *
  * @category  PHP
  * @package   Pratech\Warehouse
- * @author    Your Name <your.email@pratechbrands.com>
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
  * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  **/
 
 namespace Pratech\Warehouse\Model\Converter;
 
+use Exception;
 use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Framework\Webapi\ServiceOutputProcessor;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 
 /**
@@ -24,33 +24,13 @@ use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 class WarehouseProductResultSerializer
 {
     /**
-     * @var ServiceOutputProcessor
-     */
-    private $serviceOutputProcessor;
-
-    /**
-     * @var Json
-     */
-    private $serializer;
-
-    /**
-     * @var DataObjectProcessor
-     */
-    private $dataObjectProcessor;
-
-    /**
-     * @param ServiceOutputProcessor $serviceOutputProcessor
      * @param Json $serializer
      * @param DataObjectProcessor $dataObjectProcessor
      */
     public function __construct(
-        ServiceOutputProcessor $serviceOutputProcessor,
-        Json $serializer,
-        DataObjectProcessor $dataObjectProcessor
+        private Json                $serializer,
+        private DataObjectProcessor $dataObjectProcessor
     ) {
-        $this->serviceOutputProcessor = $serviceOutputProcessor;
-        $this->serializer = $serializer;
-        $this->dataObjectProcessor = $dataObjectProcessor;
     }
 
     /**
@@ -76,6 +56,39 @@ class WarehouseProductResultSerializer
             }
         }
 
+        // Fix available_filters that might be serialized JSON strings
+        if (isset($data['available_filters']) && is_array($data['available_filters'])) {
+            $fixedFilters = [];
+            foreach ($data['available_filters'] as $key => $filter) {
+                // Check if it's a JSON string and convert it to an object
+                if (is_string($filter) && $this->isJson($filter)) {
+                    $decodedFilter = $this->serializer->unserialize($filter);
+
+                    // Handle different filter types - some might not have a code
+                    if (isset($decodedFilter['code'])) {
+                        // For attribute filters that have a code
+                        $fixedFilters[$decodedFilter['code']] = $decodedFilter;
+                    } elseif (isset($key) && is_string($key)) {
+                        // For price ranges and other filters that might be indexed differently
+                        $fixedFilters[$key] = $decodedFilter;
+                    } else {
+                        // Fallback - just add to the array
+                        $fixedFilters[] = $decodedFilter;
+                    }
+                } else {
+                    // It's already an object or array, keep it as is
+                    if (is_numeric($key) || !is_string($key)) {
+                        $fixedFilters[] = $filter;
+                    } else {
+                        $fixedFilters[$key] = $filter;
+                    }
+                }
+            }
+
+            // Replace the original filters array with the fixed version
+            $data['available_filters'] = array_values($fixedFilters);
+        }
+
         return $data;
     }
 
@@ -87,7 +100,11 @@ class WarehouseProductResultSerializer
      */
     private function isJson(string $string): bool
     {
-        $this->serializer->unserialize($string);
-        return json_last_error() === JSON_ERROR_NONE;
+        try {
+            $result = $this->serializer->unserialize($string);
+            return json_last_error() === JSON_ERROR_NONE && is_array($result);
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }

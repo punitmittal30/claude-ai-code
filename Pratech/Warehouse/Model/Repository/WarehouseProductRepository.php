@@ -4,7 +4,7 @@
  *
  * @category  PHP
  * @package   Pratech\Warehouse
- * @author    Your Name <your.email@pratechbrands.com>
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
  * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  */
@@ -20,6 +20,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Serialize\Serializer\Json;
 use Pratech\Warehouse\Api\Data\WarehouseInterface;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterfaceFactory;
 use Pratech\Warehouse\Api\WarehouseProductRepositoryInterface;
@@ -60,8 +61,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
         ?array  $filters = null
-    )
-    {
+    ) {
         try {
             // Get nearest dark store for this pincode
             $darkStore = $this->findNearestDarkStore($pincode);
@@ -152,8 +152,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
         mixed   $filters = []
-    )
-    {
+    ) {
         try {
             // Get warehouse info for validation and result data
             $warehouse = $this->getWarehouseByCode($warehouseCode);
@@ -196,6 +195,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $result->setWarehouseName($warehouse->getName());
             $result->setItems($formattedItems);
             $result->setTotalCount($collection->getSize());
+
+            // FIX: Set available filters as an array of objects directly, not as serialized strings
             $result->setAvailableFilters($availableFilters);
 
             return $result;
@@ -312,22 +313,32 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
      * @param array $appliedFilters Currently applied filters
      * @return array
      */
-    private function generateAvailableFilters(Collection $filteredCollection, Collection $unfilteredCollection, array $appliedFilters): array
-    {
+    private function generateAvailableFilters(
+        Collection $filteredCollection,
+        Collection $unfilteredCollection,
+        array $appliedFilters
+    ): array {
         $filters = [];
 
         // Get price ranges
         $priceRanges = $this->getPriceRanges($filteredCollection);
         if (!empty($priceRanges)) {
-            $filters['price_ranges'] = $priceRanges;
+            // Use a consistent format for all filter types
+            $filters[] = [
+                'name' => 'Price',
+                'code' => 'price',
+                'ranges' => $priceRanges
+            ];
         }
 
         // Get attribute filters (brand, color, etc.)
         $attributeFilters = $this->getAttributeFilters($filteredCollection, $unfilteredCollection, $appliedFilters);
 
-        // Merge attribute filters directly into the filters array
-        foreach ($attributeFilters as $code => $data) {
-            $filters[$code] = $data;
+        // Add attribute filters to the list (they're already objects)
+        if (!empty($attributeFilters)) {
+            foreach ($attributeFilters as $filter) {
+                $filters[] = $filter;
+            }
         }
 
         return $filters;
@@ -436,8 +447,11 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
      * @param array $appliedFilters
      * @return array
      */
-    private function getAttributeFilters(Collection $filteredCollection, Collection $unfilteredCollection, array $appliedFilters): array
-    {
+    private function getAttributeFilters(
+        Collection $filteredCollection,
+        Collection $unfilteredCollection,
+        array $appliedFilters
+    ): array {
         $attributeFilters = [];
 
         // List of attribute codes to include as filters
@@ -472,7 +486,11 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                     }
 
                     // Count products with this attribute option
-                    $count = $this->countProductsWithAttributeOption($filteredCollection, $attributeCode, $option['value']);
+                    $count = $this->countProductsWithAttributeOption(
+                        $filteredCollection,
+                        $attributeCode,
+                        $option['value']
+                    );
 
                     // Only include options that have at least one product
                     if ($count > 0) {
@@ -485,6 +503,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 }
 
                 if (!empty($filterOptions)) {
+                    // Fix: Return as direct object, not as serialized string
                     $attributeFilters[$attributeCode] = [
                         'name' => $attribute->getStoreLabel(),
                         'code' => $attributeCode,

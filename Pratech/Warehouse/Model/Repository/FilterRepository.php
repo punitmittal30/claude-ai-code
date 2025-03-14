@@ -4,7 +4,7 @@
  *
  * @category  PHP
  * @package   Pratech\Warehouse
- * @author    Your Name <your.email@pratechbrands.com>
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
  * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  */
@@ -15,7 +15,6 @@ namespace Pratech\Warehouse\Model\Repository;
 use Exception;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -29,6 +28,7 @@ use Pratech\Warehouse\Api\Data\FilterResultInterface;
 use Pratech\Warehouse\Api\Data\FilterResultInterfaceFactory;
 use Pratech\Warehouse\Api\Data\PriceRangeInterface;
 use Pratech\Warehouse\Api\Data\PriceRangeInterfaceFactory;
+use Pratech\Warehouse\Api\Data\WarehouseInterface;
 use Pratech\Warehouse\Api\FilterRepositoryInterface;
 use Pratech\Warehouse\Api\WarehouseRepositoryInterface;
 use Pratech\Warehouse\Helper\FilterHelper;
@@ -40,65 +40,9 @@ use Psr\Log\LoggerInterface;
 class FilterRepository implements FilterRepositoryInterface
 {
     /**
-     * @var CollectionFactory
-     */
-    private $productCollectionFactory;
-
-    /**
-     * @var WarehouseRepositoryInterface
-     */
-    private $warehouseRepository;
-
-    /**
-     * @var FilterHelper
-     */
-    private $filterHelper;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    private $searchCriteriaBuilder;
-
-    /**
-     * @var ResourceConnection
-     */
-    private $resource;
-
-    /**
-     * @var FilterResultInterfaceFactory
-     */
-    private $filterResultFactory;
-
-    /**
-     * @var PriceRangeInterfaceFactory
-     */
-    private $priceRangeFactory;
-
-    /**
-     * @var CategoryFilterInterfaceFactory
-     */
-    private $categoryFilterFactory;
-
-    /**
-     * @var AttributeFilterInterfaceFactory
-     */
-    private $attributeFilterFactory;
-
-    /**
-     * @var AttributeOptionInterfaceFactory
-     */
-    private $attributeOptionFactory;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @param CollectionFactory $productCollectionFactory
      * @param WarehouseRepositoryInterface $warehouseRepository
      * @param FilterHelper $filterHelper
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param ResourceConnection $resource
      * @param FilterResultInterfaceFactory $filterResultFactory
      * @param PriceRangeInterfaceFactory $priceRangeFactory
@@ -108,73 +52,17 @@ class FilterRepository implements FilterRepositoryInterface
      * @param LoggerInterface $logger
      */
     public function __construct(
-        CollectionFactory               $productCollectionFactory,
-        WarehouseRepositoryInterface    $warehouseRepository,
-        FilterHelper                    $filterHelper,
-        SearchCriteriaBuilder           $searchCriteriaBuilder,
-        ResourceConnection              $resource,
-        FilterResultInterfaceFactory    $filterResultFactory,
-        PriceRangeInterfaceFactory      $priceRangeFactory,
-        CategoryFilterInterfaceFactory  $categoryFilterFactory,
-        AttributeFilterInterfaceFactory $attributeFilterFactory,
-        AttributeOptionInterfaceFactory $attributeOptionFactory,
-        LoggerInterface                 $logger
+        private CollectionFactory               $productCollectionFactory,
+        private WarehouseRepositoryInterface    $warehouseRepository,
+        private FilterHelper                    $filterHelper,
+        private ResourceConnection              $resource,
+        private FilterResultInterfaceFactory    $filterResultFactory,
+        private PriceRangeInterfaceFactory      $priceRangeFactory,
+        private CategoryFilterInterfaceFactory  $categoryFilterFactory,
+        private AttributeFilterInterfaceFactory $attributeFilterFactory,
+        private AttributeOptionInterfaceFactory $attributeOptionFactory,
+        private LoggerInterface                 $logger
     ) {
-        $this->productCollectionFactory = $productCollectionFactory;
-        $this->warehouseRepository = $warehouseRepository;
-        $this->filterHelper = $filterHelper;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->resource = $resource;
-        $this->filterResultFactory = $filterResultFactory;
-        $this->priceRangeFactory = $priceRangeFactory;
-        $this->categoryFilterFactory = $categoryFilterFactory;
-        $this->attributeFilterFactory = $attributeFilterFactory;
-        $this->attributeOptionFactory = $attributeOptionFactory;
-        $this->logger = $logger;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getWarehouseFilters(
-        string $warehouseCode,
-        ?int   $categoryId = null
-    ): FilterResultInterface {
-        try {
-            // Get warehouse info
-            $warehouse = $this->getWarehouseByCode($warehouseCode);
-
-            // Create product collection with warehouse inventory filter
-            $collection = $this->createProductCollection($warehouseCode, $categoryId);
-
-            // Get available filters
-            $filters = $this->filterHelper->getAvailableFilters($collection, $categoryId);
-
-            // Create and populate result object
-            $result = $this->filterResultFactory->create();
-            $result->setWarehouseCode($warehouseCode);
-            $result->setWarehouseName($warehouse->getName());
-
-            // Set price ranges
-            $priceRanges = $this->createPriceRanges($filters['price'] ?? []);
-            $result->setPriceRanges($priceRanges);
-
-            // Set categories
-            $categories = $this->createCategoryFilters($filters['category'] ?? []);
-            $result->setCategories($categories);
-
-            // Set attributes
-            $attributes = $this->createAttributeFilters($filters['attributes'] ?? []);
-            $result->setAttributes($attributes);
-
-            return $result;
-        } catch (NoSuchEntityException $e) {
-            $this->logger->error('Warehouse not found: ' . $e->getMessage());
-            throw $e;
-        } catch (Exception $e) {
-            $this->logger->error('Error retrieving filters: ' . $e->getMessage());
-            throw new LocalizedException(__('Could not retrieve filters: %1', $e->getMessage()));
-        }
     }
 
     /**
@@ -200,22 +88,6 @@ class FilterRepository implements FilterRepositoryInterface
         } catch (Exception $e) {
             $this->logger->error('Error retrieving filters by pincode: ' . $e->getMessage());
             throw new LocalizedException(__('Could not retrieve filters for pincode: %1', $e->getMessage()));
-        }
-    }
-
-    /**
-     * Get warehouse by code
-     *
-     * @param string $warehouseCode
-     * @return \Pratech\Warehouse\Api\Data\WarehouseInterface
-     * @throws NoSuchEntityException
-     */
-    private function getWarehouseByCode(string $warehouseCode)
-    {
-        try {
-            return $this->warehouseRepository->getByCode($warehouseCode);
-        } catch (NoSuchEntityException $e) {
-            throw new NoSuchEntityException(__('Warehouse with code "%1" does not exist.', $warehouseCode));
         }
     }
 
@@ -271,6 +143,61 @@ class FilterRepository implements FilterRepositoryInterface
             $this->logger->error('Error finding nearest dark store: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getWarehouseFilters(
+        string $warehouseCode,
+        ?int   $categoryId = null
+    ): FilterResultInterface {
+        try {
+            // Get warehouse info
+            $warehouse = $this->getWarehouseByCode($warehouseCode);
+
+            // Create product collection with warehouse inventory filter
+            $collection = $this->createProductCollection($warehouseCode, $categoryId);
+
+            // Get available filters
+            $filters = $this->filterHelper->getAvailableFilters($collection, $categoryId);
+
+            // Create and populate result object
+            $result = $this->filterResultFactory->create();
+            $result->setWarehouseCode($warehouseCode);
+            $result->setWarehouseName($warehouse->getName());
+
+            // Set price ranges
+            $priceRanges = $this->createPriceRanges($filters['price'] ?? []);
+            $result->setPriceRanges($priceRanges);
+
+            // Set categories
+            $categories = $this->createCategoryFilters($filters['category'] ?? []);
+            $result->setCategories($categories);
+
+            // Set attributes
+            $attributes = $this->createAttributeFilters($filters['attributes'] ?? []);
+            $result->setAttributes($attributes);
+
+            return $result;
+        } catch (NoSuchEntityException $e) {
+            $this->logger->error('Warehouse not found: ' . $e->getMessage());
+            throw $e;
+        } catch (Exception $e) {
+            $this->logger->error('Error retrieving filters: ' . $e->getMessage());
+            throw new LocalizedException(__('Could not retrieve filters: %1', $e->getMessage()));
+        }
+    }
+
+    /**
+     * Get warehouse by code
+     *
+     * @param string $warehouseCode
+     * @return WarehouseInterface
+     */
+    private function getWarehouseByCode(string $warehouseCode)
+    {
+        return $this->warehouseRepository->getByCode($warehouseCode);
     }
 
     /**

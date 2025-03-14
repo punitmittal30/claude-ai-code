@@ -6,7 +6,7 @@
  *
  * @category  PHP
  * @package   Pratech\Warehouse
- * @author    Your Name <your.email@pratechbrands.com>
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
  * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  **/
@@ -23,17 +23,11 @@ use Pratech\Warehouse\Model\Converter\WarehouseProductResultSerializer;
 class WarehouseProductResultPlugin
 {
     /**
-     * @var WarehouseProductResultSerializer
-     */
-    private $resultSerializer;
-
-    /**
      * @param WarehouseProductResultSerializer $resultSerializer
      */
     public function __construct(
-        WarehouseProductResultSerializer $resultSerializer
+        private WarehouseProductResultSerializer $resultSerializer
     ) {
-        $this->resultSerializer = $resultSerializer;
     }
 
     /**
