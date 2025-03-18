@@ -60,7 +60,6 @@ class WarehouseProductResultSerializer
         if (isset($data['available_filters']) && is_array($data['available_filters'])) {
             $fixedFilters = [];
             foreach ($data['available_filters'] as $key => $filter) {
-                // Check if it's a JSON string and convert it to an object
                 if (is_string($filter) && $this->isJson($filter)) {
                     $decodedFilter = $this->serializer->unserialize($filter);
 
@@ -72,7 +71,6 @@ class WarehouseProductResultSerializer
                         // For price ranges and other filters that might be indexed differently
                         $fixedFilters[$key] = $decodedFilter;
                     } else {
-                        // Fallback - just add to the array
                         $fixedFilters[] = $decodedFilter;
                     }
                 } else {
@@ -85,7 +83,6 @@ class WarehouseProductResultSerializer
                 }
             }
 
-            // Replace the original filters array with the fixed version
             $data['available_filters'] = array_values($fixedFilters);
         }
 

@@ -22,7 +22,6 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Pratech\Warehouse\Service\DeliveryDateCalculator;
 
 /**
  * Helper for formatting product responses
@@ -35,20 +34,14 @@ class ProductResponseFormatter extends AbstractHelper
      * @var array
      */
     private const ATTRIBUTES_TO_TRANSFORM = [
-        'brand',
         'color',
         'dietary_preference',
         'flavour',
-        'form',
-        'gender',
         'item_weight',
         'material',
         'pack_of',
         'pack_size',
-        'primary_benefits',
-        'primary_l1_category',
-        'primary_l2_category',
-        'size',
+        'size'
     ];
 
     /**
@@ -59,14 +52,12 @@ class ProductResponseFormatter extends AbstractHelper
     /**
      * @param Context $context
      * @param Configurable $configurableType
-     * @param DeliveryDateCalculator $deliveryDateCalculator
      * @param ProductAttributeRepositoryInterface $attributeRepository
      * @param StockRegistryInterface $stockItemRepository
      */
     public function __construct(
         Context                                     $context,
         private Configurable                        $configurableType,
-        private DeliveryDateCalculator              $deliveryDateCalculator,
         private ProductAttributeRepositoryInterface $attributeRepository,
         private StockRegistryInterface              $stockItemRepository
     ) {
@@ -116,7 +107,6 @@ class ProductResponseFormatter extends AbstractHelper
             'special_price' => (float)$product->getSpecialPrice(),
             'price_range' => $this->getPriceRange($product),
             'number_of_servings' => $product->getData('number_of_servings') ?? '',
-            'primary_l2_category' => $product->getData('primary_l2_category'),
             'stock_info' => [
                 'qty' => $productStock->getQty(),
                 'min_sale_qty' => $productStock->getMinSaleQty(),
@@ -127,12 +117,10 @@ class ProductResponseFormatter extends AbstractHelper
             'price_per_100_ml' => $product->getData('price_per_100_ml') ?? '',
             'price_per_100_gram' => $product->getData('price_per_100_gram') ?? '',
             'price_per_gram_protein' => $product->getData('price_per_gram_protein') ?? '',
-            'offers' => $product->getData('offers'),
             'badges' => $product->getData('badges') ?? '',
             'deal_of_the_day' => (bool)$product->getData('deal_of_the_day'),
             'special_from_date_formatted' => $product->getSpecialFromDate() ?? '',
             'special_to_date_formatted' => $product->getSpecialToDate() ?? '',
-            'usp' => $this->getProductUSP($product),
             'star_ratings' => (int)$product->getData('star_ratings') ?? 0,
             'review_count' => (int)$product->getData('review_count') ?? 0,
             'stock_status' => $productStock->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK'
@@ -231,23 +219,6 @@ class ProductResponseFormatter extends AbstractHelper
                 ]
             ]
         ];
-    }
-
-    /**
-     * Get product USP
-     *
-     * @param ProductInterface $product
-     * @return array
-     */
-    private function getProductUSP(ProductInterface $product): array
-    {
-        $usp = $product->getData('usp');
-
-        if (is_string($usp)) {
-            return explode(',', $usp);
-        }
-
-        return is_array($usp) ? $usp : [];
     }
 
     /**
@@ -413,69 +384,5 @@ class ProductResponseFormatter extends AbstractHelper
         }
 
         return $variants;
-    }
-
-    /**
-     * Get L2 category data
-     *
-     * @param ProductInterface $product
-     * @return array
-     */
-    private function getL2Category(ProductInterface $product): array
-    {
-        $primaryL2Category = $product->getData('primary_l2_category');
-
-        if ($primaryL2Category) {
-            // Here you would typically load the category by ID
-            // This is a simplified version
-            return [
-                'name' => $product->getData('l2_category_name') ?? null,
-                'slug' => $product->getData('l2_category_slug') ?? null
-            ];
-        }
-
-        return [
-            'name' => null,
-            'slug' => null
-        ];
-    }
-
-    /**
-     * Get stock info
-     *
-     * @param ProductInterface $product
-     * @return array
-     */
-    private function getStockInfo(ProductInterface $product): array
-    {
-        return [
-            'min_sale_qty' => 1,
-            'max_sale_qty' => 10000
-        ];
-    }
-
-    /**
-     * Get estimated delivery time
-     *
-     * @param ProductInterface $product
-     * @return array
-     */
-    private function getEstimatedDeliveryTime(ProductInterface $product): array
-    {
-        $deliveryTime = $product->getExtensionAttributes()->getEstimatedDeliveryTime();
-
-        if ($deliveryTime) {
-            return [
-                'warehouse_code' => $deliveryTime->getWarehouseCode() ?? '',
-                'delivery_time' => $deliveryTime->getDeliveryTime() ?? 144,
-                'quantity' => $deliveryTime->getQuantity() ?? 0
-            ];
-        }
-
-        return [
-            'warehouse_code' => '',
-            'delivery_time' => 144,
-            'quantity' => 0
-        ];
     }
 }
