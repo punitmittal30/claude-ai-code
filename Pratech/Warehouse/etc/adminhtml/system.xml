@@ -37,6 +37,20 @@
                     <label>Cut Off Time</label>
                     <comment>Set the value which needs to be shown for cut-off time for same day delivery</comment>
                 </field>
+                <field id="static_attributes" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10"
+                       translate="label" type="multiselect">
+                    <label>Static Attributes in API</label>
+                    <comment>Please select attributes which you want to share in the API response.
+                    </comment>
+                    <source_model>Pratech\Warehouse\Model\Config\Source\AllowedAttributes</source_model>
+                </field>
+                <field id="dynamic_attributes" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10"
+                       translate="label" type="multiselect">
+                    <label>Dynamic Attributes in API</label>
+                    <comment>Please select attributes which you want to share in the API response.
+                    </comment>
+                    <source_model>Pratech\Warehouse\Model\Config\Source\AllowedAttributes</source_model>
+                </field>
             </group>
             <group id="vinculum" translate="label" type="text" sortOrder="20" showInDefault="1"
                    showInWebsite="1" showInStore="1">
@@ -76,28 +90,6 @@
                     <depends>
                         <field id="enable">1</field>
                     </depends>
-                </field>
-            </group>
-            <group id="clickpost" translate="label" type="text" sortOrder="30" showInDefault="1"
-                   showInWebsite="1" showInStore="1">
-                <label>Clickpost</label>
-                <field id="api_key" translate="label" type="obscure" sortOrder="1" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>API Key</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                </field>
-                <field id="api_username" translate="label" type="obscure" sortOrder="2" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>API Username</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                </field>
-                <field id="origin" translate="label" type="text" sortOrder="4" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>Origin Pincode</label>
-                </field>
-                <field id="base_url" translate="label" type="text" sortOrder="4" showInDefault="1"
-                       showInWebsite="1" showInStore="1">
-                    <label>API Base URL</label>
                 </field>
             </group>
         </section>

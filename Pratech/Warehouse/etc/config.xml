@@ -18,6 +18,8 @@
                 <default_pincode>400013</default_pincode>
                 <dropship_delivery_eta>48</dropship_delivery_eta>
                 <cut_off_time>17</cut_off_time>
+                <static_attributes>badges,color,deal_of_the_day,dietary_preference,flavour,form,is_hl_verified,item_weight,material,name,number_of_servings,pack_of,pack_size,price_per_100_gram,price_per_100_ml,price_per_count,price_per_gram_protein,protein_per_serving,size,url_key</static_attributes>
+                <dynamic_attributes>price,special_from_date,special_price,special_to_date</dynamic_attributes>
             </general>
             <vinculum>
                 <enable>0</enable>

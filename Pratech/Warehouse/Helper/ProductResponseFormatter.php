@@ -22,6 +22,8 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\CacheInterface;
+use Magento\Framework\Serialize\SerializerInterface;
 
 /**
  * Helper for formatting product responses
@@ -43,8 +45,17 @@ class ProductResponseFormatter extends AbstractHelper
         'pack_size',
         'size'
     ];
-
     /**
+     * Cache key for attribute options
+     */
+    private const ATTRIBUTE_OPTIONS_CACHE_KEY = 'warehouse_attribute_options';
+    /**
+     * Cache lifetime for attribute options (1 day)
+     */
+    private const ATTRIBUTE_OPTIONS_CACHE_LIFETIME = 86400;
+    /**
+     * In-memory attribute options cache
+     *
      * @var array
      */
     private $attributeOptionsCache = [];
@@ -54,14 +65,20 @@ class ProductResponseFormatter extends AbstractHelper
      * @param Configurable $configurableType
      * @param ProductAttributeRepositoryInterface $attributeRepository
      * @param StockRegistryInterface $stockItemRepository
+     * @param CacheInterface $cache
+     * @param SerializerInterface $serializer
      */
     public function __construct(
         Context                                     $context,
         private Configurable                        $configurableType,
         private ProductAttributeRepositoryInterface $attributeRepository,
-        private StockRegistryInterface              $stockItemRepository
-    ) {
+        private StockRegistryInterface              $stockItemRepository,
+        private CacheInterface                      $cache,
+        private SerializerInterface                 $serializer
+    )
+    {
         parent::__construct($context);
+        $this->loadAttributeOptionsCache();
     }
 
     /**
@@ -79,6 +96,56 @@ class ProductResponseFormatter extends AbstractHelper
         }
 
         return $formattedItems;
+    }
+
+    /**
+     * Load attribute options cache from persistent cache
+     *
+     * @return void
+     */
+    private function loadAttributeOptionsCache(): void
+    {
+        $cachedOptions = $this->cache->load(self::ATTRIBUTE_OPTIONS_CACHE_KEY);
+        if ($cachedOptions) {
+            $this->attributeOptionsCache = $this->serializer->unserialize($cachedOptions);
+        }
+    }
+
+    /**
+     * Preload all attribute options for commonly used attributes
+     *
+     * @return void
+     */
+    private function preloadAttributeOptions(): void
+    {
+        // Skip if already loaded
+        if (!empty($this->attributeOptionsCache)) {
+            return;
+        }
+
+        foreach (self::ATTRIBUTES_TO_TRANSFORM as $attributeCode) {
+            try {
+                $attribute = $this->attributeRepository->get($attributeCode);
+                $options = $attribute->getSource()->getAllOptions(false);
+
+                foreach ($options as $option) {
+                    if (!empty($option['value'])) {
+                        $cacheKey = $attributeCode . '|' . $option['value'];
+                        $this->attributeOptionsCache[$cacheKey] = (string)$option['label'];
+                    }
+                }
+            } catch (Exception $e) {
+                $this->_logger->error('Error preloading attribute options: ' . $e->getMessage());
+            }
+        }
+
+        // Cache for future use
+        $this->cache->save(
+            $this->serializer->serialize($this->attributeOptionsCache),
+            self::ATTRIBUTE_OPTIONS_CACHE_KEY,
+            ['attribute_options'],
+            self::ATTRIBUTE_OPTIONS_CACHE_LIFETIME
+        );
     }
 
     /**
@@ -230,27 +297,50 @@ class ProductResponseFormatter extends AbstractHelper
      */
     private function getAttributeOptionLabelByCode(string $attributeCode, $value): string
     {
+        // Handle null or empty values
+        if ($value === null || $value === '') {
+            return '';
+        }
+
         try {
-            // Check if we already have this option in cache
+            // Check if we already have this option in in-memory cache
             $cacheKey = $attributeCode . '|' . $value;
             if (isset($this->attributeOptionsCache[$cacheKey])) {
                 return $this->attributeOptionsCache[$cacheKey];
             }
 
-            // Fetch attribute
+            // For multiselect attributes (comma-separated values)
+            if (is_string($value) && strpos($value, ',') !== false) {
+                $valueArray = explode(',', $value);
+                $labels = [];
+
+                foreach ($valueArray as $singleValue) {
+                    $multiCacheKey = $attributeCode . '|' . $singleValue;
+                    if (isset($this->attributeOptionsCache[$multiCacheKey])) {
+                        $labels[] = $this->attributeOptionsCache[$multiCacheKey];
+                    } else {
+                        $labels[] = $singleValue;
+                    }
+                }
+
+                return implode(', ', $labels);
+            }
+
+            // Fallback to fetching the attribute option
             $attribute = $this->attributeRepository->get($attributeCode);
+            $options = $attribute->getSource()->getAllOptions(false);
 
-            // Get option label
-            $label = $this->getAttributeOptionLabel($attribute, $value);
-
-            // Cache the result
-            $this->attributeOptionsCache[$cacheKey] = $label;
-
-            return $label;
+            foreach ($options as $option) {
+                if ($option['value'] == $value) {
+                    $this->attributeOptionsCache[$cacheKey] = (string)$option['label'];
+                    return (string)$option['label'];
+                }
+            }
         } catch (Exception $e) {
             $this->_logger->error('Error getting attribute option label: ' . $e->getMessage());
-            return (string)$value; // Return the value as string if label can't be found
         }
+
+        return (string)$value;
     }
 
     /**
