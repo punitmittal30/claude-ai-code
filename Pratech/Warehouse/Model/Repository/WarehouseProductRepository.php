@@ -30,7 +30,6 @@ use Pratech\Warehouse\Api\Data\WarehouseProductResultInterfaceFactory;
 use Pratech\Warehouse\Api\WarehouseProductRepositoryInterface;
 use Pratech\Warehouse\Api\WarehouseRepositoryInterface;
 use Pratech\Warehouse\Helper\Config;
-use Pratech\Warehouse\Helper\ProductResponseFormatter;
 use Psr\Log\LoggerInterface;
 use Zend_Db_Expr;
 
@@ -66,11 +65,10 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
      * @param WarehouseProductResultInterfaceFactory $resultFactory
      * @param WarehouseRepositoryInterface $warehouseRepository
      * @param LoggerInterface $logger
-     * @param ProductResponseFormatter $responseFormatter
      * @param ProductAttributeRepositoryInterface $attributeRepository
      * @param CacheInterface $cache
      * @param SerializerInterface $serializer
-     * @param Config $helperConfig
+     * @param Config $configHelper
      */
     public function __construct(
         private ResourceConnection                     $resource,
@@ -78,7 +76,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         private WarehouseProductResultInterfaceFactory $resultFactory,
         private WarehouseRepositoryInterface           $warehouseRepository,
         private LoggerInterface                        $logger,
-        private ProductResponseFormatter               $responseFormatter,
         private ProductAttributeRepositoryInterface    $attributeRepository,
         private CacheInterface                         $cache,
         private SerializerInterface                    $serializer,
@@ -90,13 +87,13 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getProductsByPincode(
+    public function getDarkStoreProductsByPincode(
         int     $pincode,
         int     $pageSize = 20,
         int     $currentPage = 1,
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
-        ?array  $filters = null
+        mixed   $filters = []
     )
     {
         try {
@@ -217,8 +214,12 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     {
         try {
             // Generate static and dynamic cache keys
-            $staticCacheKey = $this->buildStaticCacheKey($warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters);
-            $dynamicCacheKey = $this->buildDynamicCacheKey($warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters);
+            $staticCacheKey = $this->buildStaticCacheKey(
+                $warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters
+            );
+            $dynamicCacheKey = $this->buildDynamicCacheKey(
+                $warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters
+            );
 
             // Get warehouse info for validation and result data
             $warehouse = $this->getWarehouseByCode($warehouseCode);
@@ -250,7 +251,9 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             }
 
             // Cache miss, need to fetch from database
-            $collection = $this->getOptimizedProductCollection($warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters);
+            $collection = $this->getOptimizedProductCollection(
+                $warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters
+            );
 
             // Get count before loading to optimize
             $totalCount = $collection->getSize();
@@ -571,9 +574,9 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $priceRanges = $this->getEfficientPriceRanges($collection);
             if (!empty($priceRanges)) {
                 $filters[] = [
-                    'name' => 'Price',
-                    'code' => 'price',
-                    'ranges' => $priceRanges
+                    'label' => 'Price',
+                    'attribute_code' => 'price',
+                    'options' => $priceRanges
                 ];
             }
 
@@ -678,8 +681,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
                     if (!empty($options)) {
                         $filters[] = [
-                            'name' => $attribute->getStoreLabel(),
-                            'code' => $attributeCode,
+                            'label' => $attribute->getStoreLabel(),
+                            'attribute_code' => $attributeCode,
                             'options' => $options
                         ];
                     }
@@ -695,6 +698,162 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         }
 
         return $filters;
+    }
+
+    /**
+     * Get price ranges efficiently using optimized queries
+     *
+     * @param Collection $collection
+     * @return array
+     */
+    private function getEfficientPriceRanges(Collection $collection): array
+    {
+        $priceRanges = [];
+
+        try {
+            $connection = $this->resource->getConnection();
+
+            // We need to join with the price index table to get accurate prices
+            $priceAttributeId = $this->getAttributeId('price');
+            if (!$priceAttributeId) {
+                return [];
+            }
+
+            // Clone the collection's select to avoid modifying the original query
+            $select = clone $collection->getSelect();
+
+            // Reset columns to avoid loading unnecessary data
+            $select->reset(Select::COLUMNS);
+            $select->reset(Select::ORDER);
+            $select->reset(Select::LIMIT_COUNT);
+            $select->reset(Select::LIMIT_OFFSET);
+
+            // Join with price table to get the price data
+            $select->joinLeft(
+                ['price_table' => $this->resource->getTableName('catalog_product_entity_decimal')],
+                "e.entity_id = price_table.entity_id AND price_table.attribute_id = {$priceAttributeId} AND price_table.store_id = 0",
+                []
+            );
+
+            // Add only the columns needed for price calculation
+            $select->columns([
+                'min_price' => new Zend_Db_Expr('MIN(price_table.value)'),
+                'max_price' => new Zend_Db_Expr('MAX(price_table.value)')
+            ]);
+
+            // Execute query efficiently
+            $result = $connection->fetchRow($select);
+
+            // Get min/max prices
+            $minPrice = floor((float)($result['min_price'] ?? 0));
+            $maxPrice = ceil((float)($result['max_price'] ?? 0));
+
+            if ($minPrice == $maxPrice || $minPrice > $maxPrice || $minPrice <= 0) {
+                return [];
+            }
+
+            // Create nice rounded price ranges
+            $priceRange = $maxPrice - $minPrice;
+
+            // Determine appropriate step size based on price range
+            if ($priceRange <= 100) {
+                $stepSize = 20;  // Small price range: use steps of 20
+            } elseif ($priceRange <= 500) {
+                $stepSize = 100; // Medium price range: use steps of 100
+            } elseif ($priceRange <= 2000) {
+                $stepSize = 500; // Larger price range: use steps of 500
+            } elseif ($priceRange <= 10000) {
+                $stepSize = 1000; // Large price range: use steps of 1000
+            } else {
+                $stepSize = 5000; // Very large price range: use steps of 5000
+            }
+
+            // Generate fixed number of price ranges to avoid overhead
+            $start = floor($minPrice / $stepSize) * $stepSize;
+            $rangeCount = min(5, ceil(($maxPrice - $start) / $stepSize));
+
+            for ($i = 0; $i < $rangeCount; $i++) {
+                $rangeStart = $start + ($i * $stepSize);
+                $rangeEnd = $rangeStart + $stepSize;
+
+                // Skip ranges outside min/max bounds
+                if ($rangeEnd < $minPrice || $rangeStart > $maxPrice) {
+                    continue;
+                }
+
+                $priceRanges[] = [
+                    'from' => $rangeStart,
+                    'to' => $rangeEnd,
+                    'label' => $rangeStart . ' - ' . $rangeEnd,
+                    'count' => $this->getPriceRangeCount($collection, $rangeStart, $rangeEnd, $priceAttributeId)
+                ];
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error getting price ranges: ' . $e->getMessage());
+        }
+
+        return $priceRanges;
+    }
+
+    /**
+     * Get attribute ID by code
+     *
+     * @param string $attributeCode
+     * @return int|null
+     */
+    private function getAttributeId(string $attributeCode): ?int
+    {
+        try {
+            $attribute = $this->attributeRepository->get($attributeCode);
+            return $attribute->getAttributeId();
+        } catch (Exception $e) {
+            $this->logger->error('Error getting attribute ID: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get count of products in a price range efficiently
+     *
+     * @param Collection $collection
+     * @param float $from
+     * @param float $to
+     * @param int $priceAttributeId
+     * @return int
+     */
+    private function getPriceRangeCount(Collection $collection, float $from, float $to, int $priceAttributeId): int
+    {
+        try {
+            $connection = $collection->getConnection();
+            $select = clone $collection->getSelect();
+
+            // Reset columns and order by to improve query performance
+            $select->reset(Select::COLUMNS);
+            $select->reset(Select::ORDER);
+            $select->reset(Select::LIMIT_COUNT);
+            $select->reset(Select::LIMIT_OFFSET);
+
+            // Join with price table if not already joined
+            $fromPart = $select->getPart(Select::FROM);
+
+            if (!isset($fromPart['price_table'])) {
+                $select->joinLeft(
+                    ['price_table' => $this->resource->getTableName('catalog_product_entity_decimal')],
+                    "e.entity_id = price_table.entity_id AND price_table.attribute_id = {$priceAttributeId} AND price_table.store_id = 0",
+                    []
+                );
+            }
+
+            // Just count the rows with price in range
+            $select->columns(['count' => new Zend_Db_Expr('COUNT(DISTINCT e.entity_id)')])
+                ->where('price_table.value >= ?', $from)
+                ->where('price_table.value < ?', $to);
+
+            return (int)$connection->fetchOne($select);
+        } catch (Exception $e) {
+            $this->logger->error('Error getting price range count: ' . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -1118,162 +1277,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         } catch (Exception $e) {
             $this->logger->error('Error invalidating all caches: ' . $e->getMessage());
             return false;
-        }
-    }
-
-    /**
-     * Get price ranges efficiently using optimized queries
-     *
-     * @param Collection $collection
-     * @return array
-     */
-    private function getEfficientPriceRanges(Collection $collection): array
-    {
-        $priceRanges = [];
-
-        try {
-            $connection = $this->resource->getConnection();
-
-            // We need to join with the price index table to get accurate prices
-            $priceAttributeId = $this->getAttributeId('price');
-            if (!$priceAttributeId) {
-                return [];
-            }
-
-            // Clone the collection's select to avoid modifying the original query
-            $select = clone $collection->getSelect();
-
-            // Reset columns to avoid loading unnecessary data
-            $select->reset(\Magento\Framework\DB\Select::COLUMNS);
-            $select->reset(\Magento\Framework\DB\Select::ORDER);
-            $select->reset(\Magento\Framework\DB\Select::LIMIT_COUNT);
-            $select->reset(\Magento\Framework\DB\Select::LIMIT_OFFSET);
-
-            // Join with price table to get the price data
-            $select->joinLeft(
-                ['price_table' => $this->resource->getTableName('catalog_product_entity_decimal')],
-                "e.entity_id = price_table.entity_id AND price_table.attribute_id = {$priceAttributeId} AND price_table.store_id = 0",
-                []
-            );
-
-            // Add only the columns needed for price calculation
-            $select->columns([
-                'min_price' => new \Zend_Db_Expr('MIN(price_table.value)'),
-                'max_price' => new \Zend_Db_Expr('MAX(price_table.value)')
-            ]);
-
-            // Execute query efficiently
-            $result = $connection->fetchRow($select);
-
-            // Get min/max prices
-            $minPrice = floor((float)($result['min_price'] ?? 0));
-            $maxPrice = ceil((float)($result['max_price'] ?? 0));
-
-            if ($minPrice == $maxPrice || $minPrice > $maxPrice || $minPrice <= 0) {
-                return [];
-            }
-
-            // Create nice rounded price ranges
-            $priceRange = $maxPrice - $minPrice;
-
-            // Determine appropriate step size based on price range
-            if ($priceRange <= 100) {
-                $stepSize = 20;  // Small price range: use steps of 20
-            } elseif ($priceRange <= 500) {
-                $stepSize = 100; // Medium price range: use steps of 100
-            } elseif ($priceRange <= 2000) {
-                $stepSize = 500; // Larger price range: use steps of 500
-            } elseif ($priceRange <= 10000) {
-                $stepSize = 1000; // Large price range: use steps of 1000
-            } else {
-                $stepSize = 5000; // Very large price range: use steps of 5000
-            }
-
-            // Generate fixed number of price ranges to avoid overhead
-            $start = floor($minPrice / $stepSize) * $stepSize;
-            $rangeCount = min(5, ceil(($maxPrice - $start) / $stepSize));
-
-            for ($i = 0; $i < $rangeCount; $i++) {
-                $rangeStart = $start + ($i * $stepSize);
-                $rangeEnd = $rangeStart + $stepSize;
-
-                // Skip ranges outside min/max bounds
-                if ($rangeEnd < $minPrice || $rangeStart > $maxPrice) {
-                    continue;
-                }
-
-                $priceRanges[] = [
-                    'from' => $rangeStart,
-                    'to' => $rangeEnd,
-                    'label' => $rangeStart . ' - ' . $rangeEnd,
-                    'count' => $this->getPriceRangeCount($collection, $rangeStart, $rangeEnd, $priceAttributeId)
-                ];
-            }
-        } catch (Exception $e) {
-            $this->logger->error('Error getting price ranges: ' . $e->getMessage());
-        }
-
-        return $priceRanges;
-    }
-
-    /**
-     * Get count of products in a price range efficiently
-     *
-     * @param Collection $collection
-     * @param float $from
-     * @param float $to
-     * @param int $priceAttributeId
-     * @return int
-     */
-    private function getPriceRangeCount(Collection $collection, float $from, float $to, int $priceAttributeId): int
-    {
-        try {
-            $connection = $collection->getConnection();
-            $select = clone $collection->getSelect();
-
-            // Reset columns and order by to improve query performance
-            $select->reset(\Magento\Framework\DB\Select::COLUMNS);
-            $select->reset(\Magento\Framework\DB\Select::ORDER);
-            $select->reset(\Magento\Framework\DB\Select::LIMIT_COUNT);
-            $select->reset(\Magento\Framework\DB\Select::LIMIT_OFFSET);
-
-            // Join with price table if not already joined
-            $fromPart = $select->getPart(\Magento\Framework\DB\Select::FROM);
-
-            if (!isset($fromPart['price_table'])) {
-                $select->joinLeft(
-                    ['price_table' => $this->resource->getTableName('catalog_product_entity_decimal')],
-                    "e.entity_id = price_table.entity_id AND price_table.attribute_id = {$priceAttributeId} AND price_table.store_id = 0",
-                    []
-                );
-            }
-
-            // Just count the rows with price in range
-            $select->columns(['count' => new \Zend_Db_Expr('COUNT(DISTINCT e.entity_id)')])
-                ->where('price_table.value >= ?', $from)
-                ->where('price_table.value < ?', $to);
-
-            return (int)$connection->fetchOne($select);
-        } catch (Exception $e) {
-            $this->logger->error('Error getting price range count: ' . $e->getMessage());
-            return 0;
-        }
-    }
-
-    /**
-     * Get attribute ID by code
-     *
-     * @param string $attributeCode
-     * @return int|null
-     */
-    private function getAttributeId(string $attributeCode): ?int
-    {
-        try {
-            $attribute = $this->attributeRepository->get($attributeCode);
-            return $attribute->getAttributeId();
-        } catch (Exception $e) {
-            $this->logger->error('Error getting attribute ID: ' . $e->getMessage());
-            return null;
         }
     }
 }

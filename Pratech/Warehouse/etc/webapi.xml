@@ -75,14 +75,12 @@
             <resource ref="Pratech_Warehouse::warehouse_manage"/>
         </resources>
     </route>
-    <route url="/V1/warehouse/pincode/:pincode/products/filter" method="POST">
-        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface" method="getProductsByPincode"/>
+    <route url="/V1/dark-store/pincode/:pincode/products/filter" method="POST">
+        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
+                 method="getDarkStoreProductsByPincode"/>
         <resources>
             <resource ref="Pratech_Warehouse::warehouse_manage"/>
         </resources>
-        <data>
-            <parameter name="filters" force="true"/>
-        </data>
     </route>
 
     <!-- Available filters API endpoints -->

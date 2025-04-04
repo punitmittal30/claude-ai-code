@@ -75,8 +75,7 @@ class ProductResponseFormatter extends AbstractHelper
         private StockRegistryInterface              $stockItemRepository,
         private CacheInterface                      $cache,
         private SerializerInterface                 $serializer
-    )
-    {
+    ) {
         parent::__construct($context);
         $this->loadAttributeOptionsCache();
     }

@@ -45,15 +45,15 @@ interface WarehouseProductRepositoryInterface
      * @param int $currentPage Current page
      * @param string|null $sortField Field to sort by
      * @param string|null $sortDirection Direction to sort (ASC|DESC)
-     * @param array|null $filters Array of filters to apply [field => [value, condition_type]]
+     * @param mixed $filters Array of filters to apply [field => [value, condition_type]]
      * @return \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface
      */
-    public function getProductsByPincode(
+    public function getDarkStoreProductsByPincode(
         int $pincode,
         int $pageSize = 20,
         int $currentPage = 1,
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
-        ?array $filters = null
+        mixed $filters = []
     );
 }

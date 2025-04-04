@@ -110,9 +110,9 @@ class WarehouseInventory extends AbstractDb
      */
     public function processInventoryItem(array $warehousesInventory): array
     {
+        $data = [];
         try {
             $tableName = $this->getMainTable();
-            $data = [];
 
             foreach ($warehousesInventory as $warehouseInventory) {
                 $data[] = [
@@ -132,7 +132,11 @@ class WarehouseInventory extends AbstractDb
             return $data;
 
         } catch (Exception $e) {
-            throw new LocalizedException(__('Error processing inventory item: %1', $e->getMessage()));
+            throw new LocalizedException(__(
+                'Error processing inventory item: %1, Data: %2',
+                $e->getMessage(),
+                $data
+            ));
         }
     }
 
