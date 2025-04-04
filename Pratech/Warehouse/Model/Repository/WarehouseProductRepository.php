@@ -26,6 +26,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\SerializerInterface;
 use Pratech\Warehouse\Api\Data\WarehouseInterface;
+use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterfaceFactory;
 use Pratech\Warehouse\Api\WarehouseProductRepositoryInterface;
 use Pratech\Warehouse\Api\WarehouseRepositoryInterface;
@@ -53,13 +54,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     private const CACHE_TAG_FILTERS = 'warehouse_filters';
 
     /**
-     * Dynamic attributes (frequently changing)
-     */
-    private const DYNAMIC_ATTRIBUTES = [
-        'price', 'special_price', 'special_from_date', 'special_to_date'
-    ];
-
-    /**
      * @param ResourceConnection $resource
      * @param CollectionFactory $productCollectionFactory
      * @param WarehouseProductResultInterfaceFactory $resultFactory
@@ -80,8 +74,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         private CacheInterface                         $cache,
         private SerializerInterface                    $serializer,
         private Config                                 $configHelper
-    )
-    {
+    ) {
     }
 
     /**
@@ -94,8 +87,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
         mixed   $filters = []
-    )
-    {
+    ): WarehouseProductResultInterface {
         try {
             // Get nearest dark store for this pincode
             $darkStore = $this->findNearestDarkStore($pincode);
@@ -164,8 +156,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $darkStore = null;
 
             if (!$slaData) {
-                // No SLA data found, return first dark store
-                $darkStore = reset($darkStores);
+                // No SLA data found, throw exception
+                throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
             } else {
                 // Get warehouse by pincode
                 $warehousePincode = $slaData['warehouse_pincode'];
@@ -179,7 +171,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
                 // If no matching warehouse found, return first dark store
                 if (!$darkStore) {
-                    $darkStore = reset($darkStores);
+                    throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
                 }
             }
 
@@ -210,15 +202,24 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
         mixed   $filters = []
-    )
-    {
+    ): WarehouseProductResultInterface {
         try {
             // Generate static and dynamic cache keys
             $staticCacheKey = $this->buildStaticCacheKey(
-                $warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters
+                $warehouseCode,
+                $pageSize,
+                $currentPage,
+                $sortField,
+                $sortDirection,
+                $filters
             );
             $dynamicCacheKey = $this->buildDynamicCacheKey(
-                $warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters
+                $warehouseCode,
+                $pageSize,
+                $currentPage,
+                $sortField,
+                $sortDirection,
+                $filters
             );
 
             // Get warehouse info for validation and result data
@@ -252,7 +253,12 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Cache miss, need to fetch from database
             $collection = $this->getOptimizedProductCollection(
-                $warehouseCode, $pageSize, $currentPage, $sortField, $sortDirection, $filters
+                $warehouseCode,
+                $pageSize,
+                $currentPage,
+                $sortField,
+                $sortDirection,
+                $filters
             );
 
             // Get count before loading to optimize
@@ -330,8 +336,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         ?string $sortField,
         ?string $sortDirection,
         mixed   $filters
-    ): string
-    {
+    ): string {
         $filterHash = md5($this->serializer->serialize($filters ?? []));
         return "warehouse_static_{$warehouseCode}_p{$pageSize}_c{$currentPage}_s{$sortField}_{$sortDirection}_{$filterHash}";
     }
@@ -353,9 +358,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         int     $currentPage,
         ?string $sortField,
         ?string $sortDirection,
-                $filters
-    ): string
-    {
+        mixed   $filters
+    ): string {
         $filterHash = md5($this->serializer->serialize($filters ?? []));
         return "warehouse_dynamic_{$warehouseCode}_p{$pageSize}_c{$currentPage}_s{$sortField}_{$sortDirection}_{$filterHash}";
     }
@@ -897,8 +901,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         ?string $sortField,
         ?string $sortDirection,
         array   $filters
-    ): Collection
-    {
+    ): Collection {
         $collection = $this->getProductCollection();
 
         // Only select needed attributes

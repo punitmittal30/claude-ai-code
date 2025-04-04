@@ -1,0 +1,5 @@
+inventory_id,warehouse_code,sku,quantity
+,WH001,SKU123,10
+,WH001,SKU124,20
+,WH002,SKU125,15
+,WH002,SKU123,5

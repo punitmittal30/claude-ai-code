@@ -18,9 +18,11 @@ use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Pratech\Warehouse\Api\Data\WarehouseInterface;
 use Pratech\Warehouse\Api\WarehouseRepositoryInterface;
 use Pratech\Warehouse\Model\ResourceModel\Warehouse as ResourceWarehouse;
@@ -33,33 +35,17 @@ class WarehouseRepository implements WarehouseRepositoryInterface
      * @param WarehouseFactory $warehouseFactory
      * @param WarehouseCollectionFactory $warehouseCollectionFactory
      * @param SearchResultsInterfaceFactory $searchResultsFactory
+     * @param CacheInterface $cache
+     * @param SerializerInterface $serializer
      */
     public function __construct(
         protected ResourceWarehouse             $resource,
         protected WarehouseFactory              $warehouseFactory,
         protected WarehouseCollectionFactory    $warehouseCollectionFactory,
-        protected SearchResultsInterfaceFactory $searchResultsFactory
+        protected SearchResultsInterfaceFactory $searchResultsFactory,
+        private CacheInterface                  $cache,
+        private SerializerInterface             $serializer
     ) {
-    }
-
-    /**
-     * Save.
-     *
-     * @param WarehouseInterface $warehouse
-     * @return WarehouseInterface
-     * @throws CouldNotSaveException
-     */
-    public function save(WarehouseInterface $warehouse): WarehouseInterface
-    {
-        try {
-            $this->resource->save($warehouse);
-        } catch (Exception $exception) {
-            throw new CouldNotSaveException(__(
-                'Could not save the warehouse: %1',
-                $exception->getMessage()
-            ));
-        }
-        return $warehouse;
     }
 
     /**
@@ -190,6 +176,12 @@ class WarehouseRepository implements WarehouseRepositoryInterface
      */
     public function getAvailableDarkStores(): array
     {
+        $cacheKey = 'available_dark_stores';
+        $cachedData = $this->cache->load($cacheKey);
+
+        if ($cachedData) {
+            return $this->serializer->unserialize($cachedData);
+        }
         $darkStores = [];
         $collection = $this->warehouseCollectionFactory->create();
         $collection->addFieldToFilter('is_dark_store', ['eq' => 1]);
@@ -206,6 +198,36 @@ class WarehouseRepository implements WarehouseRepositoryInterface
                 ];
             }
         }
+
+        if (!empty($darkStores)) {
+            $this->cache->save(
+                $this->serializer->serialize($darkStores),
+                $cacheKey,
+                ['dark_stores'],
+                86400
+            );
+        }
+
         return $darkStores;
+    }
+
+    /**
+     * Save.
+     *
+     * @param WarehouseInterface $warehouse
+     * @return WarehouseInterface
+     * @throws CouldNotSaveException
+     */
+    public function save(WarehouseInterface $warehouse): WarehouseInterface
+    {
+        try {
+            $this->resource->save($warehouse);
+        } catch (Exception $exception) {
+            throw new CouldNotSaveException(__(
+                'Could not save the warehouse: %1',
+                $exception->getMessage()
+            ));
+        }
+        return $warehouse;
     }
 }

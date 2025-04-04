@@ -35,7 +35,7 @@ interface WarehouseProductRepositoryInterface
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
         mixed $filters = []
-    );
+    ): \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 
     /**
      * Get product list available in a dark store by pincode
@@ -55,5 +55,5 @@ interface WarehouseProductRepositoryInterface
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
         mixed $filters = []
-    );
+    ): \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 }

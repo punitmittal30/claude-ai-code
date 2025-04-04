@@ -6,7 +6,7 @@
  * @category  XML
  * @package   Pratech\WarehouseImportExport
  * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
- * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  */
 -->
@@ -17,5 +17,11 @@
             behaviorModel="Magento\ImportExport\Model\Source\Import\Behavior\Basic"/>
     <entity name="warehouse_sla" label="Warehouse SLA"
             model="Pratech\WarehouseImportExport\Model\Import\WarehouseSla"
+            behaviorModel="Magento\ImportExport\Model\Source\Import\Behavior\Basic"/>
+    <entity name="warehouse_inventory" label="Warehouse Inventory"
+            model="Pratech\WarehouseImportExport\Model\Import\WarehouseInventory"
+            behaviorModel="Magento\ImportExport\Model\Source\Import\Behavior\Basic"/>
+    <entity name="warehouse" label="Warehouse"
+            model="Pratech\WarehouseImportExport\Model\Import\Warehouse"
             behaviorModel="Magento\ImportExport\Model\Source\Import\Behavior\Basic"/>
 </config>

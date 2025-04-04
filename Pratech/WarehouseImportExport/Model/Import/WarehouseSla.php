@@ -66,6 +66,9 @@ class WarehouseSla extends AbstractEntity
         'priority'
     ];
 
+    /**
+     * @var string[]
+     */
     protected $columnsToUpdate = [
         'customer_pincode',
         'warehouse_pincode',

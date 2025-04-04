@@ -7,7 +7,7 @@
  * @category  PHP
  * @package   Pratech\WarehouseImportExport
  * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
- * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  **/
 
@@ -24,11 +24,11 @@ use Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingErrorAggregatorI
 use Magento\ImportExport\Model\ResourceModel\Helper;
 use Magento\ImportExport\Model\ResourceModel\Import\Data;
 
-class Pincodes extends AbstractEntity
+class Warehouse extends AbstractEntity
 {
-    public const ENTITY_CODE = 'serviceable_pincodes';
-    public const TABLE = 'pratech_serviceable_pincodes';
-    public const ENTITY_ID_COLUMN = 'entity_id';
+    public const ENTITY_CODE = 'warehouse';
+    public const TABLE = 'pratech_warehouse';
+    public const ENTITY_ID_COLUMN = 'warehouse_id';
 
     /**
      * If we should check column names
@@ -50,7 +50,7 @@ class Pincodes extends AbstractEntity
      * @var array
      */
     protected $_permanentAttributes = [
-        'entity_id'
+        'warehouse_id'
     ];
 
     /**
@@ -59,21 +59,27 @@ class Pincodes extends AbstractEntity
      * @var array
      */
     protected $validColumnNames = [
-        'entity_id',
+        'warehouse_id',
+        'warehouse_code',
+        'name',
+        'warehouse_url',
         'pincode',
-        'is_serviceable',
-        'city',
-        'state'
+        'address',
+        'is_active',
+        'is_dark_store'
     ];
 
     /**
      * @var string[]
      */
     protected $columnsToUpdate = [
+        'warehouse_code',
+        'name',
+        'warehouse_url',
         'pincode',
-        'is_serviceable',
-        'city',
-        'state'
+        'address',
+        'is_active',
+        'is_dark_store'
     ];
 
     /**
@@ -87,7 +93,7 @@ class Pincodes extends AbstractEntity
     private $resource;
 
     /**
-     * Courses constructor.
+     * Constructor
      *
      * @param JsonHelper $jsonHelper
      * @param ImportHelper $importExportData
@@ -120,20 +126,32 @@ class Pincodes extends AbstractEntity
     private function initMessageTemplates(): void
     {
         $this->addMessageTemplate(
-            'IsServiceableIsRequired',
-            __('Is Serviceable is required')
+            'WarehouseCodeIsRequired',
+            __('Warehouse Code is required')
+        );
+        $this->addMessageTemplate(
+            'NameIsRequired',
+            __('Name is required')
+        );
+        $this->addMessageTemplate(
+            'PincodeIsRequired',
+            __('Pincode is required')
+        );
+        $this->addMessageTemplate(
+            'AddressIsRequired',
+            __('Address is required')
         );
         $this->addMessageTemplate(
             'PincodeIsInvalid',
-            __('Pincode must be exactly 6 digits.')
+            __('Pincode must be exactly 6 digits')
         );
         $this->addMessageTemplate(
-            'CityIsRequired',
-            __('City is required')
+            'WarehouseCodeDuplicate',
+            __('Warehouse Code already exists')
         );
         $this->addMessageTemplate(
-            'StateIsRequired',
-            __('State is required')
+            'PincodeDuplicate',
+            __('Pincode already exists for another warehouse')
         );
     }
 
@@ -211,25 +229,58 @@ class Pincodes extends AbstractEntity
      */
     public function validateRow(array $rowData, $rowNum): bool
     {
-        $isServiceable = (int)$rowData['is_serviceable'] ?? null;
+        $warehouseCode = $rowData['warehouse_code'] ?? '';
+        $name = $rowData['name'] ?? '';
         $pincode = $rowData['pincode'] ?? '';
-        $city = $rowData['city'] ?? '';
-        $state = $rowData['state'] ?? '';
-        if ($isServiceable === null) {
-            $this->addRowError('IsServiceableIsRequired', $rowNum);
+        $address = $rowData['address'] ?? '';
+        $isActive = isset($rowData['is_active']) ? (int)$rowData['is_active'] : 1;
+        $isDarkStore = isset($rowData['is_dark_store']) ? (int)$rowData['is_dark_store'] : 0;
+
+        // Check required fields
+        if (!$warehouseCode) {
+            $this->addRowError('WarehouseCodeIsRequired', $rowNum);
         }
-        if (strlen($pincode) != 6) {
+        if (!$name) {
+            $this->addRowError('NameIsRequired', $rowNum);
+        }
+        if (!$pincode) {
+            $this->addRowError('PincodeIsRequired', $rowNum);
+        } elseif (strlen($pincode) != 6 || !is_numeric($pincode)) {
             $this->addRowError('PincodeIsInvalid', $rowNum);
         }
-        if (!$city) {
-            $this->addRowError('CityIsRequired', $rowNum);
+        if (!$address) {
+            $this->addRowError('AddressIsRequired', $rowNum);
         }
-        if (!$state) {
-            $this->addRowError('StateIsRequired', $rowNum);
+
+        // Check unique constraints if this is a new warehouse
+        if (!isset($rowData[static::ENTITY_ID_COLUMN]) || empty($rowData[static::ENTITY_ID_COLUMN])) {
+            // Check warehouse_code uniqueness
+            $warehouseCodeExists = $this->connection->fetchOne(
+                $this->connection->select()
+                    ->from($this->connection->getTableName(static::TABLE), ['COUNT(*)'])
+                    ->where('warehouse_code = ?', $warehouseCode)
+            );
+
+            if ($warehouseCodeExists) {
+                $this->addRowError('WarehouseCodeDuplicate', $rowNum);
+            }
+
+            // Check pincode uniqueness
+            $pincodeExists = $this->connection->fetchOne(
+                $this->connection->select()
+                    ->from($this->connection->getTableName(static::TABLE), ['COUNT(*)'])
+                    ->where('pincode = ?', $pincode)
+            );
+
+            if ($pincodeExists) {
+                $this->addRowError('PincodeDuplicate', $rowNum);
+            }
         }
+
         if (isset($this->_validatedRows[$rowNum])) {
             return !$this->getErrorAggregator()->isRowInvalid($rowNum);
         }
+
         $this->_validatedRows[$rowNum] = true;
         return !$this->getErrorAggregator()->isRowInvalid($rowNum);
     }
@@ -306,16 +357,6 @@ class Pincodes extends AbstractEntity
     }
 
     /**
-     * Get columns to update.
-     *
-     * @return array
-     */
-    private function getColumnsToUpdate(): array
-    {
-        return $this->columnsToUpdate;
-    }
-
-    /**
      * Save entities
      *
      * @param array $entityData
@@ -335,5 +376,15 @@ class Pincodes extends AbstractEntity
                 $this->connection->insertOnDuplicate($tableName, $rows, $this->getColumnsToUpdate());
             }
         }
+    }
+
+    /**
+     * Get columns to update.
+     *
+     * @return array
+     */
+    private function getColumnsToUpdate(): array
+    {
+        return $this->columnsToUpdate;
     }
 }

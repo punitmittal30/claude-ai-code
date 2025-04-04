@@ -16,13 +16,9 @@
         <arguments>
             <argument name="samples" xsi:type="array">
                 <item name="serviceable_pincodes" xsi:type="string">Pratech_WarehouseImportExport</item>
-            </argument>
-        </arguments>
-    </type>
-    <type name="Magento\ImportExport\Model\Import\SampleFileProvider">
-        <arguments>
-            <argument name="samples" xsi:type="array">
                 <item name="warehouse_sla" xsi:type="string">Pratech_WarehouseImportExport</item>
+                <item name="warehouse_inventory" xsi:type="string">Pratech_WarehouseImportExport</item>
+                <item name="warehouse" xsi:type="string">Pratech_WarehouseImportExport</item>
             </argument>
         </arguments>
     </type>
