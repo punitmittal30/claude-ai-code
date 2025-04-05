@@ -1,0 +1,53 @@
+# Copyright © Magento, Inc. All rights reserved.
+# See COPYING.txt for license details.
+
+interface ProductInterface {
+    # Price calculation attributes
+    price_per_count: String @doc(description: "Product Price Per Count information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    price_per_100_ml: String @doc(description: "Product Price Per 100 ml information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    price_per_100_gram: String @doc(description: "Product Price Per 100 Gram information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    price_per_gram_protein: String @doc(description: "Product Price Per Gram_protein information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+
+    # Boolean attributes
+    is_hl_verified: String @doc(description: "Is Hyugalife Verified") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    is_hm_verified: String @doc(description: "Is Heavy Metal Verified") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    deal_of_the_day: Boolean @doc(description: "Product Deal of the Day") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+
+    # Date attributes
+    special_from_date_formatted: String @doc(description: "Product Special From Date") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    special_to_date_formatted: String @doc(description: "Product Special To Date") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+
+    # Simple text attributes
+    length: String! @doc(description: "Product Length") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    width: String! @doc(description: "Product Width") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    height: String! @doc(description: "Product Height") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    number_of_servings: String! @doc(description: "Number of servings") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    wp_product_id: String! @doc(description: "Wordpress Product Id") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    marketing_class: String @doc(description: "Marketing Class") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    ean_code: String @doc(description: "Product EAN Code") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    replenishment_time: String! @doc(description: "Replenishment Time") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    offers_title: String @doc(description: "Product Offers Title information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+
+    # Select/EAV attributes
+    material: String! @doc(description: "Product Material information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    size: String! @doc(description: "Product size information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    primary_benefits: String @doc(description: "Primary Benefits") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    pack_of: String @doc(description: "Product Pack Of") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    pack_size: String @doc(description: "Product Pack Size") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    brand: String! @doc(description: "Brand Name") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    form: String @doc(description: "Product Form") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    color: String! @doc(description: "Product Color information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    dietary_preference: String! @doc(description: "Dietary Preference") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    flavour: String @doc(description: "Product Flavour") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    gender: String @doc(description: "Gender") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    item_weight: String! @doc(description: "Item Weight") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+
+    # Multiselect attributes
+    diet_type: String @doc(description: "Diet Type") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    discount: String @doc(description: "Discount") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+    concern: String @doc(description: "Concern") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
+}
+
+type ConfigurableProduct {
+  default_variant_id: Int @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\DefaultVariantId") @doc(description: "The ID of the default variant of the configurable product.")
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_Catalog
+ *
+ * @category  XML
+ * @package   Hyuga\Catalog
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="Hyuga_Catalog" setup_version="1.0.0">
+        <sequence>
+            <module name="Magento_Webapi"/>
+            <module name="Magento_Catalog"/>
+            <module name="Hyuga_CustomLogging"/>
+        </sequence>
+    </module>
+</config>
