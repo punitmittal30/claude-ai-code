@@ -56,4 +56,16 @@ interface WarehouseProductRepositoryInterface
         ?string $sortDirection = 'ASC',
         mixed $filters = []
     ): \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
+
+    /**
+     * Get product list in a specific category available in a dark store by pincode
+     *
+     * @param int $pincode Customer pincode to find nearest dark store
+     * @param string $categorySlug Category slug to get products from
+     * @return \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface
+     */
+    public function getCategoryProductsByPincode(
+        int $pincode,
+        string $categorySlug
+    ): \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 }

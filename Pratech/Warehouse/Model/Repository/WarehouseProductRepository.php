@@ -14,17 +14,23 @@
 namespace Pratech\Warehouse\Model\Repository;
 
 use Exception;
+use Hyuga\Catalog\Model\Repository\CategoryRepository;
 use Magento\Catalog\Api\ProductAttributeRepositoryInterface;
+use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Framework\App\CacheInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Store\Model\ScopeInterface;
 use Pratech\Warehouse\Api\Data\WarehouseInterface;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterfaceFactory;
@@ -47,6 +53,11 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     private const DYNAMIC_CACHE_LIFETIME = 300;
 
     /**
+     * NO OF PRODUCTS TO SHOW IN CAROUSEL CONFIGURATION PATH
+     */
+    public const NO_OF_PRODUCTS_TO_SHOW_IN_CAROUSEL = 'product/general/no_of_products_in_carousel';
+
+    /**
      * Cache tags
      */
     private const CACHE_TAG_STATIC = 'warehouse_products_static';
@@ -63,6 +74,10 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
      * @param CacheInterface $cache
      * @param SerializerInterface $serializer
      * @param Config $configHelper
+     * @param StockRegistryInterface $stockRegistry
+     * @param CategoryRepository $categoryRepository
+     * @param CategoryCollectionFactory $categoryCollectionFactory
+     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         private ResourceConnection                     $resource,
@@ -73,7 +88,11 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         private ProductAttributeRepositoryInterface    $attributeRepository,
         private CacheInterface                         $cache,
         private SerializerInterface                    $serializer,
-        private Config                                 $configHelper
+        private Config                                 $configHelper,
+        private StockRegistryInterface                 $stockRegistry,
+        private CategoryRepository                     $categoryRepository,
+        private CategoryCollectionFactory              $categoryCollectionFactory,
+        private ScopeConfigInterface                   $scopeConfig
     ) {
     }
 
@@ -1281,5 +1300,311 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $this->logger->error('Error invalidating all caches: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCategoryProductsByPincode(
+        int    $pincode,
+        string $categorySlug
+    ): WarehouseProductResultInterface {
+        try {
+            // Generate a cache key for faster lookups
+            $cacheKey = "category_products_{$pincode}_{$categorySlug}";
+            $cachedResult = $this->cache->load($cacheKey);
+
+            if ($cachedResult) {
+                $cachedData = $this->serializer->unserialize($cachedResult);
+                $result = $this->resultFactory->create();
+                $result->setWarehouseCode($cachedData['warehouse_code']);
+                $result->setWarehouseName($cachedData['warehouse_name']);
+                $result->setItems($cachedData['items']);
+                $result->setTotalCount($cachedData['total_count']);
+                return $result;
+            }
+
+            // Get category ID from slug using the mapping function
+            $categoryId = $this->getCategoryIdFromSlug($categorySlug);
+
+            if (!$categoryId) {
+                throw new NoSuchEntityException(__('Category with slug "%1" does not exist.', $categorySlug));
+            }
+
+            // Get nearest dark store for this pincode
+            $darkStore = $this->findNearestDarkStore($pincode);
+
+            if (!$darkStore) {
+                throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
+            }
+
+            $warehouseCode = $darkStore['warehouse_code'];
+
+            /** @var Category $category */
+            $category = $this->categoryCollectionFactory->create()
+                ->addAttributeToSelect('*')
+                ->addAttributeToFilter('entity_id', ['eq' => $categoryId])
+                ->addAttributeToFilter('is_active', ['eq' => 1])
+                ->getFirstItem();
+            if (!$category->getId()) {
+                throw new NoSuchEntityException(
+                    __(
+                        "The requested category %1 doesn't exist. Verify the category and try again.",
+                        $categorySlug
+                    )
+                );
+            }
+
+            // Create a direct product collection with appropriate joins and filters
+            $collection = $category->getProductCollection()
+                ->addAttributeToSelect('*')
+                ->addAttributeToSort('position')
+                ->setPageSize($this->getConfigValue(self::NO_OF_PRODUCTS_TO_SHOW_IN_CAROUSEL));
+
+            // Add warehouse inventory join
+            $this->joinWithWarehouseInventory($collection, $warehouseCode);
+
+            // Add other basic product data
+            $this->addBasicProductData($collection);
+
+            // Get count before loading to optimize
+            $totalCount = $collection->getSize();
+
+            // Format items for the response
+            $formattedItems = [];
+
+            foreach ($collection as $product) {
+                $formattedItems[] = $this->formatProduct($product);
+            }
+
+            // Create result object
+            $result = $this->resultFactory->create();
+            $result->setWarehouseCode($warehouseCode);
+            $result->setWarehouseName($darkStore['warehouse_name']);
+            $result->setItems($formattedItems);
+            $result->setTotalCount($totalCount);
+
+            // Cache the result data for 5 minutes
+            $this->cache->save(
+                $this->serializer->serialize([
+                    'warehouse_code' => $warehouseCode,
+                    'warehouse_name' => $darkStore['warehouse_name'],
+                    'items' => $formattedItems,
+                    'total_count' => $totalCount
+                ]),
+                $cacheKey,
+                ['category_products'],
+                300 // 5 minutes
+            );
+
+            return $result;
+        } catch (NoSuchEntityException $e) {
+            $this->logger->error('Category or dark store not found: ' . $e->getMessage());
+            throw $e;
+        } catch (Exception $e) {
+            $this->logger->error('Error retrieving category products by pincode: ' . $e->getMessage());
+            throw new LocalizedException(
+                __('Could not retrieve category products for pincode: %1', $e->getMessage())
+            );
+        }
+    }
+
+    /**
+     * Get category ID from slug
+     *
+     * @param string $categorySlug
+     * @return int|null
+     */
+    private function getCategoryIdFromSlug(string $categorySlug): ?int
+    {
+        try {
+            $mapping = $this->categoryRepository->getMapping();
+            return isset($mapping['map_by_slug'][$categorySlug]) ? (int)$mapping['map_by_slug'][$categorySlug] : null;
+        } catch (Exception $e) {
+            $this->logger->error('Error getting category ID from slug: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get Scope Config Value.
+     *
+     * @param string $config
+     * @return mixed
+     */
+    public function getConfigValue(string $config): mixed
+    {
+        return $this->scopeConfig->getValue(
+            $config,
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Add basic product data to collection
+     *
+     * @param Collection $collection
+     * @return void
+     */
+    private function addBasicProductData(Collection $collection): void
+    {
+        // Get static and dynamic attributes
+        $staticAttributes = $this->configHelper->getStaticAttributes();
+        $dynamicAttributes = $this->configHelper->getDynamicAttributes();
+
+        // Add all needed attributes
+        $collection->addAttributeToSelect(array_merge($staticAttributes, $dynamicAttributes));
+
+        // Add other necessary data
+        $collection->addAttributeToFilter('status', Status::STATUS_ENABLED);
+        $collection->addAttributeToFilter('visibility', ['neq' => 1]); // Not visible individually
+        $collection->addStoreFilter();
+
+        $collection->addAttributeToSort('position')
+            ->setPageSize($this->getConfigValue(self::NO_OF_PRODUCTS_TO_SHOW_IN_CAROUSEL));
+    }
+
+    /**
+     * Format product data for API response
+     *
+     * @param Product $product
+     * @return array
+     */
+    private function formatProduct(Product $product): array
+    {
+        // Basic product information
+        $formattedProduct = [
+            'id' => (int)$product->getId(),
+            'name' => $product->getName(),
+            'sku' => $product->getSku(),
+            'url_key' => $product->getUrlKey(),
+            'image' => $this->getProductImage($product),
+            'price' => (float)$product->getPrice(),
+            'special_price' => (float)$product->getSpecialPrice(),
+            'special_from_date' => $product->getSpecialFromDate(),
+            'special_to_date' => $product->getSpecialToDate(),
+            'type_id' => $product->getTypeId(),
+            'stock_info' => $this->getStockInfo($product)
+        ];
+
+        // Add attribute values that might be useful
+        $attributesToInclude = [
+            'is_hl_verified', 'is_hm_verified', 'color', 'size',
+            'dietary_preference', 'flavour', 'pack_size', 'brand',
+            'price_per_count', 'price_per_100_ml', 'price_per_100_gram',
+            'star_ratings', 'review_count', 'badges'
+        ];
+
+        foreach ($attributesToInclude as $attributeCode) {
+            $attributeValue = $product->getData($attributeCode);
+            if ($attributeValue !== null) {
+                $formattedProduct[$attributeCode] = $attributeValue;
+            }
+        }
+
+        // If it's a configurable product, also include children information
+        if ($product->getTypeId() === 'configurable') {
+            $formattedProduct['configurable_options'] = $this->getConfigurableOptions($product);
+            $formattedProduct['children'] = $this->getConfigurableChildren($product);
+        }
+
+        return $formattedProduct;
+    }
+
+    /**
+     * Get stock information for a product
+     *
+     * @param Product $product
+     * @return array
+     */
+    private function getStockInfo($product): array
+    {
+        try {
+            $stockItem = $this->stockRegistry->getStockItem($product->getId());
+
+            return [
+                'qty' => (float)$stockItem->getQty(),
+                'is_in_stock' => (bool)$stockItem->getIsInStock(),
+                'min_sale_qty' => (float)$stockItem->getMinSaleQty(),
+                'max_sale_qty' => (float)$stockItem->getMaxSaleQty()
+            ];
+        } catch (Exception $e) {
+            $this->logger->error('Error loading stock info: ' . $e->getMessage());
+            return [
+                'qty' => 0,
+                'is_in_stock' => false,
+                'min_sale_qty' => 1,
+                'max_sale_qty' => 10000
+            ];
+        }
+    }
+
+    /**
+     * Get configurable options for a product
+     *
+     * @param Product $product
+     * @return array
+     */
+    private function getConfigurableOptions($product): array
+    {
+        $options = [];
+
+        if ($product->getTypeId() !== 'configurable') {
+            return $options;
+        }
+
+        try {
+            $productTypeInstance = $product->getTypeInstance();
+            $attributes = $productTypeInstance->getConfigurableAttributes($product);
+
+            foreach ($attributes as $attribute) {
+                $attributeData = $attribute->getData();
+                $options[] = [
+                    'id' => $attributeData['attribute_id'],
+                    'code' => $attributeData['product_attribute']['attribute_code'],
+                    'label' => $attributeData['label'],
+                    'position' => $attributeData['position']
+                ];
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error getting configurable options: ' . $e->getMessage());
+        }
+
+        return $options;
+    }
+
+    /**
+     * Get configurable children products
+     *
+     * @param Product $product
+     * @return array
+     */
+    private function getConfigurableChildren($product): array
+    {
+        $children = [];
+
+        if ($product->getTypeId() !== 'configurable') {
+            return $children;
+        }
+
+        try {
+            $childProducts = $product->getTypeInstance()->getUsedProducts($product);
+
+            foreach ($childProducts as $child) {
+                // Only include basic information for children
+                $children[] = [
+                    'id' => (int)$child->getId(),
+                    'sku' => $child->getSku(),
+                    'name' => $child->getName(),
+                    'price' => (float)$child->getPrice(),
+                    'special_price' => (float)$child->getSpecialPrice(),
+                    'is_in_stock' => (bool)$child->getExtensionAttributes()->getStockItem()->getIsInStock()
+                ];
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error getting configurable children: ' . $e->getMessage());
+        }
+
+        return $children;
     }
 }
