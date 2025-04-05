@@ -54,6 +54,67 @@
     <preference for="Pratech\Warehouse\Api\Data\AttributeOptionInterface"
                 type="Pratech\Warehouse\Model\Data\AttributeOption"/>
 
+    <!-- Service classes registration -->
+    <type name="Pratech\Warehouse\Service\CacheService">
+        <arguments>
+            <argument name="cache" xsi:type="object">Magento\Framework\App\Cache</argument>
+            <argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Json</argument>
+            <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Pratech\Warehouse\Service\ProductCollectionService">
+        <arguments>
+            <argument name="productCollectionFactory" xsi:type="object">Magento\Catalog\Model\ResourceModel\Product\CollectionFactory</argument>
+            <argument name="resource" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="configHelper" xsi:type="object">Pratech\Warehouse\Helper\Config</argument>
+            <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Pratech\Warehouse\Service\ProductFormatterService">
+        <arguments>
+            <argument name="attributeRepository" xsi:type="object">Magento\Catalog\Api\ProductAttributeRepositoryInterface</argument>
+            <argument name="cacheService" xsi:type="object">Pratech\Warehouse\Service\CacheService</argument>
+            <argument name="resource" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="configHelper" xsi:type="object">Pratech\Warehouse\Helper\Config</argument>
+            <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Pratech\Warehouse\Service\FilterService">
+        <arguments>
+            <argument name="resource" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="collectionService" xsi:type="object">Pratech\Warehouse\Service\ProductCollectionService</argument>
+            <argument name="attributeRepository" xsi:type="object">Magento\Catalog\Api\ProductAttributeRepositoryInterface</argument>
+            <argument name="priceRangeFactory" xsi:type="object">Pratech\Warehouse\Api\Data\PriceRangeInterfaceFactory</argument>
+            <argument name="attributeFilterFactory" xsi:type="object">Pratech\Warehouse\Api\Data\AttributeFilterInterfaceFactory</argument>
+            <argument name="attributeOptionFactory" xsi:type="object">Pratech\Warehouse\Api\Data\AttributeOptionInterfaceFactory</argument>
+            <argument name="cacheService" xsi:type="object">Pratech\Warehouse\Service\CacheService</argument>
+            <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Pratech\Warehouse\Service\DarkStoreLocatorService">
+        <arguments>
+            <argument name="resource" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="warehouseRepository" xsi:type="object">Pratech\Warehouse\Api\WarehouseRepositoryInterface</argument>
+            <argument name="cacheService" xsi:type="object">Pratech\Warehouse\Service\CacheService</argument>
+            <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Pratech\Warehouse\Service\DeliveryDateCalculator">
+        <arguments>
+            <argument name="inventoryCollectionFactory" xsi:type="object">Pratech\Warehouse\Model\ResourceModel\WarehouseInventory\CollectionFactory</argument>
+            <argument name="slaCollectionFactory" xsi:type="object">Pratech\Warehouse\Model\ResourceModel\WarehouseSla\CollectionFactory</argument>
+            <argument name="warehouseResource" xsi:type="object">Pratech\Warehouse\Model\ResourceModel\Warehouse</argument>
+            <argument name="cacheService" xsi:type="object">Pratech\Warehouse\Service\CacheService</argument>
+            <argument name="warehouseConfig" xsi:type="object">Pratech\Warehouse\Helper\Config</argument>
+            <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
+        </arguments>
+    </type>
+
     <!-- Product Response Formatter Helper -->
     <type name="Pratech\Warehouse\Helper\ProductResponseFormatter">
         <arguments>

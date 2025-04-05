@@ -18,7 +18,6 @@ use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
-use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
@@ -29,29 +28,26 @@ use Pratech\Warehouse\Api\WarehouseSlaRepositoryInterface;
 use Pratech\Warehouse\Logger\InventorySyncLogger;
 use Pratech\Warehouse\Model\ResourceModel\Pincode as ResourcePincode;
 use Pratech\Warehouse\Model\ResourceModel\Pincode\CollectionFactory as PincodeCollectionFactory;
+use Pratech\Warehouse\Service\CacheService;
 
 class PincodeRepository implements PincodeRepositoryInterface
 {
-    private const CACHE_TAG = 'pratech_serviceable_pincodes';
-
-    private const CACHE_LIFETIME = 3600; // 1 hour
-
     /**
      * @param ResourcePincode $resource
      * @param PincodeFactory $pincodeFactory
      * @param PincodeCollectionFactory $pincodeCollectionFactory
      * @param SearchResultsInterfaceFactory $searchResultsFactory
      * @param InventorySyncLogger $inventorySyncLogger
-     * @param CacheInterface $cache
+     * @param CacheService $cacheService
      * @param WarehouseSlaRepositoryInterface $warehouseSlaRepository
      */
     public function __construct(
-        private ResourcePincode                 $resource,
-        private PincodeFactory                  $pincodeFactory,
-        private PincodeCollectionFactory        $pincodeCollectionFactory,
-        private SearchResultsInterfaceFactory   $searchResultsFactory,
-        private InventorySyncLogger             $inventorySyncLogger,
-        private CacheInterface                  $cache,
+        private ResourcePincode $resource,
+        private PincodeFactory $pincodeFactory,
+        private PincodeCollectionFactory $pincodeCollectionFactory,
+        private SearchResultsInterfaceFactory $searchResultsFactory,
+        private InventorySyncLogger $inventorySyncLogger,
+        private CacheService $cacheService,
         private WarehouseSlaRepositoryInterface $warehouseSlaRepository,
     ) {
     }
@@ -118,6 +114,10 @@ class PincodeRepository implements PincodeRepositoryInterface
     {
         try {
             $this->resource->delete($pincode);
+
+            // Clear cache for this pincode
+            $this->cacheService->remove($this->cacheService->getPincodeCacheKey($pincode->getPincode()));
+
         } catch (Exception $exception) {
             throw new CouldNotDeleteException(__(
                 'Could not delete the pincode: %1',
@@ -154,12 +154,13 @@ class PincodeRepository implements PincodeRepositoryInterface
      */
     public function getPincodeServiceability(int $pincode): array
     {
-        $cacheKey = $this->generateCacheKey($pincode);
-        $cachedResult = $this->cache->load($cacheKey);
+        $cacheKey = $this->cacheService->getPincodeCacheKey($pincode);
+        $cachedResult = $this->cacheService->get($cacheKey);
 
         if ($cachedResult) {
-            return json_decode($cachedResult, true);
+            return $cachedResult;
         }
+
         try {
             $pincodeData = $this->getByCode($pincode);
             if (!$pincodeData->getIsServiceable()) {
@@ -175,28 +176,18 @@ class PincodeRepository implements PincodeRepositoryInterface
                 'is_serviceable' => $pincodeData->getIsServiceable(),
                 'earliest_at' => $earliestAt
             ];
-            $this->cache->save(
-                json_encode($result),
+
+            $this->cacheService->save(
                 $cacheKey,
-                [self::CACHE_TAG],
-                self::CACHE_LIFETIME
+                $result,
+                [CacheService::CACHE_TAG_PINCODE],
+                CacheService::CACHE_LIFETIME_PINCODE
             );
         } catch (NoSuchEntityException $e) {
             $this->inventorySyncLogger->error($e->getMessage());
             throw new NoSuchEntityException(__('Pincode with id "%1" is not serviceable.', $pincode));
         }
         return $result;
-    }
-
-    /**
-     * Generate cache key for pincode serviceability.
-     *
-     * @param int $pincode
-     * @return string
-     */
-    private function generateCacheKey(int $pincode): string
-    {
-        return self::CACHE_TAG . '_' . $pincode;
     }
 
     /**
@@ -227,6 +218,10 @@ class PincodeRepository implements PincodeRepositoryInterface
     {
         try {
             $this->resource->save($pincode);
+
+            // Clear cache for this pincode
+            $this->cacheService->remove($this->cacheService->getPincodeCacheKey($pincode->getPincode()));
+
         } catch (Exception $exception) {
             throw new CouldNotSaveException(__(
                 'Could not save the pincode: %1',
