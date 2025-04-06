@@ -74,10 +74,20 @@
 
     <type name="Pratech\Warehouse\Service\ProductFormatterService">
         <arguments>
-            <argument name="attributeRepository" xsi:type="object">Magento\Catalog\Api\ProductAttributeRepositoryInterface</argument>
-            <argument name="cacheService" xsi:type="object">Pratech\Warehouse\Service\CacheService</argument>
             <argument name="resource" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="attributeCache" xsi:type="object">Pratech\Warehouse\Model\Cache\ProductAttributeCache</argument>
             <argument name="configHelper" xsi:type="object">Pratech\Warehouse\Helper\Config</argument>
+            <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Add the new ProductAttributeCache service -->
+    <type name="Pratech\Warehouse\Model\Cache\ProductAttributeCache">
+        <arguments>
+            <argument name="cache" xsi:type="object">Magento\Framework\App\Cache</argument>
+            <argument name="resourceConnection" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="eventManager" xsi:type="object">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Json</argument>
             <argument name="logger" xsi:type="object">Pratech\Warehouse\Logger\InventorySyncLogger</argument>
         </arguments>
     </type>

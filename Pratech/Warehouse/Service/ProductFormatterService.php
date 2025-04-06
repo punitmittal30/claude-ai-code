@@ -14,9 +14,9 @@
 namespace Pratech\Warehouse\Service;
 
 use Exception;
-use Magento\Catalog\Api\ProductAttributeRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\App\ResourceConnection;
+use Pratech\Warehouse\Model\Cache\ProductAttributeCache;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,16 +25,14 @@ use Psr\Log\LoggerInterface;
 class ProductFormatterService
 {
     /**
-     * @param ProductAttributeRepositoryInterface $attributeRepository
-     * @param CacheService $cacheService
      * @param ResourceConnection $resource
+     * @param ProductAttributeCache $attributeCache
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private ProductAttributeRepositoryInterface $attributeRepository,
-        private CacheService                        $cacheService,
-        private ResourceConnection                  $resource,
-        private LoggerInterface                     $logger
+        private ResourceConnection    $resource,
+        private ProductAttributeCache $attributeCache,
+        private LoggerInterface       $logger
     ) {
     }
 
@@ -46,45 +44,38 @@ class ProductFormatterService
      */
     public function extractStaticData(Product $product): array
     {
+        $productId = (int)$product->getId();
+
+        // Load all attributes from cache
+        $allAttributes = $this->attributeCache->getAllAttributes($productId);
+
+        // Extract static attributes
         return [
             '__typename' => $this->getProductType($product),
-            'id' => (int)$product->getId(),
+            'id' => $productId,
             'name' => $product->getName(),
             'sku' => $product->getSku(),
             'url_key' => $product->getUrlKey(),
             'image' => $this->getProductImage($product),
-            'deal_of_the_day' => (bool)$product->getData('deal_of_the_day'),
-            'badges' => $product->getData('badges') ?? '',
-            'is_hl_verified' => (int)$product->getData('is_hl_verified') ?? 0,
-            'is_hm_verified' => (int)$product->getData('is_hm_verified') ?? 0,
-            'number_of_servings' => $product->getData('number_of_servings') ?? '',
-            'star_ratings' => (int)$product->getData('star_ratings') ?? 0,
-            'review_count' => (int)$product->getData('review_count') ?? 0,
-            'price_per_count' => $product->getData('price_per_count') ?? '',
-            'price_per_100_ml' => $product->getData('price_per_100_ml') ?? '',
-            'price_per_100_gram' => $product->getData('price_per_100_gram') ?? '',
-            'price_per_gram_protein' => $product->getData('price_per_gram_protein') ?? '',
-            // Add attribute values and their labels
-            'color' => $this->getAttributeOptionLabelByCode('color', $product->getData('color')),
-            'dietary_preference' => $this->getAttributeOptionLabelByCode(
-                'dietary_preference',
-                $product->getData('dietary_preference')
-            ),
-            'material' => $this->getAttributeOptionLabelByCode(
-                'material',
-                $product->getData('material')
-            ),
-            'size' => $this->getAttributeOptionLabelByCode('size', $product->getData('size')),
-            'flavour' => $this->getAttributeOptionLabelByCode('flavour', $product->getData('flavour')),
-            'item_weight' => $this->getAttributeOptionLabelByCode(
-                'item_weight',
-                $product->getData('item_weight')
-            ),
-            'pack_of' => $this->getAttributeOptionLabelByCode('pack_of', $product->getData('pack_of')),
-            'pack_size' => $this->getAttributeOptionLabelByCode(
-                'pack_size',
-                $product->getData('pack_size')
-            )
+            'deal_of_the_day' => $allAttributes['deal_of_the_day'] ?? false,
+            'badges' => $allAttributes['badges'] ?? '',
+            'is_hl_verified' => (int)($allAttributes['is_hl_verified'] ?? 0),
+            'is_hm_verified' => (int)($allAttributes['is_hm_verified'] ?? 0),
+            'number_of_servings' => $allAttributes['number_of_servings'] ?? '',
+            'star_ratings' => (int)($allAttributes['star_ratings'] ?? 0),
+            'review_count' => (int)($allAttributes['review_count'] ?? 0),
+            'price_per_count' => $allAttributes['price_per_count'] ?? '',
+            'price_per_100_ml' => $allAttributes['price_per_100_ml'] ?? '',
+            'price_per_100_gram' => $allAttributes['price_per_100_gram'] ?? '',
+            'price_per_gram_protein' => $allAttributes['price_per_gram_protein'] ?? '',
+            'color' => $allAttributes['color_text'] ?? '',
+            'dietary_preference' => $allAttributes['dietary_preference_text'] ?? '',
+            'material' => $allAttributes['material_text'] ?? '',
+            'size' => $allAttributes['size_text'] ?? '',
+            'flavour' => $allAttributes['flavour_text'] ?? '',
+            'item_weight' => $allAttributes['item_weight_text'] ?? '',
+            'pack_of' => $allAttributes['pack_of_text'] ?? '',
+            'pack_size' => $allAttributes['pack_size_text'] ?? ''
         ];
     }
 
@@ -120,81 +111,6 @@ class ProductFormatterService
     }
 
     /**
-     * Get attribute option label by code
-     *
-     * @param string $attributeCode
-     * @param mixed $value
-     * @return string
-     */
-    public function getAttributeOptionLabelByCode(string $attributeCode, $value): string
-    {
-        if (empty($value)) {
-            return '';
-        }
-
-        $cacheKey = $this->cacheService->getAttributeOptionCacheKey($attributeCode, $value);
-        $cachedLabel = $this->cacheService->get($cacheKey);
-
-        if ($cachedLabel) {
-            return $cachedLabel;
-        }
-
-        try {
-            $attribute = $this->attributeRepository->get($attributeCode);
-            $options = $attribute->getSource()->getAllOptions(false);
-
-            foreach ($options as $option) {
-                if ($option['value'] == $value) {
-                    $label = (string)$option['label'];
-
-                    // Cache attribute option for a long time
-                    $this->cacheService->save(
-                        $cacheKey,
-                        $label,
-                        [CacheService::CACHE_TAG_STATIC],
-                        CacheService::CACHE_LIFETIME_STATIC
-                    );
-
-                    return $label;
-                }
-            }
-
-            // For multiselect attributes
-            if (is_string($value) && strpos($value, ',') !== false) {
-                $valueArray = explode(',', $value);
-                $labels = [];
-
-                foreach ($valueArray as $singleValue) {
-                    foreach ($options as $option) {
-                        if ($option['value'] == $singleValue) {
-                            $labels[] = (string)$option['label'];
-                            break;
-                        }
-                    }
-                }
-
-                if (!empty($labels)) {
-                    $label = implode(', ', $labels);
-
-                    // Cache multiselect attribute option for a long time
-                    $this->cacheService->save(
-                        $cacheKey,
-                        $label,
-                        [CacheService::CACHE_TAG_STATIC],
-                        CacheService::CACHE_LIFETIME_STATIC
-                    );
-
-                    return $label;
-                }
-            }
-        } catch (Exception $e) {
-            $this->logger->error('Error getting attribute option label: ' . $e->getMessage());
-        }
-
-        return (string)$value;
-    }
-
-    /**
      * Extract dynamic data that changes frequently
      *
      * @param Product $product
@@ -202,15 +118,20 @@ class ProductFormatterService
      */
     public function extractDynamicData(Product $product): array
     {
+        $productId = (int)$product->getId();
+
         // Get stock information
-        $stockInfo = $this->getProductStockInfo($product->getId());
+        $stockInfo = $this->getProductStockInfo($productId);
+
+        // Get all cached attributes
+        $allAttributes = $this->attributeCache->getAllAttributes($productId);
 
         return [
             'price' => (float)$product->getPrice(),
             'special_price' => (float)$product->getSpecialPrice(),
             'price_range' => $this->getPriceRange($product),
-            'special_from_date_formatted' => $product->getSpecialFromDate() ?? '',
-            'special_to_date_formatted' => $product->getSpecialToDate() ?? '',
+            'special_from_date_formatted' => $allAttributes['special_from_date'] ?? '',
+            'special_to_date_formatted' => $allAttributes['special_to_date'] ?? '',
             'stock_info' => [
                 'qty' => $stockInfo['qty'] ?? 0,
                 'min_sale_qty' => $stockInfo['min_sale_qty'] ?? 1,
@@ -234,13 +155,6 @@ class ProductFormatterService
      */
     public function getProductStockInfo(int $productId): array
     {
-        $cacheKey = $this->cacheService->getStockInfoCacheKey($productId);
-        $cachedStock = $this->cacheService->get($cacheKey);
-
-        if ($cachedStock) {
-            return $cachedStock;
-        }
-
         try {
             // Use direct SQL query for better performance
             $connection = $this->resource->getConnection();
@@ -263,22 +177,12 @@ class ProductFormatterService
                 ];
             }
 
-            $stockInfo = [
+            return [
                 'qty' => (float)$stockData['qty'],
                 'is_in_stock' => (bool)$stockData['is_in_stock'],
                 'min_sale_qty' => (float)$stockData['min_sale_qty'],
                 'max_sale_qty' => (float)$stockData['max_sale_qty']
             ];
-
-            // Cache stock info for a short time (5 minutes)
-            $this->cacheService->save(
-                $cacheKey,
-                $stockInfo,
-                [CacheService::CACHE_TAG_DYNAMIC],
-                CacheService::CACHE_LIFETIME_DYNAMIC
-            );
-
-            return $stockInfo;
         } catch (Exception $e) {
             $this->logger->error('Error loading stock item: ' . $e->getMessage());
             return [
