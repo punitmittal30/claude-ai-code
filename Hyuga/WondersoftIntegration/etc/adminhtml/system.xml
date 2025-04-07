@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="hyuga" translate="label" sortOrder="100">
+            <label>Hyuga</label>
+        </tab>
+        <section id="wondersoft_integration" translate="label" type="text" sortOrder="110" showInDefault="1"
+                 showInWebsite="1" showInStore="1">
+            <label>Wondersoft eShopaid Integration</label>
+            <tab>hyuga</tab>
+            <resource>Hyuga_WondersoftIntegration::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>General Configuration</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="server_ip" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Server IP</label>
+                    <comment>The eShopaid server IP address</comment>
+                </field>
+                <field id="username" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>API Username</label>
+                    <comment>Username for eShopaid API authentication</comment>
+                </field>
+                <field id="password" translate="label" type="obscure" sortOrder="40" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>API Password</label>
+                    <comment>Password for eShopaid API authentication</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="log_enabled" translate="label" type="select" sortOrder="50" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Enable Logging</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Log API requests and responses</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

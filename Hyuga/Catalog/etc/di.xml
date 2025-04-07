@@ -16,6 +16,4 @@
                 type="Hyuga\Catalog\Model\Resolver\ReviewCount"/>
 <!--    <preference for="Magento\ConfigurableProductGraphQl\Model\Resolver\ConfigurableVariant"-->
 <!--                type="Hyuga\Catalog\Model\Resolver\ConfigurableVariant"/>-->
-    <preference for="Hyuga\Catalog\Api\CategoryRepositoryInterface"
-                type="Hyuga\Catalog\Model\Repository\CategoryRepository"/>
 </config>

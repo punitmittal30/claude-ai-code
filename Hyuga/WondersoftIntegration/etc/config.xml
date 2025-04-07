@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <wondersoft_integration>
+            <general>
+                <enabled>0</enabled>
+                <server_ip></server_ip>
+                <username>Wondersoft</username>
+                <password></password>
+                <log_enabled>1</log_enabled>
+            </general>
+        </wondersoft_integration>
+    </default>
+</config>
