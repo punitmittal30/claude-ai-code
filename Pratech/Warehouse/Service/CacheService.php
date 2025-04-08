@@ -142,13 +142,13 @@ class CacheService
      * @return string
      */
     public function getWarehouseProductsCacheKey(
-        string $warehouseCode,
-        int $pageSize,
-        int $currentPage,
+        string  $warehouseCode,
+        int     $pageSize,
+        int     $currentPage,
         ?string $sortField,
         ?string $sortDirection,
-        $filters,
-        bool $isDynamic = false
+        mixed   $filters,
+        bool    $isDynamic = false
     ): string {
         $filterHash = md5($this->serializer->serialize($filters ?? []));
         $prefix = $isDynamic ? 'warehouse_dynamic' : 'warehouse_static';
@@ -196,11 +196,12 @@ class CacheService
      *
      * @param int $pincode
      * @param string $categorySlug
+     * @param string $requestType
      * @return string
      */
-    public function getCategoryProductsCacheKey(int $pincode, string $categorySlug): string
+    public function getCategoryProductsCacheKey(int $pincode, string $categorySlug, string $requestType): string
     {
-        return "category_products_{$pincode}_{$categorySlug}";
+        return "{$requestType}_{$pincode}_{$categorySlug}";
     }
 
     /**

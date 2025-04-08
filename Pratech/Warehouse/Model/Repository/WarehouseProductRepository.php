@@ -212,7 +212,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 CacheService::CACHE_LIFETIME_FILTERS
             );
 
-// Create result object
+            // Create result object
             $result = $this->resultFactory->create();
             $result->setWarehouseCode($warehouseCode);
             $result->setWarehouseName($warehouse->getName());
@@ -234,12 +234,135 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
      * @inheritDoc
      */
     public function getCategoryProductsByPincode(
-        int    $pincode,
-        string $categorySlug
+        int $pincode,
+        string $categorySlug,
+        string $requestType = "carousel"
+    ): WarehouseProductResultInterface {
+        return match ($requestType) {
+            'listing' => $this->getCategoryProductsForListing($pincode, $categorySlug, $requestType),
+            default => $this->getCategoryProductsForCarousel($pincode, $categorySlug, $requestType),
+        };
+    }
+
+    /**
+     * Get Category Products For Carousel.
+     *
+     * @param int $pincode
+     * @param string $categorySlug
+     * @param string $requestType
+     * @return mixed
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    public function getCategoryProductsForCarousel(int $pincode, string $categorySlug, string $requestType): mixed
+    {
+        try {
+            // Generate a cache key for faster lookups
+            $cacheKey = $this->cacheService->getCategoryProductsCacheKey($pincode, $categorySlug, $requestType);
+            $cachedResult = $this->cacheService->get($cacheKey);
+
+            if ($cachedResult) {
+                $result = $this->resultFactory->create();
+                $result->setWarehouseCode($cachedResult['warehouse_code']);
+                $result->setWarehouseName($cachedResult['warehouse_name']);
+                $result->setItems($cachedResult['items']);
+                $result->setTotalCount($cachedResult['total_count']);
+                return $result;
+            }
+
+            // Get category ID from slug
+            $categoryId = $this->getCategoryIdFromSlug($categorySlug);
+
+            if (!$categoryId) {
+                throw new NoSuchEntityException(__('Category with slug "%1" does not exist.', $categorySlug));
+            }
+
+            // Get nearest dark store for this pincode
+            $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+            $warehouseCode = $darkStore['warehouse_code'];
+
+            // Create a collection with the category filter
+            $collection = $this->productCollectionFactory->create();
+            $collection->addCategoriesFilter(['eq' => $categoryId]);
+
+            // Join with warehouse inventory and filter for active products with stock
+            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode);
+
+            // Add other needed attributes and conditions
+            $collection->addAttributeToSelect('*');
+            $collection->setPageSize($this->getConfigValue('product/general/no_of_products_in_carousel'));
+
+            // Count total results before loading data
+            $totalCount = $collection->getSize();
+
+            // Format items for the response
+            $formattedItems = [];
+            foreach ($collection as $product) {
+                $staticData = $this->productFormatter->extractStaticData($product);
+                $dynamicData = $this->productFormatter->extractDynamicData($product);
+                $formattedItems[] = array_merge($staticData, $dynamicData);
+            }
+
+            // Create result object
+            $result = $this->resultFactory->create();
+            $result->setWarehouseCode($warehouseCode);
+            $result->setWarehouseName($darkStore['warehouse_name']);
+            $result->setItems($formattedItems);
+            $result->setTotalCount($totalCount);
+
+            // Cache the result data for 5 minutes
+            $this->cacheService->save(
+                $cacheKey,
+                [
+                    'warehouse_code' => $warehouseCode,
+                    'warehouse_name' => $darkStore['warehouse_name'],
+                    'items' => $formattedItems,
+                    'total_count' => $totalCount
+                ],
+                ['category_products'],
+                300 // 5 minutes
+            );
+
+            return $result;
+        } catch (NoSuchEntityException $e) {
+            $this->logger->error('Category or dark store not found: ' . $e->getMessage());
+            throw $e;
+        } catch (Exception $e) {
+            $this->logger->error('Error retrieving category products by pincode: ' . $e->getMessage());
+            throw new LocalizedException(
+                __('Could not retrieve category products for pincode: %1', $e->getMessage())
+            );
+        }
+    }
+
+    /**
+     * Get Category Products For Listing.
+     *
+     * @param int $pincode
+     * @param string $categorySlug
+     * @param string $requestType
+     * @param int $pageSize
+     * @param int $currentPage
+     * @param string|null $sortField
+     * @param string|null $sortDirection
+     * @param mixed $filters
+     * @return WarehouseProductResultInterface
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    public function getCategoryProductsForListing(
+        int     $pincode,
+        string  $categorySlug,
+        string  $requestType,
+        int     $pageSize = 20,
+        int     $currentPage = 1,
+        ?string $sortField = null,
+        ?string $sortDirection = 'ASC',
+        mixed   $filters = []
     ): WarehouseProductResultInterface {
         try {
             // Generate a cache key for faster lookups
-            $cacheKey = $this->cacheService->getCategoryProductsCacheKey($pincode, $categorySlug);
+            $cacheKey = $this->cacheService->getCategoryProductsCacheKey($pincode, $categorySlug, $requestType);
             $cachedResult = $this->cacheService->get($cacheKey);
 
             if ($cachedResult) {

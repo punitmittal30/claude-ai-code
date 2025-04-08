@@ -93,6 +93,19 @@ class SystemConfig implements SystemConfigInterface
     public const CONFIG_PATH_RETURN_PERIOD = 'return/return/return_period_days';
 
     /**
+     * Config Paths for Page Size
+     */
+    public const PAGE_SIZE = [
+        'PLP_DWEB' => 'product/product_page_size/plp_page_size_dweb',
+        'SEARCH_DWEB' => 'product/product_page_size/search_page_size_dweb',
+        'PLP_MWEB' => 'product/product_page_size/plp_page_size_mweb',
+        'SEARCH_MWEB' => 'product/product_page_size/search_page_size_mweb',
+        'PLP_APP' => 'product/product_page_size/plp_page_size_app',
+        'SEARCH_APP' => 'product/product_page_size/search_page_size_app',
+    ];
+
+
+    /**
      * @param ScopeConfigInterface $scopeConfig
      * @param TimezoneInterface $timezoneInterface
      * @param PincodeRepositoryInterface $pincodeRepository
@@ -130,7 +143,15 @@ class SystemConfig implements SystemConfigInterface
                 'default_pincode' => $this->getDefaultPincode()
             ],
             'quiz_ids' => $this->getActiveQuizIds(),
-            'order_return_period_days' =>  $this->getConfig(self::CONFIG_PATH_RETURN_PERIOD)
+            'order_return_period_days' => $this->getConfig(self::CONFIG_PATH_RETURN_PERIOD),
+            'page_size' => [
+                'plp_dweb' => (int)$this->getConfig(self::PAGE_SIZE['PLP_DWEB']),
+                'search_dweb' => (int)$this->getConfig(self::PAGE_SIZE['SEARCH_DWEB']),
+                'plp_mweb' => (int)$this->getConfig(self::PAGE_SIZE['PLP_MWEB']),
+                'search_mweb' => (int)$this->getConfig(self::PAGE_SIZE['SEARCH_MWEB']),
+                'plp_app' => (int)$this->getConfig(self::PAGE_SIZE['PLP_APP']),
+                'search_app' => (int)$this->getConfig(self::PAGE_SIZE['SEARCH_APP']),
+            ]
         ];
     }
 
@@ -213,11 +234,11 @@ class SystemConfig implements SystemConfigInterface
         return $pincode;
     }
 
-   /**
-    * Get all active quiz IDs.
-    *
-    * @return array
-    */
+    /**
+     * Get all active quiz IDs.
+     *
+     * @return array
+     */
     public function getActiveQuizIds(): array
     {
         try {

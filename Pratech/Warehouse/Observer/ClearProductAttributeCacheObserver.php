@@ -27,8 +27,7 @@ class ClearProductAttributeCacheObserver implements ObserverInterface
      */
     public function __construct(
         private ProductAttributeCache $attributeCache
-    )
-    {
+    ) {
     }
 
     /**

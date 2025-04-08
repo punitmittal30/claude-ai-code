@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Pratech\Warehouse\Api;
 
+use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
+
 /**
  * Interface for retrieving products by warehouse
  */
@@ -62,10 +64,12 @@ interface WarehouseProductRepositoryInterface
      *
      * @param int $pincode Customer pincode to find nearest dark store
      * @param string $categorySlug Category slug to get products from
-     * @return \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface
+     * @param string $requestType
+     * @return WarehouseProductResultInterface
      */
     public function getCategoryProductsByPincode(
         int $pincode,
-        string $categorySlug
+        string $categorySlug,
+        string $requestType = "carousel"
     ): \Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 }
