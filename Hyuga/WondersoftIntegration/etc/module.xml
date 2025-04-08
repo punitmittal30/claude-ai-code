@@ -1,11 +1,20 @@
 <?xml version="1.0"?>
-
+<!--
+/**
+ * Hyuga_WondersoftIntegration
+ *
+ * @category  XML
+ * @package   Hyuga\WondersoftIntegration
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="Hyuga_WondersoftIntegration" setup_version="1.0.0">
         <sequence>
             <module name="Magento_Catalog"/>
-            <module name="Magento_Store"/>
         </sequence>
     </module>
 </config>

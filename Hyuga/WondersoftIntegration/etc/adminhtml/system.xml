@@ -2,43 +2,113 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <tab id="hyuga" translate="label" sortOrder="100">
+        <tab id="hyuga" translate="label" sortOrder="200">
             <label>Hyuga</label>
         </tab>
-        <section id="wondersoft_integration" translate="label" type="text" sortOrder="110" showInDefault="1"
-                 showInWebsite="1" showInStore="1">
-            <label>Wondersoft eShopaid Integration</label>
+        <section id="wondersoft" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1"
+                 showInStore="1">
+            <label>Wondersoft Integration</label>
             <tab>hyuga</tab>
             <resource>Hyuga_WondersoftIntegration::config</resource>
             <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
                    showInStore="1">
-                <label>General Configuration</label>
+                <label>General Settings</label>
                 <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
                        showInStore="1">
-                    <label>Enabled</label>
+                    <label>Enable Integration</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="server_ip" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
-                    <label>Server IP</label>
-                    <comment>The eShopaid server IP address</comment>
-                </field>
-                <field id="username" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
-                    <label>API Username</label>
-                    <comment>Username for eShopaid API authentication</comment>
-                </field>
-                <field id="password" translate="label" type="obscure" sortOrder="40" showInDefault="1" showInWebsite="1"
-                       showInStore="1">
-                    <label>API Password</label>
-                    <comment>Password for eShopaid API authentication</comment>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                </field>
-                <field id="log_enabled" translate="label" type="select" sortOrder="50" showInDefault="1"
+                <field id="logging_enabled" translate="label" type="select" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="1">
                     <label>Enable Logging</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Log API requests and responses</comment>
+                </field>
+                <field id="logging_level" translate="label" type="select" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Logging Level</label>
+                    <source_model>Hyuga\WondersoftIntegration\Model\Config\Source\LoggingLevel</source_model>
+                    <depends>
+                        <field id="logging_enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="api" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>API Settings</label>
+                <field id="base_url" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>API Base URL</label>
+                    <comment>Base URL for Wondersoft eShopaid API</comment>
+                </field>
+                <field id="username" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>API Username</label>
+                </field>
+                <field id="password" translate="label" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>API Password</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+            </group>
+            <group id="product_push" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Product Push Settings</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enable Product Push</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="wondersoft/general/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="retry_failed" translate="label" type="select" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Retry Failed Pushes</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="company_code" translate="label" type="text" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Company Code</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="price_push" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Price Push Settings</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enable Price Push</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="wondersoft/general/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="retry_failed" translate="label" type="select" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Retry Failed Pushes</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="price_list_id" translate="label" type="text" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Price List ID</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="price_list_name" translate="label" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Price List Name</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
                 </field>
             </group>
         </section>
