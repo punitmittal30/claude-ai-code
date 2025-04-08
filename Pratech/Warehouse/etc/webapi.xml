@@ -99,7 +99,15 @@
 
     <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/products" method="GET">
         <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
-                 method="getCategoryProductsByPincode"/>
+                 method="getCarouselProductsByPincode"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+
+    <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/products" method="POST">
+        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
+                 method="getListingProductsByPincode"/>
         <resources>
             <resource ref="Pratech_Warehouse::warehouse_manage"/>
         </resources>

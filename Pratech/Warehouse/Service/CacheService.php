@@ -196,12 +196,11 @@ class CacheService
      *
      * @param int $pincode
      * @param string $categorySlug
-     * @param string $requestType
      * @return string
      */
-    public function getCategoryProductsCacheKey(int $pincode, string $categorySlug, string $requestType): string
+    public function getCategoryProductsCacheKey(int $pincode, string $categorySlug): string
     {
-        return "{$requestType}_{$pincode}_{$categorySlug}";
+        return "{$pincode}_{$categorySlug}";
     }
 
     /**
