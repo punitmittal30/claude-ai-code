@@ -54,6 +54,9 @@
     <preference for="Pratech\Warehouse\Api\Data\AttributeOptionInterface"
                 type="Pratech\Warehouse\Model\Data\AttributeOption"/>
 
+    <preference for="Pratech\Warehouse\Api\Data\CategoryListResultInterface"
+                type="Pratech\Warehouse\Model\Data\CategoryListResult"/>
+
     <!-- Service classes registration -->
     <type name="Pratech\Warehouse\Service\CacheService">
         <arguments>

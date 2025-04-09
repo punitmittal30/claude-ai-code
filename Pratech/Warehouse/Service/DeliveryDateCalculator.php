@@ -15,11 +15,12 @@ declare(strict_types=1);
 
 namespace Pratech\Warehouse\Service;
 
+use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Pratech\Warehouse\Helper\Config;
+use Pratech\Warehouse\Model\ResourceModel\Warehouse as WarehouseResource;
 use Pratech\Warehouse\Model\ResourceModel\WarehouseInventory\CollectionFactory as InventoryCollectionFactory;
 use Pratech\Warehouse\Model\ResourceModel\WarehouseSla\CollectionFactory as SlaCollectionFactory;
-use Pratech\Warehouse\Model\ResourceModel\Warehouse as WarehouseResource;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -39,11 +40,11 @@ class DeliveryDateCalculator
      */
     public function __construct(
         private InventoryCollectionFactory $inventoryCollectionFactory,
-        private SlaCollectionFactory $slaCollectionFactory,
-        private WarehouseResource $warehouseResource,
-        private CacheService $cacheService,
-        private Config $warehouseConfig,
-        private LoggerInterface $logger
+        private SlaCollectionFactory       $slaCollectionFactory,
+        private WarehouseResource          $warehouseResource,
+        private CacheService               $cacheService,
+        private Config                     $warehouseConfig,
+        private LoggerInterface            $logger
     ) {
     }
 
@@ -148,7 +149,7 @@ class DeliveryDateCalculator
             }
         } catch (LocalizedException $e) {
             $this->logger->error('Error calculating delivery estimate: ' . $e->getMessage());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Unexpected error in delivery estimate: ' . $e->getMessage());
         }
 

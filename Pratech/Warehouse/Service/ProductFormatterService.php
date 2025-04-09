@@ -222,45 +222,4 @@ class ProductFormatterService
             ]
         ];
     }
-
-    /**
-     * Merge static and dynamic data for products
-     *
-     * @param array $staticItems
-     * @param array $dynamicItems
-     * @return array
-     */
-    public function mergeStaticAndDynamicData(array $staticItems, array $dynamicItems): array
-    {
-        $mergedItems = [];
-
-        foreach ($staticItems as $productId => $staticData) {
-            if (isset($dynamicItems[$productId])) {
-                $mergedItems[] = array_merge($staticData, $dynamicItems[$productId]);
-            } else {
-                // If dynamic data is missing, use static data with defaults
-                $mergedItems[] = array_merge($staticData, [
-                    'price' => 0,
-                    'special_price' => 0,
-                    'price_range' => [
-                        'minimum_price' => [
-                            'regular_price' => ['value' => 0],
-                            'final_price' => ['value' => 0],
-                            'discount' => ['amount_off' => 0, 'percent_off' => 0]
-                        ]
-                    ],
-                    'stock_info' => [
-                        'qty' => 0,
-                        'min_sale_qty' => 1,
-                        'max_sale_qty' => 10000,
-                        'is_in_stock' => false
-                    ],
-                    'stock_status' => 'OUT_OF_STOCK',
-                    'warehouse_quantity' => 0
-                ]);
-            }
-        }
-
-        return $mergedItems;
-    }
 }

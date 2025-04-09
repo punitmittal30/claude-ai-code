@@ -16,6 +16,7 @@ namespace Pratech\Warehouse\Plugin;
 use Magento\Framework\Webapi\ServiceOutputProcessor;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 use Pratech\Warehouse\Model\Converter\WarehouseProductResultSerializer;
+use Pratech\Warehouse\Api\Data\CategoryListResultInterface;
 
 /**
  * Plugin for handling WarehouseProductResult in the REST API
@@ -52,6 +53,16 @@ class WarehouseProductResultPlugin
         // Only apply to WarehouseProductResult objects
         if ($data instanceof WarehouseProductResultInterface) {
             return $this->resultSerializer->process($data);
+        }
+
+        // Only apply to CategoryListResult objects
+        if ($data instanceof CategoryListResultInterface) {
+            return [
+                'warehouse_code' => $data->getWarehouseCode(),
+                'warehouse_name' => $data->getWarehouseName(),
+                'categories' => $data->getCategories(),
+                'total_count' => $data->getTotalCount()
+            ];
         }
 
         // For all other objects, use the default processor

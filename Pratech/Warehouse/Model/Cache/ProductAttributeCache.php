@@ -118,11 +118,11 @@ class ProductAttributeCache
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private CacheInterface $cache,
-        private ResourceConnection $resourceConnection,
-        private EventManager $eventManager,
+        private CacheInterface      $cache,
+        private ResourceConnection  $resourceConnection,
+        private EventManager        $eventManager,
         private SerializerInterface $serializer,
-        private LoggerInterface $logger
+        private LoggerInterface     $logger
     ) {
     }
 

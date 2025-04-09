@@ -13,9 +13,10 @@
 
 namespace Pratech\Warehouse\Logger;
 
+use Magento\Framework\Logger\Handler\Base;
 use Monolog\Logger;
 
-class InventorySyncHandler extends \Magento\Framework\Logger\Handler\Base
+class InventorySyncHandler extends Base
 {
     /**
      * @var int

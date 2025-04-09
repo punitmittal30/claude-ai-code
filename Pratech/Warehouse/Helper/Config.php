@@ -27,10 +27,6 @@ class Config
 
     private const DROPSHIP_DELIVERY_ETA = 'warehouse/general/dropship_delivery_eta';
 
-    private const STATIC_ATTRIBUTES = 'warehouse/general/static_attributes';
-
-    private const DYNAMIC_ATTRIBUTES = 'warehouse/general/dynamic_attributes';
-
     /**
      * @param EncryptorInterface $encryptor
      * @param ScopeConfigInterface $scopeConfig
@@ -42,6 +38,16 @@ class Config
     }
 
     /**
+     * Get Vinculum Base URL
+     *
+     * @return string
+     */
+    public function getVinculumBaseUrl(): string
+    {
+        return $this->getConfig(self::VINCULUM_BASE_URL);
+    }
+
+    /**
      * Get Config.
      *
      * @param string $config
@@ -50,16 +56,6 @@ class Config
     public function getConfig(string $config): mixed
     {
         return $this->scopeConfig->getValue($config, ScopeInterface::SCOPE_STORE);
-    }
-
-    /**
-     * Get Vinculum Base URL
-     *
-     * @return string
-     */
-    public function getVinculumBaseUrl(): string
-    {
-        return $this->getConfig(self::VINCULUM_BASE_URL);
     }
 
     /**
@@ -92,33 +88,5 @@ class Config
     public function getDropshipDeliveryEta(): string
     {
         return $this->getConfig(self::DROPSHIP_DELIVERY_ETA);
-    }
-
-    /**
-     * Get Static Attributes.
-     *
-     * @return string[]
-     */
-    public function getStaticAttributes(): array
-    {
-        $allowedAttributes = $this->scopeConfig->getValue(
-            self::STATIC_ATTRIBUTES,
-            ScopeInterface::SCOPE_STORE
-        );
-        return explode(',', $allowedAttributes);
-    }
-
-    /**
-     * Get Dynamic Attributes.
-     *
-     * @return string[]
-     */
-    public function getDynamicAttributes(): array
-    {
-        $allowedAttributes = $this->scopeConfig->getValue(
-            self::DYNAMIC_ATTRIBUTES,
-            ScopeInterface::SCOPE_STORE
-        );
-        return explode(',', $allowedAttributes);
     }
 }

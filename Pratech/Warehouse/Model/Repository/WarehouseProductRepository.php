@@ -15,13 +15,17 @@ namespace Pratech\Warehouse\Model\Repository;
 
 use Exception;
 use Hyuga\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Api\CategoryRepositoryInterface as CoreCategoryRepositoryInterface;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\UrlInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Pratech\Warehouse\Api\Data\CategoryListResultInterface;
+use Pratech\Warehouse\Api\Data\CategoryListResultInterfaceFactory;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterfaceFactory;
 use Pratech\Warehouse\Api\WarehouseProductRepositoryInterface;
-use Pratech\Warehouse\Api\WarehouseRepositoryInterface;
 use Pratech\Warehouse\Helper\Config;
 use Pratech\Warehouse\Service\CacheService;
 use Pratech\Warehouse\Service\DarkStoreLocatorService;
@@ -36,9 +40,11 @@ use Psr\Log\LoggerInterface;
 class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 {
     /**
+     * WarehouseProductRepository Constructor
+     *
      * @param CollectionFactory $productCollectionFactory
      * @param WarehouseProductResultInterfaceFactory $resultFactory
-     * @param WarehouseRepositoryInterface $warehouseRepository
+     * @param CategoryListResultInterfaceFactory $categoryListResultFactory
      * @param Config $configHelper
      * @param CacheService $cacheService
      * @param DarkStoreLocatorService $darkStoreLocator
@@ -47,190 +53,26 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
      * @param ProductFormatterService $productFormatter
      * @param LoggerInterface $logger
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param CoreCategoryRepositoryInterface $coreCategoryRepository
+     * @param StoreManagerInterface $storeManager
+     * @param \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
      */
     public function __construct(
-        private CollectionFactory                      $productCollectionFactory,
-        private WarehouseProductResultInterfaceFactory $resultFactory,
-        private WarehouseRepositoryInterface           $warehouseRepository,
-        private Config                                 $configHelper,
-        private CacheService                           $cacheService,
-        private DarkStoreLocatorService                $darkStoreLocator,
-        private FilterService                          $filterService,
-        private ProductCollectionService               $collectionService,
-        private ProductFormatterService                $productFormatter,
-        private LoggerInterface                        $logger,
-        private CategoryRepositoryInterface            $categoryRepository,
-    )
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDarkStoreProductsByPincode(
-        int     $pincode,
-        int     $pageSize = 20,
-        int     $currentPage = 1,
-        ?string $sortField = null,
-        ?string $sortDirection = 'ASC',
-        mixed   $filters = []
-    ): WarehouseProductResultInterface
-    {
-        try {
-            // Get nearest dark store for this pincode
-            $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
-
-            // Use the warehouse code to get products
-            return $this->getProductsByWarehouse(
-                $darkStore['warehouse_code'],
-                $pageSize,
-                $currentPage,
-                $sortField,
-                $sortDirection,
-                $filters
-            );
-        } catch (NoSuchEntityException $e) {
-            $this->logger->error('Dark store not found: ' . $e->getMessage());
-            throw $e;
-        } catch (Exception $e) {
-            $this->logger->error('Error retrieving products by pincode: ' . $e->getMessage());
-            throw new LocalizedException(__('Could not retrieve products for pincode: %1', $e->getMessage()));
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getProductsByWarehouse(
-        string  $warehouseCode,
-        int     $pageSize = 20,
-        int     $currentPage = 1,
-        ?string $sortField = null,
-        ?string $sortDirection = 'ASC',
-        mixed   $filters = []
-    ): WarehouseProductResultInterface
-    {
-        try {
-            // Generate static and dynamic cache keys
-            $staticCacheKey = $this->cacheService->getWarehouseProductsCacheKey(
-                $warehouseCode,
-                $pageSize,
-                $currentPage,
-                $sortField,
-                $sortDirection,
-                $filters,
-                false
-            );
-
-            $dynamicCacheKey = $this->cacheService->getWarehouseProductsCacheKey(
-                $warehouseCode,
-                $pageSize,
-                $currentPage,
-                $sortField,
-                $sortDirection,
-                $filters,
-                true
-            );
-
-            // Get warehouse info for validation and result data
-            $warehouse = $this->warehouseRepository->getByCode($warehouseCode);
-
-            // Try to get from static cache first
-            $staticData = $this->cacheService->get($staticCacheKey);
-            $dynamicData = $this->cacheService->get($dynamicCacheKey);
-
-            if ($staticData && $dynamicData) {
-                // Both caches hit - combine and return
-                $mergedItems = $this->productFormatter->mergeStaticAndDynamicData($staticData, $dynamicData);
-
-                // Get filters (these can be cached separately)
-                $filtersCacheKey = $this->cacheService->getWarehouseFiltersCacheKey($warehouseCode, (array)$filters);
-                $availableFilters = $this->cacheService->get($filtersCacheKey) ?: [];
-
-                // Create result object
-                $result = $this->resultFactory->create();
-                $result->setWarehouseCode($warehouseCode);
-                $result->setWarehouseName($warehouse->getName());
-                $result->setItems($mergedItems);
-                $result->setTotalCount(count($mergedItems));
-                $result->setAvailableFilters($availableFilters);
-
-                return $result;
-            }
-
-            // Cache miss, need to fetch from database
-            $collection = $this->collectionService->getOptimizedProductCollection(
-                $warehouseCode,
-                $pageSize,
-                $currentPage,
-                $sortField,
-                $sortDirection,
-                (array)$filters
-            );
-
-            // Get count before loading to optimize
-            $totalCount = $collection->getSize();
-
-            // Separate static and dynamic data
-            $staticItems = [];
-            $dynamicItems = [];
-
-            foreach ($collection->getItems() as $product) {
-                $productId = $product->getId();
-
-                // Extract static data (rarely changes)
-                $staticItems[$productId] = $this->productFormatter->extractStaticData($product);
-
-                // Extract dynamic data (frequently changes)
-                $dynamicItems[$productId] = $this->productFormatter->extractDynamicData($product);
-            }
-
-            // Cache static data (long lifetime)
-            $this->cacheService->save(
-                $staticCacheKey,
-                $staticItems,
-                [CacheService::CACHE_TAG_STATIC],
-                CacheService::CACHE_LIFETIME_STATIC
-            );
-
-            // Cache dynamic data (short lifetime)
-            $this->cacheService->save(
-                $dynamicCacheKey,
-                $dynamicItems,
-                [CacheService::CACHE_TAG_DYNAMIC],
-                CacheService::CACHE_LIFETIME_DYNAMIC
-            );
-
-            // Merge for response
-            $formattedItems = $this->productFormatter->mergeStaticAndDynamicData($staticItems, $dynamicItems);
-
-            // Generate and cache filters
-            $availableFilters = $this->filterService->generateEfficientFilters($collection);
-            $filtersCacheKey = $this->cacheService->getWarehouseFiltersCacheKey($warehouseCode, (array)$filters);
-
-            $this->cacheService->save(
-                $filtersCacheKey,
-                $availableFilters,
-                [CacheService::CACHE_TAG_FILTERS],
-                CacheService::CACHE_LIFETIME_FILTERS
-            );
-
-            // Create result object
-            $result = $this->resultFactory->create();
-            $result->setWarehouseCode($warehouseCode);
-            $result->setWarehouseName($warehouse->getName());
-            $result->setItems($formattedItems);
-            $result->setTotalCount($totalCount);
-            $result->setAvailableFilters($availableFilters);
-
-            return $result;
-        } catch (NoSuchEntityException $e) {
-            $this->logger->error('Warehouse not found: ' . $e->getMessage());
-            throw new NoSuchEntityException(__('Warehouse with code "%1" does not exist.', $warehouseCode));
-        } catch (Exception $e) {
-            $this->logger->error('Error retrieving products by warehouse: ' . $e->getMessage());
-            throw new LocalizedException(__('Could not retrieve products for warehouse: %1', $e->getMessage()));
-        }
+        private CollectionFactory                                               $productCollectionFactory,
+        private WarehouseProductResultInterfaceFactory                          $resultFactory,
+        private CategoryListResultInterfaceFactory                              $categoryListResultFactory,
+        private Config                                                          $configHelper,
+        private CacheService                                                    $cacheService,
+        private DarkStoreLocatorService                                         $darkStoreLocator,
+        private FilterService                                                   $filterService,
+        private ProductCollectionService                                        $collectionService,
+        private ProductFormatterService                                         $productFormatter,
+        private LoggerInterface                                                 $logger,
+        private CategoryRepositoryInterface                                     $categoryRepository,
+        private CoreCategoryRepositoryInterface                                 $coreCategoryRepository,
+        private StoreManagerInterface                                           $storeManager,
+        private \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
+    ) {
     }
 
     /**
@@ -239,8 +81,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     public function getCarouselProductsByPincode(
         int    $pincode,
         string $categorySlug
-    ): WarehouseProductResultInterface
-    {
+    ): WarehouseProductResultInterface {
         try {
             // Generate a cache key for faster lookups
             $cacheKey = $this->cacheService->getCategoryProductsCacheKey($pincode, $categorySlug);
@@ -370,8 +211,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         ?string $sortField = null,
         ?string $sortDirection = 'ASC',
         mixed   $filters = []
-    ): WarehouseProductResultInterface
-    {
+    ): WarehouseProductResultInterface {
         try {
             // Get category ID from slug
             $categoryId = $this->getCategoryIdFromSlug($categorySlug);
@@ -385,7 +225,16 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $warehouseCode = $darkStore['warehouse_code'];
 
             // Generate cache keys for the request
-            $cacheKey = $this->cacheService->getCategoryProductsCacheKey($pincode, $categorySlug);
+            $cacheKey = $this->cacheService->getCategoryListingCacheKey(
+                $pincode,
+                $categorySlug,
+                $pageSize,
+                $currentPage,
+                $sortField,
+                $sortDirection,
+                $filters
+            );
+
             $filtersCacheKey = $this->cacheService->getWarehouseFiltersCacheKey($warehouseCode, (array)$filters);
 
             // Try to get from cache first
@@ -433,6 +282,17 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             // Generate filters for the collection
             $availableFilters = $this->filterService->generateEfficientFilters($collection);
 
+            // Add subcategory filter if this category has children
+            $subcategories = $this->getSubcategoriesForFilter($categoryId, $warehouseCode);
+            if (!empty($subcategories)) {
+                // Add subcategories as a new filter
+                $availableFilters[] = [
+                    'label' => 'Category',
+                    'attribute_code' => 'subcategory',
+                    'options' => $subcategories
+                ];
+            }
+
             // Cache the filters
             $this->cacheService->save(
                 $filtersCacheKey,
@@ -466,7 +326,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                     'items' => $formattedItems,
                     'total_count' => $totalCount
                 ],
-                ['category_products'],
+                ['category_products_listing'],
                 CacheService::CACHE_LIFETIME_DYNAMIC
             );
 
@@ -479,6 +339,105 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             throw new LocalizedException(
                 __('Could not retrieve category products for pincode: %1', $e->getMessage())
             );
+        }
+    }
+
+    /**
+     * Get Subcategories for filter with accurate product counts for the given warehouse
+     *
+     * @param int $categoryId
+     * @param string $warehouseCode
+     * @return array
+     */
+    private function getSubcategoriesForFilter(int $categoryId, string $warehouseCode): array
+    {
+        try {
+            // Generate cache key for subcategories
+            $cacheKey = $this->cacheService->getSubcategoryCacheKey($categoryId, $warehouseCode);
+
+            // Try to get from cache first
+            $cachedSubcategories = $this->cacheService->get($cacheKey);
+            if ($cachedSubcategories) {
+                return $cachedSubcategories;
+            }
+
+            $result = [];
+
+            // Get the category
+            $category = $this->coreCategoryRepository->get($categoryId);
+
+            // Get subcategories that are included in menu
+            $subCategories = $category->getChildrenCategories()
+                ->addAttributeToFilter('include_in_menu', ['eq' => 1])
+                ->addAttributeToSelect(['name', 'url_key', 'category_icon']);
+
+            // Add each subcategory to the result
+            foreach ($subCategories as $subCategory) {
+                // Get product count for this subcategory in the current warehouse
+                $subcategoryId = (int)$subCategory->getId();
+                $productCount = $this->getProductCountForSubcategory($subcategoryId, $warehouseCode);
+
+                // Only add subcategories that have products in this warehouse
+                if ($productCount > 0) {
+                    // Get category icon, if available
+                    $categoryIcon = $subCategory->getCategoryIcon();
+                    $iconUrl = '';
+
+                    // If category icon exists, get the URL
+                    if ($categoryIcon) {
+                        $mediaUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
+                        $iconUrl = $mediaUrl . 'catalog/category/' . $categoryIcon;
+                    }
+
+                    $result[] = [
+                        'id' => $subcategoryId,
+                        'label' => $subCategory->getName(),
+                        'slug' => $subCategory->getUrlKey(),
+                        'count' => $productCount,
+                        'icon' => $iconUrl  // Add the icon URL to the result
+                    ];
+                }
+            }
+
+            // Cache the result
+            if (!empty($result)) {
+                $this->cacheService->save(
+                    $cacheKey,
+                    $result,
+                    [CacheService::CACHE_TAG_FILTERS],
+                    CacheService::CACHE_LIFETIME_FILTERS
+                );
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            $this->logger->error('Error getting subcategories: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get accurate product count for a subcategory in a specific warehouse
+     *
+     * @param int $categoryId
+     * @param string $warehouseCode
+     * @return int
+     */
+    private function getProductCountForSubcategory(int $categoryId, string $warehouseCode): int
+    {
+        try {
+            // Create a collection filtered by the category
+            $collection = $this->productCollectionFactory->create();
+            $collection->addCategoriesFilter(['eq' => $categoryId]);
+
+            // Join with warehouse inventory and filter for products with stock
+            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode);
+
+            // Return the count
+            return $collection->getSize();
+        } catch (Exception $e) {
+            $this->logger->error('Error getting product count for subcategory: ' . $e->getMessage());
+            return 0;
         }
     }
 
@@ -525,6 +484,175 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         } catch (Exception $e) {
             $this->logger->error('Error invalidating all caches: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Get categories available in a dark store by pincode
+     *
+     * @param int $pincode
+     * @return CategoryListResultInterface
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function getCategoriesByPincode(
+        int $pincode
+    ): CategoryListResultInterface {
+        try {
+            // Generate cache key for categories
+            $cacheKey = $this->cacheService->getCategoriesCacheKey($pincode);
+
+            // Try to get from cache first
+            $cachedResult = $this->cacheService->get($cacheKey);
+            if ($cachedResult) {
+                $result = $this->categoryListResultFactory->create();
+                $result->setWarehouseCode($cachedResult['warehouse_code']);
+                $result->setWarehouseName($cachedResult['warehouse_name']);
+
+                // Important: use the cached categories directly without re-encoding
+                $result->setCategories($cachedResult['categories']);
+                $result->setTotalCount($cachedResult['total_count']);
+
+                return $result;
+            }
+
+            // Get nearest dark store for this pincode
+            $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+            $warehouseCode = $darkStore['warehouse_code'];
+
+            // Get main "categories" category
+            $rootCategoryId = $this->getCategoriesRootId();
+
+            if (!$rootCategoryId) {
+                throw new NoSuchEntityException(
+                    __('Root "categories" category not found')
+                );
+            }
+
+            // Get subcategories with products in the current warehouse
+            $categories = $this->getCategoriesWithProducts($rootCategoryId, $warehouseCode);
+
+            // Create result object
+            $result = $this->categoryListResultFactory->create();
+            $result->setWarehouseCode($warehouseCode);
+            $result->setWarehouseName($darkStore['warehouse_name']);
+            $result->setCategories($categories);
+            $result->setTotalCount(count($categories));
+
+            // Cache the result - store raw data
+            $cacheData = [
+                'warehouse_code' => $warehouseCode,
+                'warehouse_name' => $darkStore['warehouse_name'],
+                'categories' => $categories,
+                'total_count' => count($categories)
+            ];
+
+            $this->cacheService->save(
+                $cacheKey,
+                $cacheData,
+                ['categories_list'],
+                CacheService::CACHE_LIFETIME_STATIC
+            );
+
+            return $result;
+        } catch (NoSuchEntityException $e) {
+            $this->logger->error('Dark store not found: ' . $e->getMessage());
+            throw $e;
+        } catch (Exception $e) {
+            $this->logger->error('Error retrieving categories by pincode: ' . $e->getMessage());
+            throw new LocalizedException(
+                __('Could not retrieve categories for pincode: %1', $e->getMessage())
+            );
+        }
+    }
+
+    /**
+     * Get ID of the "categories" root category
+     *
+     * @return int|null
+     */
+    private function getCategoriesRootId(): ?int
+    {
+        try {
+            // Try to find the "categories" category by URL key
+            $categoryId = $this->getCategoryIdFromSlug('categories');
+
+            if ($categoryId) {
+                return $categoryId;
+            }
+
+            // If not found by URL key, try to find it by name
+            $collection = $this->categoryCollectionFactory->create();
+            $collection->addAttributeToFilter('name', 'Categories')
+                ->addAttributeToFilter('level', 2) // Second level, just below root
+                ->addAttributeToFilter('is_active', 1)
+                ->setPageSize(1);
+
+            $category = $collection->getFirstItem();
+
+            if ($category->getId()) {
+                return (int)$category->getId();
+            }
+
+            return null;
+        } catch (Exception $e) {
+            $this->logger->error('Error finding categories root: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get subcategories that have products in the specified warehouse
+     *
+     * @param int $categoryId
+     * @param string $warehouseCode
+     * @return array
+     */
+    private function getCategoriesWithProducts(int $categoryId, string $warehouseCode): array
+    {
+        try {
+            $result = [];
+
+            // Get the category
+            $category = $this->coreCategoryRepository->get($categoryId);
+
+            // Get subcategories that are included in menu
+            $subCategories = $category->getChildrenCategories()
+                ->addAttributeToFilter('include_in_menu', ['eq' => 1])
+                ->addAttributeToSelect(['name', 'url_key', 'category_icon']);
+
+            // Add each subcategory to the result
+            foreach ($subCategories as $subCategory) {
+                // Get product count for this subcategory in the current warehouse
+                $subcategoryId = (int)$subCategory->getId();
+                $productCount = $this->getProductCountForSubcategory($subcategoryId, $warehouseCode);
+
+                // Only add subcategories that have products in this warehouse
+                if ($productCount > 0) {
+                    // Get category icon if available
+                    $categoryIcon = $subCategory->getCategoryIcon();
+                    $iconUrl = '';
+
+                    // If category icon exists, get the URL
+                    if ($categoryIcon) {
+                        $mediaUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
+                        $iconUrl = $mediaUrl . 'catalog/category/' . $categoryIcon;
+                    }
+
+                    $result[] = [
+                        'id' => $subcategoryId,
+                        'name' => $subCategory->getName(),
+                        'slug' => $subCategory->getUrlKey(),
+                        'product_count' => $productCount,
+                        'icon' => $iconUrl
+                    ];
+                }
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            $this->logger->error('Error getting categories with products: ' . $e->getMessage());
+            return [];
         }
     }
 }

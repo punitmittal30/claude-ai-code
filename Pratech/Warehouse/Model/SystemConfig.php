@@ -104,7 +104,6 @@ class SystemConfig implements SystemConfigInterface
         'SEARCH_APP' => 'product/product_page_size/search_page_size_app',
     ];
 
-
     /**
      * @param ScopeConfigInterface $scopeConfig
      * @param TimezoneInterface $timezoneInterface

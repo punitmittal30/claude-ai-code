@@ -13,7 +13,9 @@
 
 namespace Pratech\Warehouse\Logger;
 
-class InventorySyncLogger extends \Monolog\Logger
+use Monolog\Logger;
+
+class InventorySyncLogger extends Logger
 {
 
 }

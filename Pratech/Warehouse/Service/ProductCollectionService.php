@@ -13,12 +13,10 @@
 
 namespace Pratech\Warehouse\Service;
 
-use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Exception;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
-use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
-use Pratech\Warehouse\Helper\Config;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,32 +25,13 @@ use Psr\Log\LoggerInterface;
 class ProductCollectionService
 {
     /**
-     * @param CollectionFactory $productCollectionFactory
      * @param ResourceConnection $resource
-     * @param Config $configHelper
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private CollectionFactory $productCollectionFactory,
         private ResourceConnection $resource,
-        private Config $configHelper,
-        private LoggerInterface $logger
+        private LoggerInterface    $logger
     ) {
-    }
-
-    /**
-     * Get base product collection
-     *
-     * @return Collection
-     */
-    public function getBaseCollection(): Collection
-    {
-        $collection = $this->productCollectionFactory->create();
-        $collection->addAttributeToFilter('status', Status::STATUS_ENABLED);
-        $collection->addAttributeToFilter('visibility', ['neq' => 1]);
-        $collection->addStoreFilter();
-
-        return $collection;
     }
 
     /**
@@ -65,8 +44,8 @@ class ProductCollectionService
      */
     public function joinWithWarehouseInventory(
         Collection $collection,
-        string $warehouseCode,
-        bool $onlyInStock = true
+        string     $warehouseCode,
+        bool       $onlyInStock = true
     ): Collection {
         $collection->getSelect()->join(
             ['inventory' => $this->resource->getTableName('pratech_warehouse_inventory')],
@@ -91,6 +70,12 @@ class ProductCollectionService
     public function applyFilters(Collection $collection, array $filters): Collection
     {
         foreach ($filters as $field => $condition) {
+            if ($field === 'subcategory') {
+                // Handle subcategory filter differently
+                $this->applySubcategoryFilter($collection, $condition);
+                continue;
+            }
+
             if (is_array($condition)) {
                 // If the condition is an array with value and condition type
                 if (isset($condition['value'])) {
@@ -115,6 +100,34 @@ class ProductCollectionService
     }
 
     /**
+     * Apply subcategory filter to collection
+     *
+     * @param Collection $collection
+     * @param mixed $subcategoryFilter
+     * @return void
+     */
+    private function applySubcategoryFilter(Collection $collection, mixed $subcategoryFilter): void
+    {
+        try {
+            // Extract category ID from filter
+            $subcategoryId = null;
+
+            if (is_array($subcategoryFilter) && isset($subcategoryFilter['value'])) {
+                $subcategoryId = $subcategoryFilter['value'];
+            } elseif (is_scalar($subcategoryFilter)) {
+                $subcategoryId = $subcategoryFilter;
+            }
+
+            if ($subcategoryId) {
+                // Add category filter
+                $collection->addCategoriesFilter(['eq' => $subcategoryId]);
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error applying subcategory filter: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Add category filter
      *
      * @param Collection $collection
@@ -128,56 +141,6 @@ class ProductCollectionService
         }
 
         $collection->addCategoriesFilter(['in' => $categoryIds]);
-        return $collection;
-    }
-
-    /**
-     * Get optimized product collection
-     *
-     * @param string $warehouseCode
-     * @param int $pageSize
-     * @param int $currentPage
-     * @param string|null $sortField
-     * @param string|null $sortDirection
-     * @param array $filters
-     * @return Collection
-     */
-    public function getOptimizedProductCollection(
-        string $warehouseCode,
-        int $pageSize,
-        int $currentPage,
-        ?string $sortField,
-        ?string $sortDirection,
-        array $filters
-    ): Collection {
-        $collection = $this->getBaseCollection();
-
-        // Only select needed attributes
-        $staticAttributes = $this->configHelper->getStaticAttributes();
-        $dynamicAttributes = $this->configHelper->getDynamicAttributes();
-
-        $collection->addAttributeToSelect(array_merge($staticAttributes, $dynamicAttributes));
-
-        // Add warehouse inventory join
-        $this->joinWithWarehouseInventory($collection, $warehouseCode);
-
-        // Apply filters if any
-        if (!empty($filters)) {
-            $this->applyFilters($collection, $filters);
-        }
-
-        // Apply pagination
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($currentPage);
-
-        // Apply sorting
-        if ($sortField) {
-            $collection->setOrder($sortField, $sortDirection ?: 'ASC');
-        } else {
-            // Default sort by name
-            $collection->setOrder('name', 'ASC');
-        }
-
         return $collection;
     }
 
@@ -198,7 +161,7 @@ class ProductCollectionService
             $select->reset(Select::LIMIT_OFFSET);
 
             return $this->resource->getConnection()->fetchCol($select);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error getting product IDs: ' . $e->getMessage());
             return [];
         }

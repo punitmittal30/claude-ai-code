@@ -45,14 +45,12 @@ class ProductResponseFormatter extends AbstractHelper
         'pack_size',
         'size'
     ];
+
     /**
      * Cache key for attribute options
      */
     private const ATTRIBUTE_OPTIONS_CACHE_KEY = 'warehouse_attribute_options';
-    /**
-     * Cache lifetime for attribute options (1 day)
-     */
-    private const ATTRIBUTE_OPTIONS_CACHE_LIFETIME = 86400;
+
     /**
      * In-memory attribute options cache
      *
@@ -81,23 +79,6 @@ class ProductResponseFormatter extends AbstractHelper
     }
 
     /**
-     * Format product collection to standardized response format
-     *
-     * @param array $items
-     * @return array
-     */
-    public function formatProductCollection(array $items): array
-    {
-        $formattedItems = [];
-
-        foreach ($items as $product) {
-            $formattedItems[] = $this->formatProduct($product);
-        }
-
-        return $formattedItems;
-    }
-
-    /**
      * Load attribute options cache from persistent cache
      *
      * @return void
@@ -108,43 +89,6 @@ class ProductResponseFormatter extends AbstractHelper
         if ($cachedOptions) {
             $this->attributeOptionsCache = $this->serializer->unserialize($cachedOptions);
         }
-    }
-
-    /**
-     * Preload all attribute options for commonly used attributes
-     *
-     * @return void
-     */
-    private function preloadAttributeOptions(): void
-    {
-        // Skip if already loaded
-        if (!empty($this->attributeOptionsCache)) {
-            return;
-        }
-
-        foreach (self::ATTRIBUTES_TO_TRANSFORM as $attributeCode) {
-            try {
-                $attribute = $this->attributeRepository->get($attributeCode);
-                $options = $attribute->getSource()->getAllOptions(false);
-
-                foreach ($options as $option) {
-                    if (!empty($option['value'])) {
-                        $cacheKey = $attributeCode . '|' . $option['value'];
-                        $this->attributeOptionsCache[$cacheKey] = (string)$option['label'];
-                    }
-                }
-            } catch (Exception $e) {
-                $this->_logger->error('Error preloading attribute options: ' . $e->getMessage());
-            }
-        }
-
-        // Cache for future use
-        $this->cache->save(
-            $this->serializer->serialize($this->attributeOptionsCache),
-            self::ATTRIBUTE_OPTIONS_CACHE_KEY,
-            ['attribute_options'],
-            self::ATTRIBUTE_OPTIONS_CACHE_LIFETIME
-        );
     }
 
     /**

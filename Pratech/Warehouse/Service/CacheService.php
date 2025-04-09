@@ -13,6 +13,7 @@
 
 namespace Pratech\Warehouse\Service;
 
+use Exception;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Psr\Log\LoggerInterface;
@@ -44,9 +45,9 @@ class CacheService
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private CacheInterface $cache,
+        private CacheInterface      $cache,
         private SerializerInterface $serializer,
-        private LoggerInterface $logger
+        private LoggerInterface     $logger
     ) {
     }
 
@@ -62,7 +63,7 @@ class CacheService
         if ($data) {
             try {
                 return $this->serializer->unserialize($data);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->logger->error('Error un-serializing cached data: ' . $e->getMessage());
                 return null;
             }
@@ -91,7 +92,7 @@ class CacheService
                 $lifetime
             );
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error saving data to cache: ' . $e->getMessage());
             return false;
         }
@@ -107,7 +108,7 @@ class CacheService
     {
         try {
             return $this->cache->remove($key);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error removing cache: ' . $e->getMessage());
             return false;
         }
@@ -123,37 +124,10 @@ class CacheService
     {
         try {
             return $this->cache->clean($tags);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error cleaning cache: ' . $e->getMessage());
             return false;
         }
-    }
-
-    /**
-     * Get cache key for warehouse products
-     *
-     * @param string $warehouseCode
-     * @param int $pageSize
-     * @param int $currentPage
-     * @param string|null $sortField
-     * @param string|null $sortDirection
-     * @param mixed $filters
-     * @param bool $isDynamic Whether it's a dynamic cache key
-     * @return string
-     */
-    public function getWarehouseProductsCacheKey(
-        string  $warehouseCode,
-        int     $pageSize,
-        int     $currentPage,
-        ?string $sortField,
-        ?string $sortDirection,
-        mixed   $filters,
-        bool    $isDynamic = false
-    ): string {
-        $filterHash = md5($this->serializer->serialize($filters ?? []));
-        $prefix = $isDynamic ? 'warehouse_dynamic' : 'warehouse_static';
-
-        return "{$prefix}_{$warehouseCode}_p{$pageSize}_c{$currentPage}_s{$sortField}_{$sortDirection}_{$filterHash}";
     }
 
     /**
@@ -165,6 +139,36 @@ class CacheService
     public function getDarkStoreCacheKey(int $pincode): string
     {
         return "dark_store_{$pincode}";
+    }
+
+    /**
+     * Get cache key for category products with listing parameters
+     *
+     * @param int $pincode
+     * @param string $categorySlug
+     * @param int $pageSize
+     * @param int $currentPage
+     * @param string|null $sortField
+     * @param string|null $sortDirection
+     * @param mixed $filters
+     * @return string
+     */
+    public function getCategoryListingCacheKey(
+        int     $pincode,
+        string  $categorySlug,
+        int     $pageSize = 20,
+        int     $currentPage = 1,
+        ?string $sortField = null,
+        ?string $sortDirection = null,
+        mixed   $filters = []
+    ): string {
+        // Create a hash of the filters to keep the cache key shorter
+        $filterHash = md5($this->serializer->serialize($filters ?? []));
+
+        // Build a cache key that resembles the carousel key but includes pagination and sorting
+        return "category_listing_{$pincode}_{$categorySlug}_p{$pageSize}_c{$currentPage}" .
+            "_s" . ($sortField ?? 'default') . "_" . ($sortDirection ?? 'ASC') .
+            "_{$filterHash}";
     }
 
     /**
@@ -192,6 +196,29 @@ class CacheService
     }
 
     /**
+     * Get cache key for subcategory filters
+     *
+     * @param int $categoryId
+     * @param string $warehouseCode
+     * @return string
+     */
+    public function getSubcategoryCacheKey(int $categoryId, string $warehouseCode): string
+    {
+        return "subcategory_filters_{$categoryId}_{$warehouseCode}";
+    }
+
+    /**
+     * Get cache key for categories list by pincode
+     *
+     * @param int $pincode
+     * @return string
+     */
+    public function getCategoriesCacheKey(int $pincode): string
+    {
+        return "categories_list_{$pincode}";
+    }
+
+    /**
      * Get cache key for category products
      *
      * @param int $pincode
@@ -201,39 +228,5 @@ class CacheService
     public function getCategoryProductsCacheKey(int $pincode, string $categorySlug): string
     {
         return "{$pincode}_{$categorySlug}";
-    }
-
-    /**
-     * Get cache key for attribute option
-     *
-     * @param string $attributeCode
-     * @param mixed $value
-     * @return string
-     */
-    public function getAttributeOptionCacheKey(string $attributeCode, $value): string
-    {
-        return "attr_option_{$attributeCode}_{$value}";
-    }
-
-    /**
-     * Get cache key for stock info
-     *
-     * @param int $productId
-     * @return string
-     */
-    public function getStockInfoCacheKey(int $productId): string
-    {
-        return "stock_info_{$productId}";
-    }
-
-    /**
-     * Get cache key for warehouse
-     *
-     * @param string $warehouseCode
-     * @return string
-     */
-    public function getWarehouseCacheKey(string $warehouseCode): string
-    {
-        return "warehouse_{$warehouseCode}";
     }
 }

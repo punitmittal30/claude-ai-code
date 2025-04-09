@@ -12,12 +12,14 @@ declare(strict_types=1);
 
 namespace Pratech\Warehouse\Helper;
 
+use Exception;
+use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Layer\Category\FilterableAttributeList;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Framework\DB\Select;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -47,10 +49,10 @@ class FilterHelper extends AbstractHelper
      * @param LoggerInterface $logger
      */
     public function __construct(
-        Context $context,
-        FilterableAttributeList $filterableAttributes,
+        Context                     $context,
+        FilterableAttributeList     $filterableAttributes,
         CategoryRepositoryInterface $categoryRepository,
-        LoggerInterface $logger
+        LoggerInterface             $logger
     ) {
         parent::__construct($context);
         $this->filterableAttributes = $filterableAttributes;
@@ -82,7 +84,7 @@ class FilterHelper extends AbstractHelper
             $result['attributes'] = $this->getAttributeFilters($collection);
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error in getAvailableFilters: ' . $e->getMessage());
             return [
                 'price' => [],
@@ -105,14 +107,14 @@ class FilterHelper extends AbstractHelper
             $select = clone $collection->getSelect();
 
             // Reset columns and add only price stats
-            $select->reset(\Magento\Framework\DB\Select::COLUMNS);
+            $select->reset(Select::COLUMNS);
             $select->columns([
                 'min_price' => 'MIN(price_index.min_price)',
                 'max_price' => 'MAX(price_index.max_price)'
             ]);
 
             // Join with price index table to get prices
-            $priceIndexJoin = $select->getPart(\Magento\Framework\DB\Select::FROM)['price_index'] ?? null;
+            $priceIndexJoin = $select->getPart(Select::FROM)['price_index'] ?? null;
 
             // Only join price index if not already joined
             if (!$priceIndexJoin) {
@@ -136,7 +138,7 @@ class FilterHelper extends AbstractHelper
 
             // Create nice rounded price ranges
             return $this->createNiceRanges($minPrice, $maxPrice);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error getting price ranges: ' . $e->getMessage());
             return [];
         }
@@ -196,6 +198,17 @@ class FilterHelper extends AbstractHelper
     }
 
     /**
+     * Format price value
+     *
+     * @param float $price
+     * @return string
+     */
+    private function formatPrice(float $price): string
+    {
+        return number_format($price, 2);
+    }
+
+    /**
      * Get category filters
      *
      * @param int $categoryId
@@ -219,7 +232,7 @@ class FilterHelper extends AbstractHelper
             }
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error getting category filters: ' . $e->getMessage());
             return [];
         }
@@ -262,7 +275,7 @@ class FilterHelper extends AbstractHelper
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error getting attribute filters: ' . $e->getMessage());
         }
 
@@ -280,11 +293,11 @@ class FilterHelper extends AbstractHelper
         try {
             $clonedCollection = clone $collection;
             $clonedCollection->clear();
-            $clonedCollection->getSelect()->reset(\Magento\Framework\DB\Select::COLUMNS);
+            $clonedCollection->getSelect()->reset(Select::COLUMNS);
             $clonedCollection->getSelect()->columns(['entity_id' => 'e.entity_id']);
-            $clonedCollection->getSelect()->reset(\Magento\Framework\DB\Select::ORDER);
-            $clonedCollection->getSelect()->reset(\Magento\Framework\DB\Select::LIMIT_COUNT);
-            $clonedCollection->getSelect()->reset(\Magento\Framework\DB\Select::LIMIT_OFFSET);
+            $clonedCollection->getSelect()->reset(Select::ORDER);
+            $clonedCollection->getSelect()->reset(Select::LIMIT_COUNT);
+            $clonedCollection->getSelect()->reset(Select::LIMIT_OFFSET);
 
             $ids = [];
             foreach ($clonedCollection as $product) {
@@ -292,7 +305,7 @@ class FilterHelper extends AbstractHelper
             }
 
             return $ids;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error getting product IDs: ' . $e->getMessage());
             return [];
         }
@@ -326,20 +339,9 @@ class FilterHelper extends AbstractHelper
             }
 
             return array_slice($options, 0, 5); // Return only first 5 for testing
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error getting attribute options simple: ' . $e->getMessage());
             return [];
         }
-    }
-
-    /**
-     * Format price value
-     *
-     * @param float $price
-     * @return string
-     */
-    private function formatPrice(float $price): string
-    {
-        return number_format($price, 2);
     }
 }

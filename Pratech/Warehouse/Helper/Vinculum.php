@@ -15,22 +15,12 @@ namespace Pratech\Warehouse\Helper;
 
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\HTTP\Client\Curl;
-use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Pratech\Warehouse\Model\ResourceModel\Warehouse;
 
 class Vinculum
 {
-    public const WAREHOUSES_PINCODE_MAPPING = [
-        'W02' => 124105,
-        'W03' => 421302,
-        'W04' => 560067
-    ];
-
     /**
      * @param Curl $curl
      * @param Config $configHelper
@@ -38,11 +28,61 @@ class Vinculum
      * @param Warehouse $warehouseResource
      */
     public function __construct(
-        private Curl              $curl,
-        private Config            $configHelper,
-        private Json              $json,
-        private Warehouse         $warehouseResource
+        private Curl      $curl,
+        private Config    $configHelper,
+        private Json      $json,
+        private Warehouse $warehouseResource
     ) {
+    }
+
+    /**
+     * Get All Warehouses Inventory.
+     *
+     * @return array
+     * @throws LocalizedException
+     */
+    public function getAllWarehousesInventory(): array
+    {
+        $response = [];
+        $warehouseCodes = $this->warehouseResource->getAllEnabledWarehouseCodes();
+        foreach ($warehouseCodes as $warehouseCode) {
+            $response[$warehouseCode] = $this->getCompleteWarehouseInventory($warehouseCode);
+        }
+        return $response;
+    }
+
+    /**
+     * Get complete warehouse inventory
+     *
+     * @param string $locationCode
+     * @param string|null $fromDate
+     * @param string|null $toDate
+     * @return array
+     * @throws LocalizedException
+     */
+    public function getCompleteWarehouseInventory(
+        string  $locationCode = 'W03',
+        ?string $fromDate = null,
+        ?string $toDate = null
+    ): array {
+        $allInventory = [];
+        $pageNumber = 1;
+        $hasMore = true;
+
+        while ($hasMore) {
+            $response = $this->fetchWarehouseInventory([], $locationCode, $fromDate, $toDate, $pageNumber);
+
+            if (!empty($response['response'])) {
+                foreach ($response['response'] as $item) {
+                    $allInventory[$item['skuCode']] = (int)$item['qty'];
+                }
+            }
+
+            $hasMore = (bool)($response['hasMore'] ?? false);
+            $pageNumber++;
+        }
+
+        return $allInventory;
     }
 
     /**
@@ -105,56 +145,6 @@ class Vinculum
         } catch (Exception $e) {
             throw new LocalizedException(__('Failed to fetch inventory: %1', $e->getMessage()));
         }
-    }
-
-    /**
-     * Get All Warehouses Inventory.
-     *
-     * @return array
-     * @throws LocalizedException
-     */
-    public function getAllWarehousesInventory(): array
-    {
-        $response = [];
-        $warehouseCodes = $this->warehouseResource->getAllEnabledWarehouseCodes();
-        foreach ($warehouseCodes as $warehouseCode) {
-            $response[$warehouseCode] = $this->getCompleteWarehouseInventory($warehouseCode);
-        }
-        return $response;
-    }
-
-    /**
-     * Get complete warehouse inventory
-     *
-     * @param string $locationCode
-     * @param string|null $fromDate
-     * @param string|null $toDate
-     * @return array
-     * @throws LocalizedException
-     */
-    public function getCompleteWarehouseInventory(
-        string  $locationCode = 'W03',
-        ?string $fromDate = null,
-        ?string $toDate = null
-    ): array {
-        $allInventory = [];
-        $pageNumber = 1;
-        $hasMore = true;
-
-        while ($hasMore) {
-            $response = $this->fetchWarehouseInventory([], $locationCode, $fromDate, $toDate, $pageNumber);
-
-            if (!empty($response['response'])) {
-                foreach ($response['response'] as $item) {
-                    $allInventory[$item['skuCode']] = (int)$item['qty'];
-                }
-            }
-
-            $hasMore = (bool)($response['hasMore'] ?? false);
-            $pageNumber++;
-        }
-
-        return $allInventory;
     }
 
     /**

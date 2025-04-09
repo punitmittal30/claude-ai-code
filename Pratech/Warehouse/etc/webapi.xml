@@ -54,35 +54,6 @@
         </resources>
     </route>
 
-    <!-- Product API endpoints -->
-    <route url="/V1/warehouse/:warehouseCode/products" method="GET">
-        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface" method="getProductsByWarehouse"/>
-        <resources>
-            <resource ref="Pratech_Warehouse::warehouse_manage"/>
-        </resources>
-    </route>
-    <route url="/V1/warehouse/pincode/:pincode/products" method="GET">
-        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface" method="getProductsByPincode"/>
-        <resources>
-            <resource ref="Pratech_Warehouse::warehouse_manage"/>
-        </resources>
-    </route>
-
-    <!-- Filter API endpoints -->
-    <route url="/V1/warehouse/:warehouseCode/products/filter" method="POST">
-        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface" method="getProductsByWarehouse"/>
-        <resources>
-            <resource ref="Pratech_Warehouse::warehouse_manage"/>
-        </resources>
-    </route>
-    <route url="/V1/dark-store/pincode/:pincode/products/filter" method="POST">
-        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
-                 method="getDarkStoreProductsByPincode"/>
-        <resources>
-            <resource ref="Pratech_Warehouse::warehouse_manage"/>
-        </resources>
-    </route>
-
     <!-- Available filters API endpoints -->
     <route url="/V1/warehouse/:warehouseCode/filters" method="GET">
         <service class="Pratech\Warehouse\Api\FilterRepositoryInterface" method="getWarehouseFilters"/>
@@ -97,7 +68,8 @@
         </resources>
     </route>
 
-    <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/products" method="GET">
+    <!-- Carousel products endpoint -->
+    <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/carousel" method="GET">
         <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
                  method="getCarouselProductsByPincode"/>
         <resources>
@@ -105,9 +77,19 @@
         </resources>
     </route>
 
-    <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/products" method="POST">
+    <!-- Listing products endpoint -->
+    <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/listing" method="POST">
         <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
                  method="getListingProductsByPincode"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+
+    <!-- Store specific categories endpoint -->
+    <route url="/V1/warehouse/pincode/:pincode/categories" method="GET">
+        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
+                 method="getCategoriesByPincode"/>
         <resources>
             <resource ref="Pratech_Warehouse::warehouse_manage"/>
         </resources>
