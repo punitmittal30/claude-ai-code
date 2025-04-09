@@ -48,7 +48,14 @@ class DarkStoreLocatorService
     public function findNearestDarkStore(int $pincode): array
     {
         $cacheKey = $this->cacheService->getDarkStoreCacheKey($pincode);
+
+        \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
+            ->debug('CUSTOM_LOGGING', ['Dark Store Cache Key' => $cacheKey]);
+
         $cachedData = $this->cacheService->get($cacheKey);
+
+        \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
+            ->debug('CUSTOM_LOGGING', ['Dark Store Cached Data' => $cachedData]);
 
         if ($cachedData) {
             return $cachedData;
@@ -99,6 +106,9 @@ class DarkStoreLocatorService
                     throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
                 }
             }
+
+            \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
+                ->debug('CUSTOM_LOGGING', ['Dark Store Uncached Data' => $darkStore]);
 
             // Cache the result for a day since store locations rarely change
             $this->cacheService->save(

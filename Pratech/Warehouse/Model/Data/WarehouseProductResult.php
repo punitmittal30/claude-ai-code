@@ -55,6 +55,22 @@ class WarehouseProductResult extends AbstractExtensibleObject implements Warehou
     /**
      * @inheritDoc
      */
+    public function getCategoryName()
+    {
+        return $this->_get('category_name');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setCategoryName(string $categoryName)
+    {
+        return $this->setData('category_name', $categoryName);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getItems()
     {
         return $this->_get('items') ?: [];

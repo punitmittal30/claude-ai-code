@@ -2,8 +2,6 @@
 /**
  * Pratech_Warehouse
  *
- * PHP version 8.x
- *
  * @category  PHP
  * @package   Pratech\Warehouse
  * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
@@ -46,6 +44,21 @@ interface WarehouseProductResultInterface
      * @return $this
      */
     public function setWarehouseName(string $warehouseName);
+
+    /**
+     * Get category name
+     *
+     * @return string|null
+     */
+    public function getCategoryName();
+
+    /**
+     * Set category name
+     *
+     * @param string $categoryName
+     * @return $this
+     */
+    public function setCategoryName(string $categoryName);
 
     /**
      * Get items

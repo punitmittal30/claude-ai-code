@@ -91,6 +91,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $result = $this->resultFactory->create();
                 $result->setWarehouseCode($cachedResult['warehouse_code']);
                 $result->setWarehouseName($cachedResult['warehouse_name']);
+                $result->setCategoryName($cachedResult['category_name'] ?? '');
                 $result->setItems($cachedResult['items']);
                 $result->setTotalCount($cachedResult['total_count']);
                 return $result;
@@ -102,6 +103,10 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             if (!$categoryId) {
                 throw new NoSuchEntityException(__('Category with slug "%1" does not exist.', $categorySlug));
             }
+
+            // Get category name
+            $category = $this->coreCategoryRepository->get($categoryId);
+            $categoryName = $category->getName();
 
             // Get nearest dark store for this pincode
             $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
@@ -133,6 +138,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $result = $this->resultFactory->create();
             $result->setWarehouseCode($warehouseCode);
             $result->setWarehouseName($darkStore['warehouse_name']);
+            $result->setCategoryName($categoryName);
             $result->setItems($formattedItems);
             $result->setTotalCount($totalCount);
 
@@ -142,6 +148,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 [
                     'warehouse_code' => $warehouseCode,
                     'warehouse_name' => $darkStore['warehouse_name'],
+                    'category_name' => $categoryName,
                     'items' => $formattedItems,
                     'total_count' => $totalCount
                 ],
@@ -442,52 +449,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     }
 
     /**
-     * Clear product caches for specific SKUs
-     *
-     * This method can be called when prices or inventory are updated
-     *
-     * @param array $skus Array of SKUs to clear from cache
-     * @return bool Success indicator
-     */
-    public function clearProductCaches(array $skus): bool
-    {
-        if (empty($skus)) {
-            return true;
-        }
-
-        try {
-            // Clear all dynamic caches - simpler than trying to be selective
-            return $this->cacheService->clean([CacheService::CACHE_TAG_DYNAMIC]);
-        } catch (Exception $e) {
-            $this->logger->error('Error clearing product caches: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Invalidate all caches
-     *
-     * This method can be called when warehouses or major data changes occur
-     *
-     * @return bool Success indicator
-     */
-    public function invalidateAllCaches(): bool
-    {
-        try {
-            // Clear all dynamic caches
-            $this->cacheService->clean([CacheService::CACHE_TAG_DYNAMIC]);
-
-            // Clear all filter caches
-            $this->cacheService->clean([CacheService::CACHE_TAG_FILTERS]);
-
-            return true;
-        } catch (Exception $e) {
-            $this->logger->error('Error invalidating all caches: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Get categories available in a dark store by pincode
      *
      * @param int $pincode
@@ -502,8 +463,15 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             // Generate cache key for categories
             $cacheKey = $this->cacheService->getCategoriesCacheKey($pincode);
 
+            \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
+                ->debug('CUSTOM_LOGGING', ['Category Cache Key' => $cacheKey]);
+
             // Try to get from cache first
             $cachedResult = $this->cacheService->get($cacheKey);
+
+            \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
+                ->debug('CUSTOM_LOGGING', ['Cached Result for Category Cache' => $cachedResult]);
+
             if ($cachedResult) {
                 $result = $this->categoryListResultFactory->create();
                 $result->setWarehouseCode($cachedResult['warehouse_code']);
@@ -518,10 +486,14 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Get nearest dark store for this pincode
             $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+
             $warehouseCode = $darkStore['warehouse_code'];
 
             // Get main "categories" category
             $rootCategoryId = $this->getCategoriesRootId();
+
+            \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
+                ->debug('CUSTOM_LOGGING', ['Category Root ID' => $rootCategoryId]);
 
             if (!$rootCategoryId) {
                 throw new NoSuchEntityException(

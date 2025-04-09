@@ -148,11 +148,11 @@
                     <item name="options" xsi:type="array">
                         <item name="0" xsi:type="array">
                             <item name="value" xsi:type="string">0</item>
-                            <item name="label" xsi:type="string">Inactive</item>
+                            <item name="label" xsi:type="string">No</item>
                         </item>
                         <item name="1" xsi:type="array">
                             <item name="value" xsi:type="string">1</item>
-                            <item name="label" xsi:type="string">Active</item>
+                            <item name="label" xsi:type="string">Yes</item>
                         </item>
                     </item>
                 </item>
