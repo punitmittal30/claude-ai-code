@@ -392,8 +392,9 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
                     // If category icon exists, get the URL
                     if ($categoryIcon) {
+                        $categoryIcon = str_replace('/media/', '', $categoryIcon);
                         $mediaUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
-                        $iconUrl = $mediaUrl . 'catalog/category/' . $categoryIcon;
+                        $iconUrl = $mediaUrl . $categoryIcon;
                     }
 
                     $result[] = [
@@ -463,14 +464,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             // Generate cache key for categories
             $cacheKey = $this->cacheService->getCategoriesCacheKey($pincode);
 
-            \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
-                ->debug('CUSTOM_LOGGING', ['Category Cache Key' => $cacheKey]);
-
             // Try to get from cache first
             $cachedResult = $this->cacheService->get($cacheKey);
-
-            \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
-                ->debug('CUSTOM_LOGGING', ['Cached Result for Category Cache' => $cachedResult]);
 
             if ($cachedResult) {
                 $result = $this->categoryListResultFactory->create();
@@ -491,9 +486,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Get main "categories" category
             $rootCategoryId = $this->getCategoriesRootId();
-
-            \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
-                ->debug('CUSTOM_LOGGING', ['Category Root ID' => $rootCategoryId]);
 
             if (!$rootCategoryId) {
                 throw new NoSuchEntityException(
@@ -607,8 +599,9 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
                     // If category icon exists, get the URL
                     if ($categoryIcon) {
+                        $categoryIcon = str_replace('/media/', '', $categoryIcon);
                         $mediaUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
-                        $iconUrl = $mediaUrl . 'catalog/category/' . $categoryIcon;
+                        $iconUrl = $mediaUrl . $categoryIcon;
                     }
 
                     $result[] = [

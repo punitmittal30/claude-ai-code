@@ -43,16 +43,16 @@ class WondersoftApi implements WondersoftApiInterface
      * @param Logger $logger
      * @param Curl $curl
      * @param Json $json
-     * @param Eav $eavHelper
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param Eav $eavHelper
      */
     public function __construct(
         private Helper                      $helper,
         private Logger                      $logger,
         private Curl                        $curl,
         private Json                        $json,
-        private Eav                         $eavHelper,
-        private CategoryRepositoryInterface $categoryRepository
+        private CategoryRepositoryInterface $categoryRepository,
+        private Eav                         $eavHelper
     ) {
     }
 
@@ -85,17 +85,20 @@ class WondersoftApi implements WondersoftApiInterface
             $this->curl->post($url, $this->json->serialize($requestData));
 
             $response = $this->curl->getBody();
-            $this->logger->info('Response: ' . $response);
 
             // Parse JSON response
             $responseData = $this->json->unserialize($response);
 
             if (isset($responseData['Response']['Result']) && $responseData['Response']['Result'] === 'SUCCESS') {
 
-                $this->logger->info('Product pushed successfully: ' . $product->getSku());
+                $this->logger->info(
+                    'Product pushed successfully: ' . $product->getSku() . ' - Response: ' . $response
+                );
                 return true;
             } else {
-                $this->logger->error('Failed to push product: ' . $product->getSku() . ' - Response: ' . $response);
+                $this->logger->error(
+                    'Failed to push product: ' . $product->getSku() . ' - Response: ' . $response
+                );
                 return false;
             }
         } catch (Exception $e) {
@@ -200,12 +203,16 @@ class WondersoftApi implements WondersoftApiInterface
                     "UOMDescription" => '',
                     "BrandCode" => '',
                     "BrandName" => '',
-                    "CategoryCode" => $categoryName . '-' . $categoryId,
+                    "CategoryCode" => $categoryName,
                     "CategoryDescription" => $categoryName,
                     "SubCategoryCode" => '',
                     "SubCategoryDescription" => '',
                     "ChapterNumber" => $eanCode,
-                    "TaxRate" => 0,
+                    "TaxRate" => $product->getCustomAttribute('gst')
+                        ? (int)$this->eavHelper->getOptionLabel(
+                            'gst',
+                            $product->getCustomAttribute('gst')->getValue()
+                        ) : 0,
                     "PurchasePrice" => $product->getCost() ?? 0,
                     "SalesPrice" => $price,
                     "MRP" => $product->getPrice(),
@@ -320,14 +327,13 @@ class WondersoftApi implements WondersoftApiInterface
             $this->curl->post($url, $this->json->serialize($requestData));
 
             $response = $this->curl->getBody();
-            $this->logger->info('Response: ' . $response);
 
             // Parse JSON response
             $responseData = $this->json->unserialize($response);
 
             if (isset($responseData['Response']['Result']) && $responseData['Response']['Result'] === 'SUCCESS') {
 
-                $this->logger->info('Price list pushed successfully: ' . $product->getSku());
+                $this->logger->info('Price list pushed successfully: ' . $product->getSku() . ' - Response: ' . $response);
                 return true;
             } else {
                 $this->logger->error('Failed to push price list: ' . $product->getSku() . ' - Response: ' . $response);

@@ -58,11 +58,21 @@ class ProductSaveAfter implements ObserverInterface
                 $this->logger->info('New product detected: ' . $product->getSku());
 
                 try {
-                    $result = $this->wondersoftApi->pushProduct($product);
-                    if (!$result) {
-                        $this->logger->error('Failed to push new product to Wondersoft: ' . $product->getSku());
+                    if (!$product->getCustomAttribute('ean_code')) {
+                        $this->logger->error(
+                            'EAN Missing | Failed to push new product to Wondersoft: ' . $product->getSku()
+                        );
                     } else {
-                        $this->logger->info('Successfully pushed new product to Wondersoft: ' . $product->getSku());
+                        $result = $this->wondersoftApi->pushProduct($product);
+                        if (!$result) {
+                            $this->logger->error(
+                                'Failed to push new product to Wondersoft: ' . $product->getSku()
+                            );
+                        } else {
+                            $this->logger->info(
+                                'Successfully pushed new product to Wondersoft: ' . $product->getSku()
+                            );
+                        }
                     }
                 } catch (Exception $e) {
                     $this->logger->critical('Exception when pushing new product: ' . $e->getMessage());
@@ -72,59 +82,73 @@ class ProductSaveAfter implements ObserverInterface
 
         // Process price push if enabled
         if ($this->helper->isPricePushEnabled()) {
-            $shouldPushPrice = false;
+            if (!$product->getCustomAttribute('ean_code')) {
+                $this->logger->error(
+                    'EAN Missing | Failed to push price update to Wondersoft: ' . $product->getSku()
+                );
+            } else {
+                $shouldPushPrice = false;
 
-            // Check for regular price changes
-            if ($origData && isset($origData['price'])) {
-                if ($product->getPrice() != $origData['price']) {
-                    $shouldPushPrice = true;
-                    $this->logger->info('Price change detected for product: ' . $product->getSku());
-                }
-            } elseif ($product->getPrice() !== null) {
-                $shouldPushPrice = true;
-            }
-
-            // Check for special price changes
-            if ($origData && isset($origData['special_price'])) {
-                if ($product->getSpecialPrice() != $origData['special_price']) {
-                    $shouldPushPrice = true;
-                    $this->logger->info('Special price change detected for product: ' . $product->getSku());
-                }
-            } elseif ($product->getSpecialPrice() !== null) {
-                $shouldPushPrice = true;
-            }
-
-            // Check for special_from_date changes
-            if ($origData && isset($origData['special_from_date'])) {
-                if ($product->getSpecialFromDate() != $origData['special_from_date']) {
-                    $shouldPushPrice = true;
-                    $this->logger->info('Special from date change detected for product: ' . $product->getSku());
-                }
-            } elseif ($product->getSpecialFromDate() !== null) {
-                $shouldPushPrice = true;
-            }
-
-            // Check for special_to_date changes
-            if ($origData && isset($origData['special_to_date'])) {
-                if ($product->getSpecialToDate() != $origData['special_to_date']) {
-                    $shouldPushPrice = true;
-                    $this->logger->info('Special to date change detected for product: ' . $product->getSku());
-                }
-            } elseif ($product->getSpecialToDate() !== null) {
-                $shouldPushPrice = true;
-            }
-
-            // Push price list if any price-related attributes have changed
-            if ($shouldPushPrice) {
-                try {
-                    $result = $this->wondersoftApi->pushPriceList($product);
-                    if (!$result) {
-                        $this->logger->error('Failed to push price update to Wondersoft: ' . $product->getSku());
-                    } else {
-                        $this->logger->info('Successfully pushed price update to Wondersoft: ' . $product->getSku());
+                // Check for regular price changes
+                if ($origData && isset($origData['price'])) {
+                    if ($product->getPrice() != $origData['price']) {
+                        $shouldPushPrice = true;
+                        $this->logger->info('Price change detected for product: ' . $product->getSku());
                     }
-                } catch (Exception $e) {
-                    $this->logger->critical('Exception when pushing price update: ' . $e->getMessage());
+                } elseif ($product->getPrice() !== null) {
+                    $shouldPushPrice = true;
+                }
+
+                // Check for special price changes
+                if ($origData && isset($origData['special_price'])) {
+                    if ($product->getSpecialPrice() != $origData['special_price']) {
+                        $shouldPushPrice = true;
+                        $this->logger->info('Special price change detected for product: ' . $product->getSku());
+                    }
+                } elseif ($product->getSpecialPrice() !== null) {
+                    $shouldPushPrice = true;
+                }
+
+                // Check for special_from_date changes
+                if ($origData && isset($origData['special_from_date'])) {
+                    if ($product->getSpecialFromDate() != $origData['special_from_date']) {
+                        $shouldPushPrice = true;
+                        $this->logger->info(
+                            'Special from date change detected for product: ' . $product->getSku()
+                        );
+                    }
+                } elseif ($product->getSpecialFromDate() !== null) {
+                    $shouldPushPrice = true;
+                }
+
+                // Check for special_to_date changes
+                if ($origData && isset($origData['special_to_date'])) {
+                    if ($product->getSpecialToDate() != $origData['special_to_date']) {
+                        $shouldPushPrice = true;
+                        $this->logger->info(
+                            'Special to date change detected for product: ' . $product->getSku()
+                        );
+                    }
+                } elseif ($product->getSpecialToDate() !== null) {
+                    $shouldPushPrice = true;
+                }
+
+                // Push price list if any price-related attributes have changed
+                if ($shouldPushPrice) {
+                    try {
+                        $result = $this->wondersoftApi->pushPriceList($product);
+                        if (!$result) {
+                            $this->logger->error(
+                                'Failed to push price update to Wondersoft: ' . $product->getSku()
+                            );
+                        } else {
+                            $this->logger->info(
+                                'Successfully pushed price update to Wondersoft: ' . $product->getSku()
+                            );
+                        }
+                    } catch (Exception $e) {
+                        $this->logger->critical('Exception when pushing price update: ' . $e->getMessage());
+                    }
                 }
             }
         }

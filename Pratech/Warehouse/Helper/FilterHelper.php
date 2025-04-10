@@ -28,36 +28,18 @@ use Psr\Log\LoggerInterface;
 class FilterHelper extends AbstractHelper
 {
     /**
-     * @var FilterableAttributeList
-     */
-    private $filterableAttributes;
-
-    /**
-     * @var CategoryRepositoryInterface
-     */
-    private $categoryRepository;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @param Context $context
      * @param FilterableAttributeList $filterableAttributes
      * @param CategoryRepositoryInterface $categoryRepository
      * @param LoggerInterface $logger
      */
     public function __construct(
-        Context                     $context,
-        FilterableAttributeList     $filterableAttributes,
-        CategoryRepositoryInterface $categoryRepository,
-        LoggerInterface             $logger
+        Context                             $context,
+        private FilterableAttributeList     $filterableAttributes,
+        private CategoryRepositoryInterface $categoryRepository,
+        private LoggerInterface             $logger
     ) {
         parent::__construct($context);
-        $this->filterableAttributes = $filterableAttributes;
-        $this->categoryRepository = $categoryRepository;
-        $this->logger = $logger;
     }
 
     /**
