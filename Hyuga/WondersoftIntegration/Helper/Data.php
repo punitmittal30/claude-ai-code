@@ -38,6 +38,9 @@ class Data extends AbstractHelper
     public const XML_PATH_PRICE_LIST_ID = 'wondersoft/price_push/price_list_id';
     public const XML_PATH_PRICE_LIST_NAME = 'wondersoft/price_push/price_list_name';
 
+    public const XML_PATH_PRICE_REVISION_PUSH_ENABLED = 'wondersoft/price_revision/enabled';
+    public const XML_PATH_PRICE_REVISION_PREFIX = 'wondersoft/price_revision/id_prefix';
+
     /**
      * Constructor
      *
@@ -231,6 +234,59 @@ class Data extends AbstractHelper
     {
         return $this->scopeConfig->getValue(
             self::XML_PATH_PRICE_LIST_NAME,
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Check if price revision push is enabled
+     *
+     * @return bool
+     */
+    public function isPriceRevisionPushEnabled(): bool
+    {
+        return $this->isEnabled() && (bool)$this->scopeConfig->getValue(
+            self::XML_PATH_PRICE_REVISION_PUSH_ENABLED,
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Get price revision ID prefix
+     *
+     * @return string
+     */
+    public function getPriceRevisionPrefix(): string
+    {
+        return $this->scopeConfig->getValue(
+            self::XML_PATH_PRICE_REVISION_PREFIX,
+            ScopeInterface::SCOPE_STORE
+        ) ?: 'PR';
+    }
+
+    /**
+     * Generate a unique price revision ID
+     *
+     * @return string
+     */
+    public function generatePriceRevisionId(): string
+    {
+        $prefix = $this->getPriceRevisionPrefix();
+        $date = date('Ymd');
+        $random = substr(str_shuffle("0123456789"), 0, 6);
+
+        return $prefix . $date . $random;
+    }
+
+    /**
+     * Get Locale.
+     *
+     * @return string
+     */
+    public function getLocale(): string
+    {
+        return $this->scopeConfig->getValue(
+            'general/locale/timezone',
             ScopeInterface::SCOPE_STORE
         );
     }

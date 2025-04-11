@@ -26,15 +26,15 @@ class CacheService
     /**
      * Cache tags
      */
-    public const CACHE_TAG_STATIC = 'warehouse_products_static';
     public const CACHE_TAG_DYNAMIC = 'warehouse_products_dynamic';
     public const CACHE_TAG_FILTERS = 'warehouse_filters';
     public const CACHE_TAG_PINCODE = 'pratech_serviceable_pincodes';
+    public const CACHE_TAG_DARK_STORE = 'dark_store';
 
     /**
      * Cache lifetimes
      */
-    public const CACHE_LIFETIME_STATIC = 86400; // 24 hours
+    public const CACHE_LIFETIME_STATIC = 604800; // 1 week
     public const CACHE_LIFETIME_DYNAMIC = 300;  // 5 minutes
     public const CACHE_LIFETIME_FILTERS = 3600; // 1 hour
     public const CACHE_LIFETIME_PINCODE = 3600; // 1 hour

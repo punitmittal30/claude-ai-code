@@ -471,8 +471,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $result = $this->categoryListResultFactory->create();
                 $result->setWarehouseCode($cachedResult['warehouse_code']);
                 $result->setWarehouseName($cachedResult['warehouse_name']);
-
-                // Important: use the cached categories directly without re-encoding
                 $result->setCategories($cachedResult['categories']);
                 $result->setTotalCount($cachedResult['total_count']);
 

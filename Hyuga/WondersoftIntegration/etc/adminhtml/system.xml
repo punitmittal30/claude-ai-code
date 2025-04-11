@@ -111,6 +111,26 @@
                     </depends>
                 </field>
             </group>
+            <group id="price_revision" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Price Revision Settings</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Enable Price Revision Push</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="wondersoft/general/enabled">1</field>
+                    </depends>
+                </field>
+                <field id="id_prefix" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Price Revision ID Prefix</label>
+                    <comment>Prefix for automatically generated Price Revision IDs</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
         </section>
     </system>
 </config>

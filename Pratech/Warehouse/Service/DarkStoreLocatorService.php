@@ -105,7 +105,7 @@ class DarkStoreLocatorService
             $this->cacheService->save(
                 $cacheKey,
                 $darkStore,
-                [CacheService::CACHE_TAG_STATIC],
+                [CacheService::CACHE_TAG_DARK_STORE],
                 CacheService::CACHE_LIFETIME_STATIC
             );
 

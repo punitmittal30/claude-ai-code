@@ -186,6 +186,10 @@ class WondersoftApi implements WondersoftApiInterface
             ? $product->getCustomAttribute('ean_code')->getValue()
             : '';
 
+        $hsnCode = $product->getCustomAttribute('hsn_code')
+            ? $product->getCustomAttribute('hsn_code')->getValue()
+            : '';
+
         return [
             "MasterItem" => [
                 "Item" => [
@@ -207,13 +211,13 @@ class WondersoftApi implements WondersoftApiInterface
                     "CategoryDescription" => $categoryName,
                     "SubCategoryCode" => '',
                     "SubCategoryDescription" => '',
-                    "ChapterNumber" => $eanCode,
+                    "ChapterNumber" => $hsnCode,
                     "TaxRate" => $product->getCustomAttribute('gst')
                         ? (int)$this->eavHelper->getOptionLabel(
                             'gst',
                             $product->getCustomAttribute('gst')->getValue()
                         ) : 0,
-                    "PurchasePrice" => $product->getCost() ?? 0,
+                    "PurchasePrice" => $product->getFloorPrice() ?? 0,
                     "SalesPrice" => $price,
                     "MRP" => $product->getPrice(),
                     "IsSerialNoProduct" => 0,
@@ -333,7 +337,9 @@ class WondersoftApi implements WondersoftApiInterface
 
             if (isset($responseData['Response']['Result']) && $responseData['Response']['Result'] === 'SUCCESS') {
 
-                $this->logger->info('Price list pushed successfully: ' . $product->getSku() . ' - Response: ' . $response);
+                $this->logger->info(
+                    'Price list pushed successfully: ' . $product->getSku() . ' - Response: ' . $response
+                );
                 return true;
             } else {
                 $this->logger->error('Failed to push price list: ' . $product->getSku() . ' - Response: ' . $response);
@@ -385,5 +391,139 @@ class WondersoftApi implements WondersoftApiInterface
                 ]
             ]
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function pushPriceRevision(array $products, string $revisionId, ?string $effectiveDate = null): bool
+    {
+        if (!$this->helper->isPriceRevisionPushEnabled()) {
+            return false;
+        }
+
+        $token = $this->getToken();
+        if (!$token) {
+            return false;
+        }
+
+        $url = $this->helper->getApiBaseUrl() . '/ProcessData';
+
+        $this->curl->addHeader('SERVICE_METHODNAME', 'PushPriceRevision');
+        $this->curl->addHeader('AUTHORIZATION', $token);
+        $this->curl->addHeader('Content-Type', 'application/json');
+
+        $requestData = $this->preparePriceRevisionData($products, $revisionId, $effectiveDate);
+
+        try {
+            $this->logger->info('Pushing price revision to Wondersoft: ' . $revisionId);
+            $this->logger->info('Request: ' . $this->json->serialize($requestData));
+
+            $this->curl->post($url, $this->json->serialize($requestData));
+
+            $response = $this->curl->getBody();
+
+            // Parse JSON response
+            $responseData = $this->json->unserialize($response);
+
+            if (isset($responseData['Response']['Result']) && $responseData['Response']['Result'] === 'SUCCESS') {
+                $this->logger->info('Price revision pushed successfully: ' . $revisionId . ' - Response: ' . $response);
+                return true;
+            } else {
+                $this->logger->error('Failed to push price revision: ' . $revisionId . ' - Response: ' . $response);
+                return false;
+            }
+        } catch (Exception $e) {
+            $this->logger->critical('Exception when pushing price revision: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Prepare price revision data for API request
+     *
+     * @param array $products
+     * @param string $revisionId
+     * @param string|null $effectiveDate
+     * @return array
+     */
+    protected function preparePriceRevisionData(
+        array $products,
+        string $revisionId,
+        ?string $effectiveDate = null
+    ): array {
+        // Use current date if not provided
+        $effectiveDate = $effectiveDate ?? date('Y-m-d');
+
+        $productItems = [];
+        $lineNumber = 1;
+
+        foreach ($products as $product) {
+            $productItems[] = [
+                "LineNumber" => $lineNumber++,
+                "ProductCode" => $product['sku'],
+                "SalesPrice" => $product['price'],
+                "ItemCost" => $product['cost'] ?? 0,
+                "MRP" => $product['mrp'] ?? $product['price'],
+                "MSP" => $product['msp'] ?? "",
+                "FromMRP" => $product['from_mrp'] ?? "",
+                "QualityType" => $product['quality_type'] ?? 0,
+                "AlphaBatchId" => $product['alpha_batch_id'] ?? "",
+                "LotNumber" => $product['lot_number'] ?? "",
+                "UOMCode" => $product['uom_code'] ?? "",
+                "BarCode" => $product['barcode'] ?? ""
+            ];
+        }
+
+        return [
+            "PriceRevision" => [
+                "Header" => [
+                    "PriceRevisionID" => $revisionId,
+                    "EffectiveFrom" => $effectiveDate
+                ],
+                "Products" => [
+                    "Product" => $productItems
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Send a price revision for multiple products
+     *
+     * @param array $productData Array of product data with SKU and prices
+     * @param string|null $revisionId Custom revision ID (optional)
+     * @param string|null $effectiveDate Effective date (optional)
+     * @return bool
+     */
+    public function sendBatchPriceRevision(
+        array $productData,
+        ?string $revisionId = null,
+        ?string $effectiveDate = null
+    ): bool {
+        if (!$this->helper->isPriceRevisionPushEnabled()) {
+            return false;
+        }
+
+        // Generate a revision ID if not provided
+        $revisionId = $revisionId ?: $this->helper->generatePriceRevisionId();
+
+        // Format the product data for the API
+        $products = [];
+        foreach ($productData as $item) {
+            if (!isset($item['sku']) || !isset($item['price'])) {
+                $this->logger->error('Missing required fields (sku or price) in price revision data');
+                continue;
+            }
+
+            $products[] = $item;
+        }
+
+        if (empty($products)) {
+            $this->logger->error('No valid products to include in price revision');
+            return false;
+        }
+
+        return $this->pushPriceRevision($products, $revisionId, $effectiveDate);
     }
 }

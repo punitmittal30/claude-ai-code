@@ -39,4 +39,14 @@ interface WondersoftApiInterface
      * @return bool
      */
     public function pushPriceList(ProductInterface $product): bool;
+
+    /**
+     * Push price revision to Wondersoft
+     *
+     * @param array $products Array of products with price data
+     * @param string $revisionId Price revision ID
+     * @param string|null $effectiveDate Effective date (defaults to current date)
+     * @return bool
+     */
+    public function pushPriceRevision(array $products, string $revisionId, ?string $effectiveDate = null): bool;
 }

@@ -25,6 +25,10 @@
                 <price_list_id>HP</price_list_id>
                 <price_list_name>Hyuga Prices</price_list_name>
             </price_push>
+            <price_revision>
+                <enabled>0</enabled>
+                <id_prefix>PR</id_prefix>
+            </price_revision>
         </wondersoft>
     </default>
 </config>

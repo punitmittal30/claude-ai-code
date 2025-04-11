@@ -224,7 +224,7 @@ class WarehouseSla extends AbstractEntity
         if (strlen($customerPincode) != 6) {
             $this->addRowError('CustomerPincodeIsInvalid', $rowNum);
         }
-        if (strlen($customerPincode) != 6) {
+        if (strlen($warehousePincode) != 6) {
             $this->addRowError('WarehousePincodeIsInvalid', $rowNum);
         }
         if (isset($this->_validatedRows[$rowNum])) {
