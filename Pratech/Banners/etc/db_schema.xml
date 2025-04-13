@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Banners
+ *
+ * @category  XML
+ * @package   Pratech\Banners
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="pratech_banner" resource="default" engine="innodb" comment="Banner Table">
+        <column xsi:type="int" name="banner_id" identity="true" nullable="false" unsigned="true" comment="Banner ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Banner Name"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="1" comment="Is Banner Active"/>
+        <column xsi:type="varchar" name="desktop_image" length="255" comment="Banner Desktop Image"/>
+        <column xsi:type="varchar" name="mobile_image" length="255" comment="Banner Mobile Image"/>
+        <column xsi:type="varchar" name="app_image" length="255" comment="App Image"/>
+        <column xsi:type="varchar" name="title" length="255" comment="Banner Title"/>
+        <column xsi:type="varchar" name="description" length="255" comment="Banner Description"/>
+        <column xsi:type="text" name="term_and_conditions" nullable="true" comment="Term and Conditions"/>
+        <column xsi:type="varchar" name="url" length="255" comment="URL"/>
+        <column xsi:type="smallint" name="new_tab" nullable="false" padding="5" default="1" comment="New Tab"/>
+        <column xsi:type="timestamp" name="created_at" default="CURRENT_TIMESTAMP" comment="Create Date"/>
+        <column xsi:type="timestamp" name="updated_at" default="CURRENT_TIMESTAMP" comment="Update Date"/>
+        <column xsi:type="int" name="priority" comment="Priority"/>
+        <constraint xsi:type="primary" referenceId="PRATECH_BANNER_ID_PRIMARY">
+            <column name="banner_id"/>
+        </constraint>
+    </table>
+    <table name="pratech_slider" resource="default" engine="innodb" comment="Slider Table">
+        <column xsi:type="int" name="slider_id" nullable="false" unsigned="true" identity="true" comment="Slider ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Slider Name"/>
+        <column xsi:type="smallint" name="status" default="1" nullable="false" padding="5" comment="Is Slider Active"/>
+        <column xsi:type="text" name="location" comment="Location"/>
+        <column xsi:type="varchar" name="title" length="255" comment="Banner Title"/>
+        <column xsi:type="varchar" name="sub_title" length="255" comment="Banner Sub Title"/>
+        <column xsi:type="varchar" name="description" length="255" comment="Banner Description"/>
+        <column xsi:type="int" name="priority" comment="Priority"/>
+        <column xsi:type="text" name="type" comment="Type"/>
+        <column xsi:type="text" name="template" comment="Template"/>
+        <column xsi:type="smallint" name="autoplay" comment="Auto Play"/>
+        <column xsi:type="smallint" name="show_dots" comment="Show Dots"/>
+        <column xsi:type="smallint" name="show_arrow" comment="Show Arrows"/>
+        <column xsi:type="date" name="start_date" nullable="true" comment="Start Date"/>
+        <column xsi:type="date" name="end_date" nullable="true" comment="End Date"/>
+        <column xsi:type="timestamp" name="created_at" default="CURRENT_TIMESTAMP"
+                on_update="false" comment="Create Date"/>
+        <column xsi:type="timestamp" name="updated_at" default="CURRENT_TIMESTAMP"
+                on_update="true" comment="Update Date"/>
+        <constraint xsi:type="primary" referenceId="PRATECH_SLIDER_ID_PRIMARY">
+            <column name="slider_id"/>
+        </constraint>
+    </table>
+    <table name="pratech_slider_banner" resource="default" engine="innodb" comment="Slider Banner Table">
+        <column xsi:type="int" name="slider_id" unsigned="true" nullable="false" comment="Slider ID"/>
+        <column xsi:type="int" name="banner_id" unsigned="true" nullable="false" comment="Banner ID"/>
+        <column xsi:type="smallint" name="position" nullable="false" default="0" comment="Position"/>
+        <constraint xsi:type="primary" referenceId="PRATECH_SLIDER_BANNER_ID_PRIMARY">
+            <column name="slider_id"/>
+            <column name="banner_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="PRATECH_SLIDER_BANNER_BANNER_ID"
+                    table="pratech_slider_banner" column="banner_id"
+                    referenceTable="pratech_banner" referenceColumn="banner_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="PRATECH_SLIDER_BANNER_SLIDE_ID"
+                    table="pratech_slider_banner" column="slider_id"
+                    referenceTable="pratech_slider" referenceColumn="slider_id"
+                    onDelete="CASCADE"/>
+    </table>
+    <table name="pratech_banner_product" resource="default" engine="innodb" comment="Banner Product Table">
+        <column xsi:type="int" name="banner_id" unsigned="true" nullable="false" comment="Slider ID"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Banner ID"/>
+        <column xsi:type="smallint" name="position" nullable="false" default="0" comment="Position"/>
+        <constraint xsi:type="primary" referenceId="PRATECH_BANNER_PRODUCT_ID_PRIMARY">
+            <column name="banner_id"/>
+            <column name="product_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="PRATECH_BANNER_PRODUCT_PRODUCT_ID"
+                    table="pratech_banner_product" column="product_id"
+                    referenceTable="catalog_product_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="PRATECH_BANNER_PRODUCT_BANNER_ID"
+                    table="pratech_banner_product" column="banner_id"
+                    referenceTable="pratech_banner" referenceColumn="banner_id"
+                    onDelete="CASCADE"/>
+    </table>
+</schema>
