@@ -13,6 +13,7 @@
 
 namespace Pratech\Filters\Helper;
 
+use Hyuga\Catalog\Model\Repository\CategoryRepository;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Pratech\Base\Logger\Logger;
@@ -30,14 +31,16 @@ class Filter
      * @param Logger $logger
      * @param FiltersPositionFactory $filtersPositionFactory
      * @param QuickFiltersFactory $quickFiltersFactory
+     * @param CategoryRepository $categoryRepository
      */
     public function __construct(
         private Logger                 $logger,
         private FiltersPositionFactory $filtersPositionFactory,
-        private QuickFiltersFactory    $quickFiltersFactory
-    ) {
+        private QuickFiltersFactory    $quickFiltersFactory,
+        private CategoryRepository     $categoryRepository
+    )
+    {
     }
-
 
     /**
      * Get Filters Position Data
@@ -86,6 +89,32 @@ class Filter
                         json_decode($filter->getFiltersData(), true)
                         : [],
                 ];
+            }
+        } catch (NoSuchEntityException|LocalizedException $exception) {
+            $this->logger->error($exception->getMessage() . __METHOD__);
+        }
+        return $result;
+    }
+
+    public function getAllQuickFilters(): array
+    {
+        $result = [];
+        try {
+            $collection = $this->quickFiltersFactory->create()
+                ->getCollection();
+
+            $categoryIdSLugMapping = $this->categoryRepository->getMapping();
+
+            foreach ($collection as $filter) {
+                $categorySlug = $categoryIdSLugMapping['map_by_id'][$filter->getCategoryId()];
+                $categoryFilters = json_decode($filter->getFiltersData(), true);
+                foreach ($categoryFilters as $categoryFilter) {
+                    $result[$categorySlug][] = [
+                        'key' => $categoryFilter['attribute_type'],
+                        'value' => $categoryFilter['attribute_value'],
+                        'header' => $categoryFilter['attribute_label'],
+                    ];
+                }
             }
         } catch (NoSuchEntityException|LocalizedException $exception) {
             $this->logger->error($exception->getMessage() . __METHOD__);

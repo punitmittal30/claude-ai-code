@@ -64,4 +64,12 @@ class Filters implements FiltersRepositoryInterface
             $this->filterHelper->getQuickFilters($categoryId)
         );
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAllQuickFilters(): array
+    {
+        return $this->filterHelper->getAllQuickFilters();
+    }
 }

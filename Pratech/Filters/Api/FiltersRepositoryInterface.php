@@ -39,4 +39,13 @@ interface FiltersRepositoryInterface
      * @throws LocalizedException
      */
     public function getQuickFilters(int $categoryId): array;
+
+    /**
+     * Get All Quick Filters Data
+     *
+     * @return array
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function getAllQuickFilters(): array;
 }

@@ -25,4 +25,10 @@
             <resource ref="Pratech_Filters::filters"/>
         </resources>
     </route>
+    <route url="/V1/filters/quickFilters/all" method="GET">
+        <service class="Pratech\Filters\Api\FiltersRepositoryInterface" method="getAllQuickFilters"/>
+        <resources>
+            <resource ref="Pratech_Filters::filters"/>
+        </resources>
+    </route>
 </routes>
