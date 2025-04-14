@@ -18,11 +18,19 @@ use Magento\Framework\Option\ArrayInterface;
 
 class AttributeList implements ArrayInterface
 {
+    /**
+     * @param AttributeCollection $attributeCollection
+     */
     public function __construct(
         private AttributeCollection $attributeCollection
     ) {
     }
 
+    /**
+     * To Option Array.
+     *
+     * @return array
+     */
     public function toOptionArray(): array
     {
         $attributeCollection = $this->attributeCollection->addFieldToFilter('is_filterable', 1)

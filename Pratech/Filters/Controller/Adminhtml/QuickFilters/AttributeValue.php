@@ -17,7 +17,11 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Eav\Model\Config;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\CollectionFactory as OptionCollectionFactory;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 class AttributeValue extends Action
 {
@@ -37,6 +41,12 @@ class AttributeValue extends Action
         parent::__construct($context);
     }
 
+    /**
+     * Execute Method.
+     *
+     * @return ResponseInterface|Json|ResultInterface
+     * @throws LocalizedException
+     */
     public function execute()
     {
         $attributeCode = $this->getRequest()->getParam('attributeCode');

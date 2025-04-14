@@ -38,8 +38,7 @@ class Filter
         private FiltersPositionFactory $filtersPositionFactory,
         private QuickFiltersFactory    $quickFiltersFactory,
         private CategoryRepository     $categoryRepository
-    )
-    {
+    ) {
     }
 
     /**
@@ -96,6 +95,11 @@ class Filter
         return $result;
     }
 
+    /**
+     * Get All Quick Filters Data.
+     *
+     * @return array
+     */
     public function getAllQuickFilters(): array
     {
         $result = [];
@@ -103,22 +107,44 @@ class Filter
             $collection = $this->quickFiltersFactory->create()
                 ->getCollection();
 
-            $categoryIdSLugMapping = $this->categoryRepository->getMapping();
+            $categoryIdSlugMapping = $this->categoryRepository->getMapping();
 
             foreach ($collection as $filter) {
-                $categorySlug = $categoryIdSLugMapping['map_by_id'][$filter->getCategoryId()];
+                $categorySlug = $categoryIdSlugMapping['map_by_id'][$filter->getCategoryId()];
                 $categoryFilters = json_decode($filter->getFiltersData(), true);
-                foreach ($categoryFilters as $categoryFilter) {
-                    $result[$categorySlug][] = [
-                        'key' => $categoryFilter['attribute_type'],
-                        'value' => $categoryFilter['attribute_value'],
-                        'header' => $categoryFilter['attribute_label'],
-                    ];
-                }
+                $result[$categorySlug] = $this->formatFiltersData($categoryFilters);
             }
         } catch (NoSuchEntityException|LocalizedException $exception) {
             $this->logger->error($exception->getMessage() . __METHOD__);
         }
         return $result;
+    }
+
+    /**
+     * Format filters data to ensure proper structure
+     *
+     * @param array $filtersData
+     * @return array
+     */
+    private function formatFiltersData(array $filtersData): array
+    {
+        $formattedData = [];
+
+        foreach ($filtersData as $filter) {
+            $formattedFilter = [
+                'key' => $filter['attribute_type'],
+                'header' => $filter['attribute_label'],
+                'value' => []
+            ];
+
+            foreach ($filter['attribute_value'] as $value) {
+                $formattedFilter['value'][] = [
+                    'id' => $value['value'],
+                    'label' => $value['label']
+                ];
+            }
+            $formattedData[] = $formattedFilter;
+        }
+        return $formattedData;
     }
 }
