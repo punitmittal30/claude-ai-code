@@ -43,4 +43,10 @@
         <observer name="hyuga_clear_attribute_metadata_cache"
                   instance="Hyuga\Catalog\Observer\ClearAttributeMetadataCacheObserver" />
     </event>
+
+    <!-- Update Inventory Clear Events -->
+    <event name="update_stock_by_vinculum">
+        <observer name="update_stock_by_vinculum"
+                  instance="Hyuga\Catalog\Observer\ClearStockManagementCache"/>
+    </event>
 </config>
