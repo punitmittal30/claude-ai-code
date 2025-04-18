@@ -15,7 +15,7 @@ namespace Hyuga\CacheManagement\Observer;
 
 use Exception;
 use Hyuga\CacheManagement\Api\CacheServiceInterface;
-use Hyuga\CacheManagement\Model\Redis\WarehouseRedisCache;
+use Hyuga\CacheManagement\Api\NodeRedisServiceInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Psr\Log\LoggerInterface;
@@ -25,14 +25,13 @@ class ClearCacheOnDarkStoreStatusChange implements ObserverInterface
     /**
      * @param CacheServiceInterface $cacheService
      * @param LoggerInterface $logger
-     * @param WarehouseRedisCache $warehouseRedisCache
+     * @param NodeRedisServiceInterface $nodeRedisService
      */
     public function __construct(
-        private CacheServiceInterface $cacheService,
-        private LoggerInterface       $logger,
-        private WarehouseRedisCache   $warehouseRedisCache
-    )
-    {
+        private CacheServiceInterface     $cacheService,
+        private LoggerInterface           $logger,
+        private NodeRedisServiceInterface $nodeRedisService
+    ) {
     }
 
     /**
@@ -63,6 +62,8 @@ class ClearCacheOnDarkStoreStatusChange implements ObserverInterface
     private function handleDarkStoreChange(): void
     {
         $this->cacheService->cleanAllPincodeCaches();
-        $this->warehouseRedisCache->cleanAllPincodeCachesAndDarkStoreSlugs();
+        $this->cacheService->cleanAvailableDarkStoresCache();
+        $this->cacheService->cleanAllNearestDarkStoreCaches();
+        $this->nodeRedisService->cleanAllPincodeCachesAndDarkStoreSlugs();
     }
 }

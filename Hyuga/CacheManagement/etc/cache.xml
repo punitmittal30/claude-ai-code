@@ -14,26 +14,31 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
     <type name="hyuga_pincode" translate="label,description" instance="Hyuga\CacheManagement\Model\Cache\Type\Pincode">
         <label>Pincode Serviceability</label>
-        <description>Cache for pincode serviceability API responses</description>
+        <description>Pincode serviceability API responses caching</description>
     </type>
     <type name="hyuga_warehouse_products" translate="label,description"
           instance="Hyuga\CacheManagement\Model\Cache\Type\Products">
         <label>Warehouse Products</label>
-        <description>Cache for warehouse product listings and data</description>
+        <description>Warehouse product listings and data caching</description>
     </type>
     <type name="hyuga_warehouse_filters" translate="label,description"
           instance="Hyuga\CacheManagement\Model\Cache\Type\Filters">
         <label>Warehouse Filters</label>
-        <description>Cache for product filter data in warehouses</description>
+        <description>Product filter data in warehouses caching</description>
     </type>
     <type name="hyuga_nearest_dark_store" translate="label,description"
           instance="Hyuga\CacheManagement\Model\Cache\Type\NearestDarkStore">
         <label>Nearest Dark Store</label>
-        <description>Cache for nearest dark store information</description>
+        <description>Nearest dark store information caching</description>
     </type>
     <type name="hyuga_available_dark_store" translate="label,description"
           instance="Hyuga\CacheManagement\Model\Cache\Type\AvailableDarkStore">
         <label>Available Dark Store</label>
-        <description>Cache for available dark store information</description>
+        <description>Available dark store information caching</description>
+    </type>
+    <type name="hyuga_category_id_slug_mapping" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\CategoryIdSlugMapping">
+        <label>Available Dark Store</label>
+        <description>Category ID Slug Mapping caching</description>
     </type>
 </config>

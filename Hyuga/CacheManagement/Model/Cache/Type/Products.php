@@ -19,7 +19,7 @@ use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 class Products extends TagScope
 {
     public const TYPE_IDENTIFIER = 'hyuga_warehouse_products';
-    public const CACHE_TAG = 'HYUGA_WAREHOUSE_PRODUCTS';
+    public const CACHE_TAG = 'warehouse_products_dynamic';
 
     /**
      * @param FrontendPool $frontendPool

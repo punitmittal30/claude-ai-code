@@ -61,7 +61,7 @@ class ClearStockManagementCache implements ObserverInterface
             }
 
         } catch (\Exception $exception) {
-            $this->redisCacheLogger->error("execute() | UpdateStockProductCache | Product ID: " . $productId .
+            $this->redisCacheLogger->error("execute() | ClearStockManagementCache | Product ID: " . $productId .
                 " cache clearing issue | " . $exception->getMessage() . " | Trace: " . $exception->getTraceAsString());
         }
     }

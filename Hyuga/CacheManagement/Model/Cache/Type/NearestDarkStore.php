@@ -19,7 +19,7 @@ use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 class NearestDarkStore extends TagScope
 {
     public const TYPE_IDENTIFIER = 'hyuga_nearest_dark_store';
-    public const CACHE_TAG = 'HYUGA_NEAREST_DARK_STORE';
+    public const CACHE_TAG = 'nearest_dark_store';
 
     /**
      * @param FrontendPool $frontendPool

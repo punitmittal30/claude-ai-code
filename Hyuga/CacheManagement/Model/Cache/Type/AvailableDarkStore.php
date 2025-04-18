@@ -19,7 +19,7 @@ use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 class AvailableDarkStore extends TagScope
 {
     public const TYPE_IDENTIFIER = 'hyuga_available_dark_store';
-    public const CACHE_TAG = 'HYUGA_AVAILABLE_DARK_STORE';
+    public const CACHE_TAG = 'available_dark_stores';
 
     /**
      * @param FrontendPool $frontendPool

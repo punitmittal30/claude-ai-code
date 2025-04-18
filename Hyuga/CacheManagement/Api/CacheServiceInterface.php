@@ -21,12 +21,17 @@ interface CacheServiceInterface
     public const CACHE_TAG_PINCODE = 'serviceable_pincode';
     public const CACHE_TAG_NEAREST_DARK_STORE = 'nearest_dark_store';
     public const CACHE_KEY_AVAILABLE_DARK_STORES = 'available_dark_stores';
+    public const CACHE_KEY_CATEGORY_ID_SLUG_MAPPING = 'category_id_slug_mapping';
+    public const CACHE_KEY_CATEGORIES_BY_PINCODE = 'categories_list';
+    public const CACHE_KEY_SUBCATEGORY_FILTERS = 'subcategory_filters';
+    public const CACHE_TAG_FILTERS = 'warehouse_filters';
+    public const CACHE_TAG_DYNAMIC = 'warehouse_products_dynamic';
 
     // Constants for cache lifetimes
-    public const CACHE_LIFETIME_STATIC = 604800; // 1 week
-    public const CACHE_LIFETIME_DYNAMIC = 300;   // 5 minutes
-    public const CACHE_LIFETIME_FILTERS = 3600;  // 1 hour
-    public const CACHE_LIFETIME_PINCODE = 604800;  // 1 week
+    public const CACHE_LIFETIME_STATIC = 604800;
+    public const CACHE_LIFETIME_5_MINUTES = 300;
+    public const CACHE_LIFETIME_1_HOUR = 3600;
+    public const CACHE_LIFETIME_1_WEEK = 604800;
 
     /**
      * Get cached data
@@ -185,5 +190,22 @@ interface CacheServiceInterface
      *
      * @return bool
      */
-    public function clearAvailableDarkStoresCache(): bool;
+    public function cleanAvailableDarkStoresCache(): bool;
+
+    /**
+     * Get cache key for categories list by pincode
+     *
+     * @param int $pincode
+     * @return string
+     */
+    public function getCategoriesByPincodeCacheKey(int $pincode): string;
+
+    /**
+     * Get cache key for subcategory filters
+     *
+     * @param int $categoryId
+     * @param string $warehouseCode
+     * @return string
+     */
+    public function getSubcategoryCacheKey(int $categoryId, string $warehouseCode): string;
 }

@@ -16,6 +16,9 @@
     <preference for="Hyuga\CacheManagement\Api\CacheServiceInterface"
                 type="Hyuga\CacheManagement\Model\CacheService"/>
 
+    <preference for="Hyuga\CacheManagement\Api\NodeRedisServiceInterface"
+                type="Hyuga\CacheManagement\Model\NodeRedisService"/>
+
     <!-- Resource model plugins -->
     <type name="Pratech\Warehouse\Model\ResourceModel\Pincode">
         <plugin name="hyuga_cache_pincode_resource_plugin"

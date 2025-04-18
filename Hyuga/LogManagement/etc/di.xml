@@ -43,4 +43,18 @@
         </arguments>
     </type>
 
+    <!-- Define Logger for GraphQl Resolver Caching -->
+    <type name="Hyuga\LogManagement\Logger\CartApiHandler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Hyuga\LogManagement\Logger\CartApiLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">cart_api</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Hyuga\LogManagement\Logger\CartApiHandler</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

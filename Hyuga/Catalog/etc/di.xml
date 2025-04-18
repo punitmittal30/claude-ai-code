@@ -18,6 +18,8 @@
     <!--                type="Hyuga\Catalog\Model\Resolver\ConfigurableVariant"/>-->
     <preference for="Hyuga\Catalog\Api\CategoryRepositoryInterface"
                 type="Hyuga\Catalog\Model\Repository\CategoryRepository"/>
+    <preference for="Hyuga\Catalog\Api\ProductRepositoryInterface"
+                type="Hyuga\Catalog\Model\Repository\ProductRepository"/>
     <preference for="Hyuga\Catalog\Api\StockManagementInterface"
                 type="Hyuga\Catalog\Model\StockManagement"/>
 </config>

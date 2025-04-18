@@ -154,7 +154,7 @@ class CacheService implements CacheServiceInterface
      */
     public function getNearestDarkStoreCacheKey(int $pincode): string
     {
-        return "nearest_dark_store_{$pincode}";
+        return self::CACHE_TAG_NEAREST_DARK_STORE . '_' . $pincode;
     }
 
     /**
@@ -270,7 +270,7 @@ class CacheService implements CacheServiceInterface
     /**
      * @inheritDoc
      */
-    public function clearAvailableDarkStoresCache(): bool
+    public function cleanAvailableDarkStoresCache(): bool
     {
         try {
             $this->logger->info("Clearing available dark store cache");
@@ -278,5 +278,22 @@ class CacheService implements CacheServiceInterface
         } catch (Exception $e) {
             $this->logger->error('Error cleaning available dark store cache: ' . $e->getMessage());
             return false;
-        }    }
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCategoriesByPincodeCacheKey(int $pincode): string
+    {
+        return self::CACHE_KEY_CATEGORIES_BY_PINCODE . '_' . $pincode;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSubcategoryCacheKey(int $categoryId, string $warehouseCode): string
+    {
+        return self::CACHE_KEY_SUBCATEGORY_FILTERS . '_' . $categoryId . '_' . $warehouseCode;
+    }
 }

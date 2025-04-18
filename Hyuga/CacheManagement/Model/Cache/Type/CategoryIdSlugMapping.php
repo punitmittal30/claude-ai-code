@@ -16,10 +16,10 @@ namespace Hyuga\CacheManagement\Model\Cache\Type;
 use Magento\Framework\App\Cache\Type\FrontendPool;
 use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 
-class Filters extends TagScope
+class CategoryIdSlugMapping extends TagScope
 {
-    public const TYPE_IDENTIFIER = 'hyuga_warehouse_filters';
-    public const CACHE_TAG = 'warehouse_filters';
+    public const TYPE_IDENTIFIER = 'hyuga_category_id_slug_mapping';
+    public const CACHE_TAG = 'category_id_slug_mapping';
 
     /**
      * @param FrontendPool $frontendPool

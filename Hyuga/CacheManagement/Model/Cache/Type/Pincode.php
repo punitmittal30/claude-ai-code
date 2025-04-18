@@ -19,7 +19,7 @@ use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 class Pincode extends TagScope
 {
     public const TYPE_IDENTIFIER = 'hyuga_pincode';
-    public const CACHE_TAG = 'HYUGA_PINCODE';
+    public const CACHE_TAG = 'serviceable_pincode';
 
     /**
      * @param FrontendPool $frontendPool

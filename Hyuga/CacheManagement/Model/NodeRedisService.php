@@ -1,20 +1,15 @@
 <?php
 
-namespace Hyuga\CacheManagement\Model\Redis;
+namespace Hyuga\CacheManagement\Model;
 
 use Exception;
+use Hyuga\CacheManagement\Api\NodeRedisServiceInterface;
 use Hyuga\LogManagement\Logger\CachingLogger;
 use Pratech\RedisIntegration\Model\RedisConnection;
 use Predis\Client;
 
-class WarehouseRedisCache
+class NodeRedisService implements NodeRedisServiceInterface
 {
-    /**
-     * Identifiers
-     */
-    public const DARK_STORE_URL_LIST = "warehouse:url:list";
-    public const PINCODE_SERVICEABILITY = "pincode:serviceability";
-
     /**
      * @var Client|null
      */
@@ -27,8 +22,7 @@ class WarehouseRedisCache
     public function __construct(
         RedisConnection       $redisConnection,
         private CachingLogger $cachingLogger,
-    )
-    {
+    ) {
         $this->redisConnection = $redisConnection->connect();
     }
 
@@ -74,5 +68,24 @@ class WarehouseRedisCache
     private function getKeys(string $pattern): array
     {
         return $this->redisConnection->keys($pattern);
+    }
+
+    /**
+     * Delete Warehouse URL.
+     *
+     * @return void
+     */
+    public function cleanCategoryIdSlugMapping(): void
+    {
+        try {
+            if ($this->redisConnection) {
+                if ($this->validateExistingKey(self::CATEGORY_ID_SLUG_MAPPING)) {
+                    $this->redisConnection->del($this->getKeys(self::CATEGORY_ID_SLUG_MAPPING));
+                }
+            }
+        } catch (Exception $e) {
+            $this->cachingLogger->error("cleanCategoryIdSlugMapping failed | "
+                . $e->getMessage() . " | Trace: " . $e->getTraceAsString());
+        }
     }
 }

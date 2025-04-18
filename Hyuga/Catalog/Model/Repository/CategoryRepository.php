@@ -14,13 +14,12 @@
 namespace Hyuga\Catalog\Model\Repository;
 
 use Exception;
+use Hyuga\CacheManagement\Api\CacheServiceInterface;
 use Hyuga\Catalog\Api\CategoryRepositoryInterface;
 use Hyuga\LogManagement\Logger\CachingLogger;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
-use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Serialize\SerializerInterface;
 use Pratech\Base\Model\Data\Response;
 
 /**
@@ -38,16 +37,14 @@ class CategoryRepository implements CategoryRepositoryInterface
      *
      * @param Response $response
      * @param CategoryCollectionFactory $categoryCollectionFactory
-     * @param CacheInterface $cache
-     * @param SerializerInterface $serializer
      * @param CachingLogger $cachingLogger
+     * @param CacheServiceInterface $cacheService
      */
     public function __construct(
         private Response                  $response,
         private CategoryCollectionFactory $categoryCollectionFactory,
-        private CacheInterface            $cache,
-        private SerializerInterface       $serializer,
-        private CachingLogger             $cachingLogger
+        private CachingLogger             $cachingLogger,
+        private CacheServiceInterface     $cacheService
     ) {
     }
 
@@ -72,15 +69,13 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getMapping(): array
     {
-        $cacheKey = 'category_id_slug_mapping';
+        $cacheKey = CacheServiceInterface::CACHE_KEY_CATEGORY_ID_SLUG_MAPPING;
+        $cachedResult = $this->cacheService->get($cacheKey);
 
-        // Try to get from cache first
-        $cachedMapping = $this->cache->load($cacheKey);
-        if ($cachedMapping) {
-            return $this->serializer->unserialize($cachedMapping);
+        if ($cachedResult) {
+            return $cachedResult;
         }
 
-        // If not in cache, build the mapping
         $mapById = [];
         $mapByKey = [];
 
@@ -98,19 +93,18 @@ class CategoryRepository implements CategoryRepositoryInterface
                 }
             }
 
-            $mapping = [
+            $result = [
                 "map_by_id" => $mapById,
                 "map_by_slug" => $mapByKey
             ];
 
-            // Save to cache with tags that will be cleared on category changes
-            $this->cache->save(
-                $this->serializer->serialize($mapping),
+            $this->cacheService->save(
                 $cacheKey,
+                $result,
                 ['category_mapping_cache', 'catalog_category', 'catalog_url'],
-                604800 // 1 week
+                CacheServiceInterface::CACHE_LIFETIME_1_WEEK
             );
-            return $mapping;
+            return $result;
         } catch (Exception $e) {
             $this->cachingLogger->error('Error building category mapping: ' . $e->getMessage());
             throw new LocalizedException(__('Unable to build category mapping: %1', $e->getMessage()));
