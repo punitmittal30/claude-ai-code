@@ -14,6 +14,7 @@
 namespace Pratech\Warehouse\Service;
 
 use Exception;
+use Hyuga\CacheManagement\Api\CacheServiceInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Pratech\Warehouse\Api\WarehouseRepositoryInterface;
@@ -27,13 +28,13 @@ class DarkStoreLocatorService
     /**
      * @param ResourceConnection $resource
      * @param WarehouseRepositoryInterface $warehouseRepository
-     * @param CacheService $cacheService
+     * @param CacheServiceInterface $cacheService
      * @param LoggerInterface $logger
      */
     public function __construct(
         private ResourceConnection           $resource,
         private WarehouseRepositoryInterface $warehouseRepository,
-        private CacheService                 $cacheService,
+        private CacheServiceInterface        $cacheService,
         private LoggerInterface              $logger
     ) {
     }
@@ -47,7 +48,7 @@ class DarkStoreLocatorService
      */
     public function findNearestDarkStore(int $pincode): array
     {
-        $cacheKey = $this->cacheService->getDarkStoreCacheKey($pincode);
+        $cacheKey = $this->cacheService->getNearestDarkStoreCacheKey($pincode);
 
         $cachedData = $this->cacheService->get($cacheKey);
 
@@ -56,7 +57,6 @@ class DarkStoreLocatorService
         }
 
         try {
-            // Get all dark stores
             $darkStores = $this->warehouseRepository->getAvailableDarkStores();
 
             if (empty($darkStores)) {
@@ -65,7 +65,6 @@ class DarkStoreLocatorService
 
             $warehousePincodes = array_column($darkStores, 'warehouse_pincode');
 
-            // Find SLA data to determine nearest warehouse by delivery time
             $connection = $this->resource->getConnection();
             $slaTable = $this->resource->getTableName('pratech_warehouse_sla');
 
@@ -82,10 +81,8 @@ class DarkStoreLocatorService
             $darkStore = null;
 
             if (!$slaData) {
-                // No SLA data found, throw exception
                 throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
             } else {
-                // Get warehouse by pincode
                 $warehousePincode = $slaData['warehouse_pincode'];
 
                 foreach ($darkStores as $store) {
@@ -101,12 +98,11 @@ class DarkStoreLocatorService
                 }
             }
 
-            // Cache the result for a day since store locations rarely change
             $this->cacheService->save(
                 $cacheKey,
                 $darkStore,
-                [CacheService::CACHE_TAG_DARK_STORE],
-                CacheService::CACHE_LIFETIME_STATIC
+                [CacheServiceInterface::CACHE_TAG_NEAREST_DARK_STORE],
+                CacheServiceInterface::CACHE_LIFETIME_STATIC
             );
 
             return $darkStore;

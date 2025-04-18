@@ -44,8 +44,7 @@ class Warehouse extends AbstractDb
     public function __construct(
         Context                  $context,
         private ManagerInterface $eventManager
-    )
-    {
+    ) {
         parent::__construct($context);
     }
 
@@ -106,7 +105,8 @@ class Warehouse extends AbstractDb
                 [
                     'old_value' => $oldData,
                     'new_value' => $newData
-                ]);
+                ]
+            );
         }
 
         return parent::save($object);

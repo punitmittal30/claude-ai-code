@@ -16,14 +16,9 @@ namespace Pratech\Cart\Helper;
 use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
-use Magento\Catalog\Pricing\Price\FinalPrice;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
-use Magento\ConfigurableProduct\Api\Data\OptionInterface;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\ConfigurableProduct\Pricing\Price\ConfigurableOptionsProviderInterface;
-use Magento\Eav\Model\Entity\Attribute;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
@@ -55,11 +50,6 @@ use Pratech\Warehouse\Service\DeliveryDateCalculator;
 class CustomerCart
 {
     /**
-     * CONFIGURABLE ATTRIBUTES CONFIGURATION PATH
-     */
-    public const CONFIGURABLE_ATTRIBUTE_CONFIG_PATH = 'product/attributes/configurable_attributes';
-
-    /**
      * Cross Sell Status on Cart page
      */
     public const CROSS_SELL_ENABLE_CONFIG_PATH = 'cart/cross_sell/enable';
@@ -77,49 +67,46 @@ class CustomerCart
     /**
      * Cart Helper Constructor
      *
-     * @param CartManagementInterface              $customerCartManagement
-     * @param CartRepositoryInterface              $quoteRepository
-     * @param QuoteIdMaskFactory                   $quoteIdMaskFactory
-     * @param CartItemRepositoryInterface          $customerCartItemRepository
-     * @param CartTotalRepositoryInterface         $customerCartTotalRepository
-     * @param ProductRepositoryInterface           $productRepository
-     * @param StockRegistryInterface               $stockItemRepository
-     * @param BaseHelper                           $baseHelper
-     * @param TimezoneInterface                    $timezoneInterface
-     * @param Coupon                               $couponHelper
-     * @param CustomerPaymentManagementInterface   $customerPaymentManagement
-     * @param PaymentInterface                     $payment
-     * @param Logger                               $apiLogger
-     * @param QuoteFactory                         $quoteFactory
-     * @param Configurable                         $configurableType
-     * @param DeliveryDateCalculator               $deliveryDateCalculator
-     * @param ConfigurableOptionsProviderInterface $configurableOptionsProvider
-     * @param Attribute                            $attribute
-     * @param ProductHelper                        $productHelper
-     * @param ScopeConfigInterface                 $scopeConfig
+     * @param CartManagementInterface $customerCartManagement
+     * @param CartRepositoryInterface $quoteRepository
+     * @param QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param CartItemRepositoryInterface $customerCartItemRepository
+     * @param CartTotalRepositoryInterface $customerCartTotalRepository
+     * @param ProductRepositoryInterface $productRepository
+     * @param StockRegistryInterface $stockItemRepository
+     * @param BaseHelper $baseHelper
+     * @param TimezoneInterface $timezoneInterface
+     * @param Coupon $couponHelper
+     * @param CustomerPaymentManagementInterface $customerPaymentManagement
+     * @param PaymentInterface $payment
+     * @param Logger $apiLogger
+     * @param QuoteFactory $quoteFactory
+     * @param Configurable $configurableType
+     * @param DeliveryDateCalculator $deliveryDateCalculator
+     * @param ProductHelper $productHelper
+     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        private CartManagementInterface              $customerCartManagement,
-        private CartRepositoryInterface              $quoteRepository,
-        private QuoteIdMaskFactory                   $quoteIdMaskFactory,
-        private CartItemRepositoryInterface          $customerCartItemRepository,
-        private CartTotalRepositoryInterface         $customerCartTotalRepository,
-        private ProductRepositoryInterface           $productRepository,
-        private StockRegistryInterface               $stockItemRepository,
-        private BaseHelper                           $baseHelper,
-        private TimezoneInterface                    $timezoneInterface,
-        private Coupon                               $couponHelper,
-        private CustomerPaymentManagementInterface   $customerPaymentManagement,
-        private PaymentInterface                     $payment,
-        private Logger                               $apiLogger,
-        private QuoteFactory                         $quoteFactory,
-        private Configurable                         $configurableType,
-        private DeliveryDateCalculator               $deliveryDateCalculator,
-        private ConfigurableOptionsProviderInterface $configurableOptionsProvider,
-        private Attribute                            $attribute,
-        private ProductHelper                        $productHelper,
-        private ScopeConfigInterface                 $scopeConfig
-    ) {
+        private CartManagementInterface            $customerCartManagement,
+        private CartRepositoryInterface            $quoteRepository,
+        private QuoteIdMaskFactory                 $quoteIdMaskFactory,
+        private CartItemRepositoryInterface        $customerCartItemRepository,
+        private CartTotalRepositoryInterface       $customerCartTotalRepository,
+        private ProductRepositoryInterface         $productRepository,
+        private StockRegistryInterface             $stockItemRepository,
+        private BaseHelper                         $baseHelper,
+        private TimezoneInterface                  $timezoneInterface,
+        private Coupon                             $couponHelper,
+        private CustomerPaymentManagementInterface $customerPaymentManagement,
+        private PaymentInterface                   $payment,
+        private Logger                             $apiLogger,
+        private QuoteFactory                       $quoteFactory,
+        private Configurable                       $configurableType,
+        private DeliveryDateCalculator             $deliveryDateCalculator,
+        private ProductHelper                      $productHelper,
+        private ScopeConfigInterface               $scopeConfig
+    )
+    {
     }
 
     /**
@@ -422,9 +409,9 @@ class CustomerCart
             : null;
         $today = $this->timezoneInterface->date()->format('Y-m-d H:i:s');
         if ($specialPrice) {
-            if ((is_null($specialFromDate) && is_null($specialToDate)) 
-                || ($today >= $specialFromDate && is_null($specialToDate)) 
-                || ($today <= $specialToDate && is_null($specialFromDate)) 
+            if ((is_null($specialFromDate) && is_null($specialToDate))
+                || ($today >= $specialFromDate && is_null($specialToDate))
+                || ($today <= $specialToDate && is_null($specialFromDate))
                 || ($today >= $specialFromDate && $today <= $specialToDate)
             ) {
                 return true;
@@ -436,7 +423,7 @@ class CustomerCart
     /**
      * Update Item In Customer Cart.
      *
-     * @param  CartItemInterface $cartItem
+     * @param CartItemInterface $cartItem
      * @return array
      * @throws CouldNotSaveException
      * @throws InputException
@@ -462,25 +449,13 @@ class CustomerCart
     }
 
     /**
-     * Get Customer Default Cart
+     * Get cross-sell products of cart items
      *
-     * @param int $customerId
-     * @return CartInterface
-     * @throws NoSuchEntityException
-     */
-    private function getCustomerDefaultCart(int $customerId): CartInterface
-    {
-        return $this->customerCartManagement->getCartForCustomer($customerId);
-    }
-
-    /**
-     * Get cross sell products of cart items
-     *
-     * @param  string   $type Possible values: customer|guest
-     * @param  string   $cartId
-     * @param  int|null $pincode
-     * @throws Exception|NoSuchEntityException
+     * @param string $type Possible values: customer|guest
+     * @param string $cartId
+     * @param int|null $pincode
      * @return array
+     * @throws Exception|NoSuchEntityException
      */
     public function getCartCrossSellProducts(string $type, string $cartId, int $pincode = null): array
     {
@@ -490,7 +465,7 @@ class CustomerCart
                 return [];
             }
 
-            $cartDetails = ($type == 'guest') ? 
+            $cartDetails = ($type == 'guest') ?
                 $this->getGuestCart($cartId)
                 : $this->quoteRepository->get($cartId);
             $cartItems = $cartDetails->getItems();
@@ -531,13 +506,28 @@ class CustomerCart
     }
 
     /**
+     * Get Scope Config Value.
+     *
+     * @param string $config
+     * @return mixed
+     */
+    public function getConfigValue(string $config): mixed
+    {
+        return $this->scopeConfig->getValue(
+            $config,
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
      * Process cross-sell products for all cart items
      *
-     * @param  array    $cartItems
-     * @param  array    $cartItemProductIds
-     * @param  int      $noOfCrossSellToDisplay
-     * @param  int|null $pincode
+     * @param array $cartItems
+     * @param array $cartItemProductIds
+     * @param int $noOfCrossSellToDisplay
+     * @param int|null $pincode
      * @return array
+     * @throws NoSuchEntityException
      */
     private function processCrossSellForAllItems(array $cartItems, array $cartItemProductIds, int $noOfCrossSellToDisplay, ?int $pincode): array
     {
@@ -551,10 +541,10 @@ class CustomerCart
             $crossSellProductIds = $item->getProduct()->getCrossSellProductIds();
             $productIdsToProcess = array_merge($productIdsToProcess, $crossSellProductIds);
             foreach (array_diff(
-                $crossSellProductIds,
-                    $cartItemProductIds,
-                    $productIdsProcessed
-                ) as $productId) {
+                         $crossSellProductIds,
+                         $cartItemProductIds,
+                         $productIdsProcessed
+                     ) as $productId) {
                 $productStock = $this->productHelper->getProductStockInfo($productId);
                 if ($productStock->getIsInStock()) {
                     $crossSellProducts[] = $this->productHelper->formatProductForCarousel($productId, $pincode);
@@ -588,13 +578,14 @@ class CustomerCart
     /**
      * Process cross-sell products for the last cart item
      *
-     * @param  mixed    $lastItem
-     * @param  array    $cartItemProductIds
-     * @param  int      $noOfCrossSellToDisplay
-     * @param  int|null $pincode
+     * @param mixed $lastItem
+     * @param array $cartItemProductIds
+     * @param int $noOfCrossSellToDisplay
+     * @param int|null $pincode
      * @return array
+     * @throws NoSuchEntityException
      */
-    private function processCrossSellForLastItem($lastItem, array $cartItemProductIds, int $noOfCrossSellToDisplay, ?int $pincode): array
+    private function processCrossSellForLastItem(mixed $lastItem, array $cartItemProductIds, int $noOfCrossSellToDisplay, ?int $pincode): array
     {
         $crossSellProducts = [];
         $productIds = $lastItem->getProduct()->getCrossSellProductIds();
@@ -612,19 +603,5 @@ class CustomerCart
             }
         }
         return $crossSellProducts;
-    }
-
-    /**
-     * Get Scope Config Value.
-     *
-     * @param  string $config
-     * @return mixed
-     */
-    public function getConfigValue(string $config): mixed
-    {
-        return $this->scopeConfig->getValue(
-            $config,
-            ScopeInterface::SCOPE_STORE
-        );
     }
 }

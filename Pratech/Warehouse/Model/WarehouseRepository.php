@@ -14,16 +14,18 @@
 namespace Pratech\Warehouse\Model;
 
 use Exception;
+use Hyuga\CacheManagement\Api\CacheServiceInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Pratech\Warehouse\Api\Data\WarehouseInterface;
 use Pratech\Warehouse\Api\WarehouseRepositoryInterface;
-use Pratech\Warehouse\Model\Cache\DarkStoreCache;
 use Pratech\Warehouse\Model\ResourceModel\Warehouse as ResourceWarehouse;
 use Pratech\Warehouse\Model\ResourceModel\Warehouse\CollectionFactory as WarehouseCollectionFactory;
 
@@ -34,14 +36,16 @@ class WarehouseRepository implements WarehouseRepositoryInterface
      * @param WarehouseFactory $warehouseFactory
      * @param WarehouseCollectionFactory $warehouseCollectionFactory
      * @param SearchResultsInterfaceFactory $searchResultsFactory
-     * @param DarkStoreCache $darkStoreCache
+     * @param CacheInterface $cache
+     * @param SerializerInterface $serializer
      */
     public function __construct(
-        protected ResourceWarehouse             $resource,
-        protected WarehouseFactory              $warehouseFactory,
-        protected WarehouseCollectionFactory    $warehouseCollectionFactory,
-        protected SearchResultsInterfaceFactory $searchResultsFactory,
-        private DarkStoreCache                  $darkStoreCache
+        private ResourceWarehouse             $resource,
+        private WarehouseFactory              $warehouseFactory,
+        private WarehouseCollectionFactory    $warehouseCollectionFactory,
+        private SearchResultsInterfaceFactory $searchResultsFactory,
+        private CacheInterface                $cache,
+        private SerializerInterface           $serializer
     ) {
     }
 
@@ -173,26 +177,38 @@ class WarehouseRepository implements WarehouseRepositoryInterface
      */
     public function getAvailableDarkStores(): array
     {
-        // Use the DarkStoreCache service to get or fetch available dark stores
-        return $this->darkStoreCache->getAvailableDarkStores(function () {
-            $darkStores = [];
-            $collection = $this->warehouseCollectionFactory->create();
-            $collection->addFieldToFilter('is_dark_store', ['eq' => 1]);
-            $collection->addFieldToFilter('is_active', ['eq' => 1]);
+        $cachedData = $this->cache->load(CacheServiceInterface::CACHE_KEY_AVAILABLE_DARK_STORES);
 
-            /** @var WarehouseInterface $warehouse */
-            foreach ($collection as $warehouse) {
-                $darkStores[] = [
-                    'warehouse_name' => $warehouse->getName(),
-                    'warehouse_code' => $warehouse->getWarehouseCode(),
-                    'warehouse_url' => $warehouse->getWarehouseUrl(),
-                    'warehouse_pincode' => (int)$warehouse->getPincode(),
-                    'is_active' => (int)$warehouse->getIsActive()
-                ];
-            }
+        if ($cachedData) {
+            return $this->serializer->unserialize($cachedData);
+        }
 
-            return $darkStores;
-        });
+        $darkStores = [];
+        $collection = $this->warehouseCollectionFactory->create();
+        $collection->addFieldToFilter('is_dark_store', ['eq' => 1]);
+        $collection->addFieldToFilter('is_active', ['eq' => 1]);
+
+        /** @var WarehouseInterface $warehouse */
+        foreach ($collection as $warehouse) {
+            $darkStores[] = [
+                'warehouse_name' => $warehouse->getName(),
+                'warehouse_code' => $warehouse->getWarehouseCode(),
+                'warehouse_url' => $warehouse->getWarehouseUrl(),
+                'warehouse_pincode' => (int)$warehouse->getPincode(),
+                'is_active' => (int)$warehouse->getIsActive()
+            ];
+        }
+
+        if (!empty($darkStores)) {
+            $this->cache->save(
+                $this->serializer->serialize($darkStores),
+                CacheServiceInterface::CACHE_KEY_AVAILABLE_DARK_STORES,
+                [CacheServiceInterface::CACHE_KEY_AVAILABLE_DARK_STORES],
+                CacheServiceInterface::CACHE_LIFETIME_STATIC
+            );
+        }
+
+        return $darkStores;
     }
 
     /**

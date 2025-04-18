@@ -185,9 +185,4 @@
     <type name="Magento\Framework\Webapi\ServiceOutputProcessor">
         <plugin name="warehouse_product_result_plugin" type="Pratech\Warehouse\Plugin\WarehouseProductResultPlugin"/>
     </type>
-
-    <!-- Register plugin for WarehouseResource to clear cache on save/delete operations -->
-    <type name="Pratech\Warehouse\Model\ResourceModel\Warehouse">
-        <plugin name="darkstore_cache_cleaner" type="Pratech\Warehouse\Plugin\WarehouseResourcePlugin" sortOrder="10"/>
-    </type>
 </config>

@@ -14,6 +14,7 @@
 namespace Pratech\Warehouse\Model\Repository;
 
 use Exception;
+use Hyuga\CacheManagement\Api\CacheServiceInterface;
 use Hyuga\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface as CoreCategoryRepositoryInterface;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
@@ -27,7 +28,6 @@ use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterfaceFactory;
 use Pratech\Warehouse\Api\WarehouseProductRepositoryInterface;
 use Pratech\Warehouse\Helper\Config;
-use Pratech\Warehouse\Service\CacheService;
 use Pratech\Warehouse\Service\DarkStoreLocatorService;
 use Pratech\Warehouse\Service\FilterService;
 use Pratech\Warehouse\Service\ProductCollectionService;
@@ -51,7 +51,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
      * @param WarehouseProductResultInterfaceFactory $resultFactory
      * @param CategoryListResultInterfaceFactory $categoryListResultFactory
      * @param Config $configHelper
-     * @param CacheService $cacheService
+     * @param CacheServiceInterface $cacheService
      * @param DarkStoreLocatorService $darkStoreLocator
      * @param FilterService $filterService
      * @param ProductCollectionService $collectionService
@@ -67,7 +67,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         private WarehouseProductResultInterfaceFactory                          $resultFactory,
         private CategoryListResultInterfaceFactory                              $categoryListResultFactory,
         private Config                                                          $configHelper,
-        private CacheService                                                    $cacheService,
+        private CacheServiceInterface                                           $cacheService,
         private DarkStoreLocatorService                                         $darkStoreLocator,
         private FilterService                                                   $filterService,
         private ProductCollectionService                                        $collectionService,
@@ -76,7 +76,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         private CategoryRepositoryInterface                                     $categoryRepository,
         private CoreCategoryRepositoryInterface                                 $coreCategoryRepository,
         private StoreManagerInterface                                           $storeManager,
-        private \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
+        private \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
     ) {
     }
 
@@ -309,8 +309,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $this->cacheService->save(
                 $filtersCacheKey,
                 $availableFilters,
-                [CacheService::CACHE_TAG_FILTERS],
-                CacheService::CACHE_LIFETIME_FILTERS
+                [CacheServiceInterface::CACHE_TAG_FILTERS],
+                CacheServiceInterface::CACHE_LIFETIME_1_WEEK
             );
 
             // Format items for the response
@@ -339,7 +339,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                     'total_count' => $totalCount
                 ],
                 ['category_products_listing'],
-                CacheService::CACHE_LIFETIME_DYNAMIC
+                CacheServiceInterface::CACHE_LIFETIME_1_WEEK
             );
 
             return $result;
@@ -364,10 +364,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     private function getSubcategoriesForFilter(int $categoryId, string $warehouseCode): array
     {
         try {
-            // Generate cache key for subcategories
             $cacheKey = $this->cacheService->getSubcategoryCacheKey($categoryId, $warehouseCode);
 
-            // Try to get from cache first
             $cachedSubcategories = $this->cacheService->get($cacheKey);
             if ($cachedSubcategories) {
                 return $cachedSubcategories;
@@ -375,7 +373,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             $result = [];
 
-            // Get the category
             $category = $this->coreCategoryRepository->get($categoryId);
 
             // Get subcategories that are included in menu
@@ -417,8 +414,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $this->cacheService->save(
                     $cacheKey,
                     $result,
-                    [CacheService::CACHE_TAG_FILTERS],
-                    CacheService::CACHE_LIFETIME_FILTERS
+                    [CacheServiceInterface::CACHE_TAG_FILTERS],
+                    CacheServiceInterface::CACHE_LIFETIME_1_WEEK
                 );
             }
 
@@ -466,10 +463,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         int $pincode
     ): CategoryListResultInterface {
         try {
-            // Generate cache key for categories
-            $cacheKey = $this->cacheService->getCategoriesCacheKey($pincode);
+            $cacheKey = $this->cacheService->getCategoriesByPincodeCacheKey($pincode);
 
-            // Try to get from cache first
             $cachedResult = $this->cacheService->get($cacheKey);
 
             if ($cachedResult) {
@@ -483,12 +478,10 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 return $result;
             }
 
-            // Get nearest dark store for this pincode
             $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
 
             $warehouseCode = $darkStore['warehouse_code'];
 
-            // Get main "categories" category
             $rootCategoryId = $this->getCategoriesRootId();
 
             if (!$rootCategoryId) {
@@ -500,7 +493,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             // Get subcategories with products in the current warehouse
             $categories = $this->getCategoriesWithProducts($rootCategoryId, $warehouseCode);
 
-            // Create result object
             $result = $this->categoryListResultFactory->create();
             $result->setTitle(self::CATEGORY_BY_PINCODE_TITLE);
             $result->setWarehouseCode($warehouseCode);
@@ -508,7 +500,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $result->setCategories($categories);
             $result->setTotalCount(count($categories));
 
-            // Cache the result - store raw data
             $cacheData = [
                 'title' => self::CATEGORY_BY_PINCODE_TITLE,
                 'warehouse_code' => $warehouseCode,
@@ -521,7 +512,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $cacheKey,
                 $cacheData,
                 ['categories_list'],
-                CacheService::CACHE_LIFETIME_STATIC
+                CacheServiceInterface::CACHE_LIFETIME_1_WEEK
             );
 
             return $result;
@@ -544,17 +535,15 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
     private function getCategoriesRootId(): ?int
     {
         try {
-            // Try to find the "categories" category by URL key
             $categoryId = $this->getCategoryIdFromSlug('categories');
 
             if ($categoryId) {
                 return $categoryId;
             }
 
-            // If not found by URL key, try to find it by name
             $collection = $this->categoryCollectionFactory->create();
             $collection->addAttributeToFilter('name', 'Categories')
-                ->addAttributeToFilter('level', 2) // Second level, just below root
+                ->addAttributeToFilter('level', 2)
                 ->addAttributeToFilter('is_active', 1)
                 ->setPageSize(1);
 

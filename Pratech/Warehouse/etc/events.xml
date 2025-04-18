@@ -12,11 +12,6 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="warehouse_save_after">
-        <observer name="clear_warehouse_url_list"
-                  instance="Pratech\Warehouse\Observer\WarehouseSaveAfter"/>
-    </event>
-
     <!-- Clear cache on product save -->
     <event name="catalog_product_save_after">
         <observer name="pratech_warehouse_clear_product_cache"

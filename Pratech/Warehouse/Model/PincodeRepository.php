@@ -53,8 +53,7 @@ class PincodeRepository implements PincodeRepositoryInterface
         private CacheService                    $cacheService,
         private WarehouseSlaRepositoryInterface $warehouseSlaRepository,
         private DarkStoreLocatorService         $darkStoreLocator
-    )
-    {
+    ) {
     }
 
     /**
@@ -197,7 +196,7 @@ class PincodeRepository implements PincodeRepositoryInterface
                 $cacheKey,
                 $result,
                 [CacheServiceInterface::CACHE_TAG_PINCODE],
-                CacheServiceInterface::CACHE_LIFETIME_PINCODE
+                CacheServiceInterface::CACHE_LIFETIME_1_WEEK
             );
         } catch (NoSuchEntityException $e) {
             $this->inventorySyncLogger->error($e->getMessage());

@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Pratech\Warehouse\Service;
 
 use Exception;
+use Hyuga\CacheManagement\Api\CacheServiceInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Pratech\Warehouse\Helper\Config;
 use Pratech\Warehouse\Model\ResourceModel\Warehouse as WarehouseResource;
@@ -34,7 +35,7 @@ class DeliveryDateCalculator
      * @param InventoryCollectionFactory $inventoryCollectionFactory
      * @param SlaCollectionFactory $slaCollectionFactory
      * @param WarehouseResource $warehouseResource
-     * @param CacheService $cacheService
+     * @param CacheServiceInterface $cacheService
      * @param Config $warehouseConfig
      * @param LoggerInterface $logger
      */
@@ -42,7 +43,7 @@ class DeliveryDateCalculator
         private InventoryCollectionFactory $inventoryCollectionFactory,
         private SlaCollectionFactory       $slaCollectionFactory,
         private WarehouseResource          $warehouseResource,
-        private CacheService               $cacheService,
+        private CacheServiceInterface      $cacheService,
         private Config                     $warehouseConfig,
         private LoggerInterface            $logger
     ) {
@@ -85,8 +86,8 @@ class DeliveryDateCalculator
         $this->cacheService->save(
             $cacheKey,
             $result,
-            [CacheService::CACHE_TAG_DYNAMIC],
-            CacheService::CACHE_LIFETIME_DYNAMIC
+            [CacheServiceInterface::CACHE_TAG_DYNAMIC],
+            CacheServiceInterface::CACHE_LIFETIME_1_WEEK
         );
 
         return $result;
