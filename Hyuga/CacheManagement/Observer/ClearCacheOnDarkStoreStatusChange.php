@@ -15,25 +15,28 @@ namespace Hyuga\CacheManagement\Observer;
 
 use Exception;
 use Hyuga\CacheManagement\Api\CacheServiceInterface;
+use Hyuga\CacheManagement\Model\Redis\WarehouseRedisCache;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Psr\Log\LoggerInterface;
 
-class ClearPincodeCache implements ObserverInterface
+class ClearCacheOnDarkStoreStatusChange implements ObserverInterface
 {
     /**
      * @param CacheServiceInterface $cacheService
      * @param LoggerInterface $logger
+     * @param WarehouseRedisCache $warehouseRedisCache
      */
     public function __construct(
         private CacheServiceInterface $cacheService,
-        private LoggerInterface       $logger
+        private LoggerInterface       $logger,
+        private WarehouseRedisCache   $warehouseRedisCache
     )
     {
     }
 
     /**
-     * Clear pincode serviceability cache when pincode data changes
+     * Clear cache when dark store status changes.
      *
      * @param Observer $observer
      * @return void
@@ -45,11 +48,10 @@ class ClearPincodeCache implements ObserverInterface
 
             $eventName = $observer->getEvent()->getName();
 
-            // Handle based on event name
             switch ($eventName) {
                 case 'warehouse_entity_changed':
                     if ($object['old_value']['is_dark_store'] != $object['new_value']['is_dark_store']) {
-                        $this->handleWarehouseEntityChanged();
+                        $this->handleDarkStoreChange();
                     }
                     break;
             }
@@ -58,8 +60,9 @@ class ClearPincodeCache implements ObserverInterface
         }
     }
 
-    private function handleWarehouseEntityChanged(): void
+    private function handleDarkStoreChange(): void
     {
         $this->cacheService->cleanAllPincodeCaches();
+        $this->warehouseRedisCache->cleanAllPincodeCachesAndDarkStoreSlugs();
     }
 }

@@ -16,6 +16,7 @@
         <sequence>
             <module name="Magento_Backend"/>
             <module name="Magento_Cache"/>
+            <module name="Hyuga_LogManagement"/>
         </sequence>
     </module>
 </config>

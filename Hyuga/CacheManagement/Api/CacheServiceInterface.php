@@ -18,14 +18,15 @@ interface CacheServiceInterface
     // Constants for cache tags
     public const CACHE_TAG_WAREHOUSE_PRODUCTS = 'warehouse_products_dynamic';
     public const CACHE_TAG_WAREHOUSE_FILTERS = 'warehouse_filters';
-    public const CACHE_TAG_PINCODE = 'pratech_serviceable_pincodes';
-    public const CACHE_TAG_DARK_STORE = 'dark_store';
+    public const CACHE_TAG_PINCODE = 'serviceable_pincode';
+    public const CACHE_TAG_NEAREST_DARK_STORE = 'nearest_dark_store';
+    public const CACHE_KEY_AVAILABLE_DARK_STORES = 'available_dark_stores';
 
     // Constants for cache lifetimes
     public const CACHE_LIFETIME_STATIC = 604800; // 1 week
     public const CACHE_LIFETIME_DYNAMIC = 300;   // 5 minutes
     public const CACHE_LIFETIME_FILTERS = 3600;  // 1 hour
-    public const CACHE_LIFETIME_PINCODE = 3600;  // 1 hour
+    public const CACHE_LIFETIME_PINCODE = 604800;  // 1 week
 
     /**
      * Get cached data
@@ -86,12 +87,12 @@ interface CacheServiceInterface
     public function cleanAllPincodeCaches(): bool;
 
     /**
-     * Get cache key for dark store by pincode
+     * Get cache key for nearest dark store by pincode
      *
      * @param int $pincode
      * @return string
      */
-    public function getDarkStoreCacheKey(int $pincode): string;
+    public function getNearestDarkStoreCacheKey(int $pincode): string;
 
     /**
      * Clean dark store cache for specific pincode
@@ -99,14 +100,14 @@ interface CacheServiceInterface
      * @param int $pincode
      * @return bool
      */
-    public function cleanDarkStoreCache(int $pincode): bool;
+    public function cleanNearestDarkStoreCache(int $pincode): bool;
 
     /**
      * Clean all dark store caches
      *
      * @return bool
      */
-    public function cleanAllDarkStoreCaches(): bool;
+    public function cleanAllNearestDarkStoreCaches(): bool;
 
     /**
      * Get cache key for warehouse filters
@@ -178,4 +179,11 @@ interface CacheServiceInterface
      * @return bool
      */
     public function cleanAllWarehouseProductsCaches(): bool;
+
+    /**
+     * Clean available dark store cache.
+     *
+     * @return bool
+     */
+    public function clearAvailableDarkStoresCache(): bool;
 }

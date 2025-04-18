@@ -43,9 +43,9 @@ class AdditionalButtons extends Template
      *
      * @return string
      */
-    public function getFlushDarkStoreCacheUrl(): string
+    public function getFlushNearestDarkStoreCacheUrl(): string
     {
-        return $this->getUrl('hyuga_cachemanagement/cache/flushDarkStoreCache');
+        return $this->getUrl('hyuga_cachemanagement/cache/flushNearestDarkStoreCache');
     }
 
     /**
@@ -56,5 +56,15 @@ class AdditionalButtons extends Template
     public function getFlushWarehouseFiltersCacheUrl(): string
     {
         return $this->getUrl('hyuga_cachemanagement/cache/flushWarehouseFiltersCache');
+    }
+
+    /**
+     * Get URL for flushing dark store cache
+     *
+     * @return string
+     */
+    public function getFlushAvailableDarkStoreCacheUrl(): string
+    {
+        return $this->getUrl('hyuga_cachemanagement/cache/flushAvailableDarkStoreCache');
     }
 }

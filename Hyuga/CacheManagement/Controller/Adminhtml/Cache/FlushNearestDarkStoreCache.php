@@ -19,7 +19,7 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\Redirect;
 
-class FlushDarkStoreCache extends Action
+class FlushNearestDarkStoreCache extends Action
 {
     /**
      * @param Context $context
@@ -40,7 +40,7 @@ class FlushDarkStoreCache extends Action
     public function execute()
     {
         try {
-            $this->cacheService->cleanAllDarkStoreCaches();
+            $this->cacheService->cleanAllNearestDarkStoreCaches();
             $this->messageManager->addSuccessMessage(__('The dark store cache has been cleaned.'));
         } catch (Exception $e) {
             $this->messageManager->addErrorMessage(__(

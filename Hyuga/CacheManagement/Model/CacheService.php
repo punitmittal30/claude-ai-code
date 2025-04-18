@@ -137,10 +137,10 @@ class CacheService implements CacheServiceInterface
     /**
      * @inheritDoc
      */
-    public function cleanDarkStoreCache(int $pincode): bool
+    public function cleanNearestDarkStoreCache(int $pincode): bool
     {
         try {
-            $cacheKey = $this->getDarkStoreCacheKey($pincode);
+            $cacheKey = $this->getNearestDarkStoreCacheKey($pincode);
             $this->logger->info("Clearing dark store cache for pincode: {$pincode}");
             return $this->remove($cacheKey);
         } catch (Exception $e) {
@@ -152,19 +152,19 @@ class CacheService implements CacheServiceInterface
     /**
      * @inheritDoc
      */
-    public function getDarkStoreCacheKey(int $pincode): string
+    public function getNearestDarkStoreCacheKey(int $pincode): string
     {
-        return "dark_store_{$pincode}";
+        return "nearest_dark_store_{$pincode}";
     }
 
     /**
      * @inheritDoc
      */
-    public function cleanAllDarkStoreCaches(): bool
+    public function cleanAllNearestDarkStoreCaches(): bool
     {
         try {
             $this->logger->info("Clearing all dark store caches");
-            return $this->clean([self::CACHE_TAG_DARK_STORE]);
+            return $this->clean([self::CACHE_TAG_NEAREST_DARK_STORE]);
         } catch (Exception $e) {
             $this->logger->error('Error cleaning all dark store caches: ' . $e->getMessage());
             return false;
@@ -266,4 +266,17 @@ class CacheService implements CacheServiceInterface
             return false;
         }
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearAvailableDarkStoresCache(): bool
+    {
+        try {
+            $this->logger->info("Clearing available dark store cache");
+            return $this->clean([self::CACHE_KEY_AVAILABLE_DARK_STORES]);
+        } catch (Exception $e) {
+            $this->logger->error('Error cleaning available dark store cache: ' . $e->getMessage());
+            return false;
+        }    }
 }

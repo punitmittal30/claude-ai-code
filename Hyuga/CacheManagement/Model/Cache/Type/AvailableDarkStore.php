@@ -16,10 +16,10 @@ namespace Hyuga\CacheManagement\Model\Cache\Type;
 use Magento\Framework\App\Cache\Type\FrontendPool;
 use Magento\Framework\Cache\Frontend\Decorator\TagScope;
 
-class DarkStore extends TagScope
+class AvailableDarkStore extends TagScope
 {
-    public const TYPE_IDENTIFIER = 'hyuga_dark_store';
-    public const CACHE_TAG = 'HYUGA_DARK_STORE';
+    public const TYPE_IDENTIFIER = 'hyuga_available_dark_store';
+    public const CACHE_TAG = 'HYUGA_AVAILABLE_DARK_STORE';
 
     /**
      * @param FrontendPool $frontendPool

@@ -16,17 +16,6 @@
     <preference for="Hyuga\CacheManagement\Api\CacheServiceInterface"
                 type="Hyuga\CacheManagement\Model\CacheService"/>
 
-    <!-- Console commands -->
-    <type name="Magento\Framework\Console\CommandList">
-        <arguments>
-            <argument name="commands" xsi:type="array">
-                <item name="hyuga_flush_pincode_cache" xsi:type="object">
-                    Hyuga\CacheManagement\Console\Command\FlushPincodeCacheCommand
-                </item>
-            </argument>
-        </arguments>
-    </type>
-
     <!-- Resource model plugins -->
     <type name="Pratech\Warehouse\Model\ResourceModel\Pincode">
         <plugin name="hyuga_cache_pincode_resource_plugin"

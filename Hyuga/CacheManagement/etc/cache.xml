@@ -26,9 +26,14 @@
         <label>Warehouse Filters</label>
         <description>Cache for product filter data in warehouses</description>
     </type>
-    <type name="hyuga_dark_store" translate="label,description"
-          instance="Hyuga\CacheManagement\Model\Cache\Type\DarkStore">
-        <label>Dark Store</label>
-        <description>Cache for dark store information</description>
+    <type name="hyuga_nearest_dark_store" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\NearestDarkStore">
+        <label>Nearest Dark Store</label>
+        <description>Cache for nearest dark store information</description>
+    </type>
+    <type name="hyuga_available_dark_store" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\AvailableDarkStore">
+        <label>Available Dark Store</label>
+        <description>Cache for available dark store information</description>
     </type>
 </config>

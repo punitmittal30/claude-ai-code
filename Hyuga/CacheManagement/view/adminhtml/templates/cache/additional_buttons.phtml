@@ -41,14 +41,14 @@ use Hyuga\CacheManagement\Block\Adminhtml\Cache\AdditionalButtons;
             <p><?= $escaper->escapeHtml(__('Clears the warehouse products cache')) ?></p>
         </div>
         <div class="additional-button">
-            <button id="flush_dark_store_cache"
-                    title="<?= $escaper->escapeHtmlAttr(__('Flush Dark Store Cache')) ?>"
+            <button id="flush_nearest_dark_store_cache"
+                    title="<?= $escaper->escapeHtmlAttr(__('Flush Nearest Dark Store Cache')) ?>"
                     type="button"
                     class="action-primary"
-                    onclick="setLocation('<?= $escaper->escapeJs($block->getFlushDarkStoreCacheUrl()) ?>')">
-                <span><?= $escaper->escapeHtml(__('Flush Dark Store Cache')) ?></span>
+                    onclick="setLocation('<?= $escaper->escapeJs($block->getFlushNearestDarkStoreCacheUrl()) ?>')">
+                <span><?= $escaper->escapeHtml(__('Flush Nearest Dark Store Cache')) ?></span>
             </button>
-            <p><?= $escaper->escapeHtml(__('Clears the dark store cache')) ?></p>
+            <p><?= $escaper->escapeHtml(__('Clears the nearest dark store cache')) ?></p>
         </div>
         <div class="additional-button">
             <button id="flush_warehouse_filters_cache"
@@ -59,6 +59,16 @@ use Hyuga\CacheManagement\Block\Adminhtml\Cache\AdditionalButtons;
                 <span><?= $escaper->escapeHtml(__('Flush Warehouse Filters Cache')) ?></span>
             </button>
             <p><?= $escaper->escapeHtml(__('Clears the warehouse filters cache')) ?></p>
+        </div>
+        <div class="additional-button">
+            <button id="flush_available_dark_store_cache"
+                    title="<?= $escaper->escapeHtmlAttr(__('Flush Available Dark Store Cache')) ?>"
+                    type="button"
+                    class="action-primary"
+                    onclick="setLocation('<?= $escaper->escapeJs($block->getFlushAvailableDarkStoreCacheUrl()) ?>')">
+                <span><?= $escaper->escapeHtml(__('Flush Available Dark Store Cache')) ?></span>
+            </button>
+            <p><?= $escaper->escapeHtml(__('Clears the available dark store cache')) ?></p>
         </div>
     </div>
 </div>

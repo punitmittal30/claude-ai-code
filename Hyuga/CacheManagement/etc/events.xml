@@ -14,6 +14,6 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="warehouse_entity_changed">
         <observer name="hyuga_cache_clear_pincode_on_dark_store_status_change"
-                  instance="Hyuga\CacheManagement\Observer\ClearPincodeCache"/>
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnDarkStoreStatusChange"/>
     </event>
 </config>
