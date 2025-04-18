@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Return
+ *
+ * @category  XML
+ * @package   Pratech\Return
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Pratech\Return\Api\Data\ReasonInterface" type="Pratech\Return\Model\Reason\Reason"/>
+    <preference for="Pratech\Return\Api\Data\RejectReasonInterface" type="Pratech\Return\Model\RejectReason\Reason"/>
+    <preference for="Pratech\Return\Api\Data\ReturnItemInterface" type="Pratech\Return\Model\Data\ReturnItem"/>
+    <preference for="Pratech\Return\Api\Data\PaymentDetailsInterface" type="Pratech\Return\Model\Data\PaymentDetails"/>
+    <preference for="Pratech\Return\Api\Data\BankAccountDetailsInterface"
+                type="Pratech\Return\Model\Data\BankAccountDetails"/>
+    <preference for="Pratech\Return\Api\StatusRepositoryInterface" type="Pratech\Return\Model\Status\Repository"/>
+    <preference for="Pratech\Return\Api\Data\StatusInterface" type="Pratech\Return\Model\Status\Status"/>
+    <preference for="Pratech\Return\Api\ReturnRepositoryInterface" type="Pratech\Return\Model\ReturnRepository"/>
+    <preference for="Pratech\Return\Api\CreateReturnProcessorInterface"
+                type="Pratech\Return\Model\Order\CreateReturnProcessor"/>
+    <preference for="Pratech\Return\Api\Data\ReturnOrderInterface" type="Pratech\Return\Model\Order\ReturnOrder"/>
+    <preference for="Pratech\Return\Api\Data\ReturnOrderItemInterface"
+                type="Pratech\Return\Model\Order\ReturnOrderItem"/>
+    <preference for="Pratech\Return\Api\RequestRepositoryInterface" type="Pratech\Return\Model\Request\Repository"/>
+    <preference for="Pratech\Return\Api\Data\RequestInterface" type="Pratech\Return\Model\Request\Request"/>
+    <preference for="Pratech\Return\Api\Data\RequestItemInterface" type="Pratech\Return\Model\Request\RequestItem"/>
+    <preference for="Pratech\Return\Api\HistoryRepositoryInterface" type="Pratech\Return\Model\History\Repository"/>
+    <preference for="Pratech\Return\Api\Data\HistoryInterface" type="Pratech\Return\Model\History\History"/>
+    <preference for="Pratech\Return\Api\Data\TrackingInterface" type="Pratech\Return\Model\Request\Tracking"/>
+
+    <type name="Pratech\Return\Model\History\CreateEvent">
+        <arguments>
+            <argument name="authSession" xsi:type="object">Magento\Backend\Model\Auth\Session\Proxy</argument>
+        </arguments>
+    </type>
+
+    <!-- Define Logger for logging Return Refund logs -->
+    <type name="Pratech\Return\Logger\ReturnRefundHandler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Pratech\Return\Logger\ReturnRefundLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">return_refund</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Pratech\Return\Logger\ReturnRefundHandler</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

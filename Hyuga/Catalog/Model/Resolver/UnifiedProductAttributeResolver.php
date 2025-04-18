@@ -14,7 +14,7 @@
 namespace Hyuga\Catalog\Model\Resolver;
 
 use Hyuga\Catalog\Model\Cache\ProductAttributeCache;
-use Hyuga\CustomLogging\Logger\GraphQlResolverLogger;
+use Hyuga\LogManagement\Logger\GraphQlResolverLogger;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -66,7 +66,6 @@ class UnifiedProductAttributeResolver implements ResolverInterface
             'ean_code',
             'height',
             'length',
-            'marketing_class',
             'offers_title',
             'number_of_servings',
             'width'

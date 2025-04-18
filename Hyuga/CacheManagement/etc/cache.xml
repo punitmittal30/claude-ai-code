@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_CacheManagement
+ *
+ * @category  XML
+ * @package   Hyuga\CacheManagement
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
+    <type name="hyuga_pincode" translate="label,description" instance="Hyuga\CacheManagement\Model\Cache\Type\Pincode">
+        <label>Pincode Serviceability</label>
+        <description>Cache for pincode serviceability API responses</description>
+    </type>
+    <type name="hyuga_warehouse_products" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\Products">
+        <label>Warehouse Products</label>
+        <description>Cache for warehouse product listings and data</description>
+    </type>
+    <type name="hyuga_warehouse_filters" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\Filters">
+        <label>Warehouse Filters</label>
+        <description>Cache for product filter data in warehouses</description>
+    </type>
+    <type name="hyuga_dark_store" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\DarkStore">
+        <label>Dark Store</label>
+        <description>Cache for dark store information</description>
+    </type>
+</config>

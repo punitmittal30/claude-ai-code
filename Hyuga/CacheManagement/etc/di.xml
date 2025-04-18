@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_CacheManagement
+ *
+ * @category  XML
+ * @package   Hyuga\CacheManagement
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Service implementation -->
+    <preference for="Hyuga\CacheManagement\Api\CacheServiceInterface"
+                type="Hyuga\CacheManagement\Model\CacheService"/>
+
+    <!-- Console commands -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="hyuga_flush_pincode_cache" xsi:type="object">
+                    Hyuga\CacheManagement\Console\Command\FlushPincodeCacheCommand
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Resource model plugins -->
+    <type name="Pratech\Warehouse\Model\ResourceModel\Pincode">
+        <plugin name="hyuga_cache_pincode_resource_plugin"
+                type="Hyuga\CacheManagement\Plugin\PincodeResourceModelPlugin"
+                sortOrder="10"/>
+    </type>
+
+    <type name="Pratech\Warehouse\Model\ResourceModel\WarehouseSla">
+        <plugin name="hyuga_cache_sla_resource_plugin"
+                type="Hyuga\CacheManagement\Plugin\SlaResourceModelPlugin"
+                sortOrder="10"/>
+    </type>
+</config>

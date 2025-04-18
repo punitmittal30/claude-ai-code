@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Pratech_RedisIntegration
+ *
+ * @category  XML
+ * @package   Pratech\RedisIntegration
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="pratech_redis" frontName="pratech_redis">
+            <module name="Pratech_RedisIntegration" before="Magento_Backend"/>
+        </route>
+    </router>
+</config>

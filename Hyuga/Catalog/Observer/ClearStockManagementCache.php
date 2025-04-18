@@ -1,8 +1,18 @@
 <?php
+/**
+ * Hyuga_Catalog
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Hyuga\Catalog
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 
 namespace Hyuga\Catalog\Observer;
 
-use Magento\Catalog\Model\Product;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Pratech\RedisIntegration\Logger\RedisCacheLogger;
@@ -30,19 +40,29 @@ class ClearStockManagementCache implements ObserverInterface
      */
     public function execute(Observer $observer): void
     {
-        /** @var Product $product */
         $product = $observer->getEvent()->getData('product');
+        $attributeChanges = $observer->getEvent()->getData('attribute_changes') ?: [];
+        $stockStatusChanged = $observer->getEvent()->getData('stock_status_changed') ?: false;
+        $productId = $product->getId();
+
         try {
-            $this->productsRedisCache->deleteProduct($product->getId());
-            $this->productsRedisCache->deleteSearch();
-            $this->productsRedisCache->deletePlp();
-            $this->productsRedisCache->deleteProductsOffer($product->getId());
-            $this->productsRedisCache->deleteBanner();
-            $this->customerRedisCache->deleteAllCustomerPurchasedProducts();
+            $priceChanged = isset($attributeChanges['price']);
+            $expiryDateChanged = isset($attributeChanges['expiry_date']);
+
+            if ($priceChanged || $stockStatusChanged) {
+                $this->productsRedisCache->deleteProduct($productId);
+                $this->productsRedisCache->deleteSearch();
+                $this->productsRedisCache->deletePlp();
+                $this->productsRedisCache->deleteProductsOffer($productId);
+                $this->productsRedisCache->deleteBanner();
+                $this->customerRedisCache->deleteAllCustomerPurchasedProducts();
+            } elseif ($expiryDateChanged) {
+                $this->productsRedisCache->deleteProduct($productId);
+            }
+
         } catch (\Exception $exception) {
-            $this->redisCacheLogger->error("execute() | UpdateStockProductCache | Product ID: " . $product->getId() .
+            $this->redisCacheLogger->error("execute() | UpdateStockProductCache | Product ID: " . $productId .
                 " cache clearing issue | " . $exception->getMessage() . " | Trace: " . $exception->getTraceAsString());
         }
     }
-
 }

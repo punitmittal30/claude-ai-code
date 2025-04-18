@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Catalog
+ *
+ * @category  XML
+ * @package   Pratech\Catalog
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Pratech_Catalog::attributes_mapping" title="Attributes Mapping" translate="true" module="Pratech_Catalog"
+          sortOrder="100" parent="Magento_Backend::stores_attributes" 
+          action="pratech/attributemapping" resource="Pratech_Catalog::attributes_mapping"/>
+    </menu>
+</config>

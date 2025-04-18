@@ -23,7 +23,6 @@ interface ProductInterface {
     height: String! @doc(description: "Product Height") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
     number_of_servings: String! @doc(description: "Number of servings") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
     wp_product_id: String! @doc(description: "Wordpress Product Id") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
-    marketing_class: String @doc(description: "Marketing Class") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
     ean_code: String @doc(description: "Product EAN Code") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
     replenishment_time: String! @doc(description: "Replenishment Time") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")
     offers_title: String @doc(description: "Product Offers Title information") @resolver(class: "Hyuga\\Catalog\\Model\\Resolver\\UnifiedProductAttributeResolver")

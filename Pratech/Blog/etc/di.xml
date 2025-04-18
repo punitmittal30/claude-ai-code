@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_Blog
+ *
+ * @category  XML
+ * @package   Pratech\Blog
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<preference for="Pratech\Blog\Api\CategoryRepositoryInterface" type="Pratech\Blog\Model\CategoryRepository"/>
+	<preference for="Pratech\Blog\Api\Data\CategoryInterface" type="Pratech\Blog\Model\Category"/>
+	<preference for="Pratech\Blog\Api\Data\CategorySearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+	<virtualType name="Pratech\Blog\Model\ResourceModel\Category\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">pratech_blog_category</argument>
+			<argument name="resourceModel" xsi:type="string">Pratech\Blog\Model\ResourceModel\Category\Collection</argument>
+		</arguments>
+	</virtualType>
+	<preference for="Pratech\Blog\Api\TagRepositoryInterface" type="Pratech\Blog\Model\TagRepository"/>
+	<preference for="Pratech\Blog\Api\Data\TagInterface" type="Pratech\Blog\Model\Tag"/>
+	<preference for="Pratech\Blog\Api\Data\TagSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+	<virtualType name="Pratech\Blog\Model\ResourceModel\Tag\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">pratech_blog_tag</argument>
+			<argument name="resourceModel" xsi:type="string">Pratech\Blog\Model\ResourceModel\Tag\Collection</argument>
+		</arguments>
+	</virtualType>
+	<preference for="Pratech\Blog\Api\CommentRepositoryInterface" type="Pratech\Blog\Model\CommentRepository"/>
+	<preference for="Pratech\Blog\Api\Data\CommentInterface" type="Pratech\Blog\Model\Comment"/>
+	<preference for="Pratech\Blog\Api\Data\CommentSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+	<virtualType name="Pratech\Blog\Model\ResourceModel\Comment\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">pratech_blog_comment</argument>
+			<argument name="resourceModel" xsi:type="string">Pratech\Blog\Model\ResourceModel\Comment\Collection</argument>
+		</arguments>
+	</virtualType>
+	<type name="Magento\Cms\Model\Page\DataProvider">
+        <plugin name="blog_data_manage" type="Pratech\Blog\Plugin\Model\Page\DataProvider"/>
+    </type>
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="pratech_blog_tag_listing_data_source" xsi:type="string">Pratech\Blog\Model\ResourceModel\Tag\Grid\Collection</item>
+				<item name="pratech_blog_comment_listing_data_source" xsi:type="string">Pratech\Blog\Model\ResourceModel\Comment\Grid\Collection</item>
+				<item name="pratech_blog_category_listing_data_source" xsi:type="string">Pratech\Blog\Model\ResourceModel\Category\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+</config>

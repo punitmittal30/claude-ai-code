@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/queue.xsd">
+    <broker topic="campaign.codegenerator" exchange="magento">
+        <queue name="promocodegenerator" consumer="promocodegeneratorProcessor"
+               handler="Pratech\Promotion\Model\PromoCode\Consumer::process"/>
+    </broker>
+</config>

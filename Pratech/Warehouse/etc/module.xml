@@ -16,6 +16,7 @@
         <sequence>
             <module name="Magento_Catalog"/>
             <module name="Magento_Inventory"/>
+            <module name="Hyuga_CacheManagement"/>
         </sequence>
     </module>
 </config>

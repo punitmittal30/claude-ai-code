@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Promotion
+ *
+ * @category  XML
+ * @package   Pratech\Promotion
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Pratech\Promotion\Api\CampaignManagementInterface"
+                type="Pratech\Promotion\Model\CampaignManagement"/>
+    <preference for="Pratech\Promotion\Api\PromoCodeManagementInterface"
+                type="Pratech\Promotion\Model\Service\PromoCodeManagementService"/>
+    <preference for="Pratech\Promotion\Api\Data\PromoCodeGenerationSpecInterface"
+                type="Pratech\Promotion\Model\Data\PromoCodeGenerationSpec"/>
+    <preference for="Pratech\Promotion\Api\Data\PromoCodeMassDeleteResultInterface"
+                type="Pratech\Promotion\Model\Data\PromoCodeMassDeleteResult"/>
+    <preference for="Pratech\Promotion\Api\Data\PromoCodeInterface"
+                type="Pratech\Promotion\Model\PromoCode"/>
+    <preference for="Pratech\Promotion\Api\PromoCodeRepositoryInterface"
+                type="Pratech\Promotion\Model\PromoCodeRepository"/>
+    <preference for="Pratech\Promotion\Api\Data\PromoCodeSearchResultInterface"
+                type="Magento\Framework\Api\SearchResults" />
+    <preference for="Pratech\Promotion\Model\Spi\PromoCodeResourceInterface"
+                type="Pratech\Promotion\Model\ResourceModel\PromoCode" />
+    <virtualType name="PromotionCampaignGridDataProvider"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">
+                Pratech\Promotion\Model\ResourceModel\Campaign\Collection
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="promotion_campaign_listing_data_source" xsi:type="string">
+                    Pratech\Promotion\Model\Resource\Campaign\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Pratech\Promotion\Model\Resource\Campaign\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">pratech_promotion_campaign</argument>
+            <argument name="resourceModel" xsi:type="string">
+                Pratech\Promotion\Model\ResourceModel\Campaign
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Pratech\Promotion\Helper\Code">
+        <arguments>
+            <argument name="couponParameters" xsi:type="array">
+                <item name="separator" xsi:type="string">-</item>
+                <item name="charset" xsi:type="array">
+                    <item name="alphanum" xsi:type="string">ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789</item>
+                    <item name="alpha" xsi:type="string">ABCDEFGHIJKLMNOPQRSTUVWXYZ</item>
+                    <item name="num" xsi:type="string">0123456789</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>

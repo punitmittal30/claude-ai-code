@@ -13,7 +13,11 @@
 
 namespace Pratech\Warehouse\Model\ResourceModel;
 
+use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Model\ResourceModel\Db\Context;
 
 class Warehouse extends AbstractDb
 {
@@ -34,13 +38,15 @@ class Warehouse extends AbstractDb
     public const WAREHOUSE_PINCODE_COLUMN = 'pincode';
 
     /**
-     * Construct Method.
-     *
-     * @return void
+     * @param Context $context
+     * @param ManagerInterface $eventManager
      */
-    protected function _construct(): void
+    public function __construct(
+        Context                  $context,
+        private ManagerInterface $eventManager
+    )
     {
-        $this->_init('pratech_warehouse', 'warehouse_id');
+        parent::__construct($context);
     }
 
     /**
@@ -72,5 +78,47 @@ class Warehouse extends AbstractDb
             ->where('pincode IN(?)', $warehousePincodes);
 
         return $adapter->fetchPairs($select);
+    }
+
+    /**
+     * Save Method.
+     *
+     * @param AbstractModel $object
+     * @return AbstractModel|Warehouse
+     * @throws AlreadyExistsException
+     */
+    public function save(AbstractModel $object)
+    {
+        if ($object->getId()) {
+            // Load existing data
+            $oldObject = clone $object;
+            $this->load($oldObject, $object->getId());
+
+            $oldData = $oldObject->getData();
+            $newData = $object->getData();
+
+            if ($oldData == $newData) {
+                return $object;
+            }
+
+            $this->eventManager->dispatch(
+                'warehouse_entity_changed',
+                [
+                    'old_value' => $oldData,
+                    'new_value' => $newData
+                ]);
+        }
+
+        return parent::save($object);
+    }
+
+    /**
+     * Construct Method.
+     *
+     * @return void
+     */
+    protected function _construct(): void
+    {
+        $this->_init('pratech_warehouse', 'warehouse_id');
     }
 }

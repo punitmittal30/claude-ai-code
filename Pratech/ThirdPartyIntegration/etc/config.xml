@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_ThirdPartyIntegration
+ *
+ * @category  XML
+ * @package   Pratech\ThirdPartyIntegration
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <third_party_integrations>
+            <dpanda>
+                <enable>1</enable>
+                <brands_category_id>89</brands_category_id>
+            </dpanda>
+            <limechat>
+                <enable>1</enable>
+            </limechat>
+        </third_party_integrations>
+    </default>
+</config>

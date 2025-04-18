@@ -14,6 +14,7 @@
 namespace Pratech\Warehouse\Model;
 
 use Exception;
+use Hyuga\CacheManagement\Api\CacheServiceInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
@@ -28,7 +29,7 @@ use Pratech\Warehouse\Api\WarehouseSlaRepositoryInterface;
 use Pratech\Warehouse\Logger\InventorySyncLogger;
 use Pratech\Warehouse\Model\ResourceModel\Pincode as ResourcePincode;
 use Pratech\Warehouse\Model\ResourceModel\Pincode\CollectionFactory as PincodeCollectionFactory;
-use Pratech\Warehouse\Service\CacheService;
+use Hyuga\CacheManagement\Model\CacheService;
 use Pratech\Warehouse\Service\DarkStoreLocatorService;
 
 class PincodeRepository implements PincodeRepositoryInterface
@@ -119,7 +120,6 @@ class PincodeRepository implements PincodeRepositoryInterface
         try {
             $this->resource->delete($pincode);
 
-            // Clear cache for this pincode
             $this->cacheService->remove($this->cacheService->getPincodeCacheKey($pincode->getPincode()));
 
         } catch (Exception $exception) {
@@ -196,8 +196,8 @@ class PincodeRepository implements PincodeRepositoryInterface
             $this->cacheService->save(
                 $cacheKey,
                 $result,
-                [CacheService::CACHE_TAG_PINCODE],
-                CacheService::CACHE_LIFETIME_PINCODE
+                [CacheServiceInterface::CACHE_TAG_PINCODE],
+                CacheServiceInterface::CACHE_LIFETIME_PINCODE
             );
         } catch (NoSuchEntityException $e) {
             $this->inventorySyncLogger->error($e->getMessage());
@@ -235,7 +235,6 @@ class PincodeRepository implements PincodeRepositoryInterface
         try {
             $this->resource->save($pincode);
 
-            // Clear cache for this pincode
             $this->cacheService->remove($this->cacheService->getPincodeCacheKey($pincode->getPincode()));
 
         } catch (Exception $exception) {

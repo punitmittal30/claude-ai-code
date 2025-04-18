@@ -1,0 +1,108 @@
+<?php
+/* @var \Pratech\Order\Block\Adminhtml\Order\PartialCancel\Create\Items $block */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+?>
+<?php
+/** @var Pratech\Order\ViewModel\PartialCancel\Create\ItemsToRender $itemsToRenderViewModel */
+$itemsToRenderViewModel = $block->getData('itemsToRenderViewModel');
+$_items = $itemsToRenderViewModel->getItems();
+?>
+
+<section class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $escaper->escapeHtml(__('Items to Cancel')) ?></span>
+    </div>
+
+    <?php if (count($_items)): ?>
+    <div class="admin__table-wrapper">
+        <table class="data-table admin__table-primary order-creditmemo-tables">
+            <thead>
+                <tr class="headings">
+                    <th class="col-product"><span><?= $escaper->escapeHtml(__('Product')) ?></span></th>
+                    <th class="col-price"><span><?= $escaper->escapeHtml(__('Price')) ?></span></th>
+                    <th class="col-ordered-qty"><span><?= $escaper->escapeHtml(__('Qty')) ?></span></th>
+                    <th class="col-refund"><span><?= $escaper->escapeHtml(__('Cancel')) ?></span></th>
+                    <th class="col-subtotal"><span><?= $escaper->escapeHtml(__('Subtotal')) ?></span></th>
+                    <th class="col-tax-amount"><span><?= $escaper->escapeHtml(__('Tax Amount')) ?></span></th>
+                    <th class="col-discont"><span><?= $escaper->escapeHtml(__('Discount Amount')) ?></span></th>
+                    <th class="col-total last"><span><?= $escaper->escapeHtml(__('Row Total')) ?></span></th>
+                </tr>
+            </thead>
+            <?php $i = 0; foreach ($_items as $_item): ?>
+                <?php if ($_item->getParentItem()):
+                    continue;
+                else:
+                    $i++;
+                endif; ?>
+                <tbody class="<?= /* @noEscape */ $i%2 ? 'even' : 'odd' ?>">
+                    <?= $block->getItemHtml($_item) ?>
+                    <?= $block->getItemExtraInfoHtml($_item) ?>
+                </tbody>
+            <?php endforeach; ?>
+        </table>
+    </div>
+    <?php else: ?>
+    <div class="no-items">
+        <?= $escaper->escapeHtml(__('No Items To Cancel')) ?>
+    </div>
+    <?php endif; ?>
+</section>
+
+<?php if (!empty($orderTotalBar)): ?>
+<section class="fieldset-wrapper">
+    <?= /* @noEscape */ $orderTotalBar ?>
+</section>
+<?php endif; ?>
+
+<section class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-comments-history">
+            <div class="admin__page-section-item-title">
+                <span class="title"><?= $escaper->escapeHtml(__('Partial Cancellation Comments')) ?></span>
+            </div>
+            <div id="history_form" class="admin__fieldset-wrapper-content">
+                <div class="admin__field">
+                    <label class="normal admin__field-label"
+                           for="partialcancel_comment_text">
+                        <span><?= $escaper->escapeHtml(__('Comment Text')) ?></span></label>
+                    <div class="admin__field-control">
+                        <textarea id="partialcancel_comment_text"
+                                  class="admin__control-textarea"
+                                  name="partialcancel[comment_text]"
+                                  rows="3"
+                                  cols="5"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin__page-section-item order-totals creditmemo-totals">
+            <div class="order-totals-actions">
+                <div class="actions">
+                    <?= $block->getChildHtml('submit_button') ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<?php $scriptString = <<<script
+
+require(['jquery'], function(jQuery){
+
+//<![CDATA[
+var submitButtons = jQuery('.submit-button');
+
+submitPartialOrderCancellation = function() {
+    // Temporary solution will be replaced after refactoring order functionality
+    jQuery('#edit_form').triggerHandler('save');
+};
+
+//]]>
+
+});
+script;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>

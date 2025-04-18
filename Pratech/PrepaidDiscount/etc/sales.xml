@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_PrepaidDiscount
+ *
+ * @category  XML
+ * @package   Pratech\PrepaidDiscount
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/sales.xsd">
+    <section name="quote">
+        <group name="totals">
+            <item name="prepaid_discount" instance="Pratech\PrepaidDiscount\Model\Total\PrepaidDiscount"
+                  sort_order="540"/>
+            <item name="grand_total_without_prepaid"
+                  instance="Pratech\PrepaidDiscount\Model\Total\GrandTotalWithoutPrepaid"
+                  sort_order="530"/>
+        </group>
+    </section>
+    <section name="order_invoice">
+        <group name="totals">
+            <item name="prepaid_discount" instance="Pratech\PrepaidDiscount\Model\Invoice\Total\PrepaidDiscount"
+                  sort_order="200"/>
+            <item name="grand_total_without_prepaid"
+                  instance="Pratech\PrepaidDiscount\Model\Invoice\Total\GrandTotalWithoutPrepaid"
+                  sort_order="190"/>
+        </group>
+    </section>
+    <section name="order_creditmemo">
+        <group name="totals">
+            <item name="prepaid_discount" instance="Pratech\PrepaidDiscount\Model\CreditMemo\Total\PrepaidDiscount"
+                  sort_order="200"/>
+            <item name="grand_total_without_prepaid"
+                  instance="Pratech\PrepaidDiscount\Model\CreditMemo\Total\GrandTotalWithoutPrepaid"
+                  sort_order="190"/>
+        </group>
+    </section>
+</config>

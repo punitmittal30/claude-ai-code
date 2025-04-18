@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Return
+ *
+ * @category  XML
+ * @package   Pratech\Return
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="update_return_track_number" instance="Pratech\Return\Cron\UpdateReturnTracking" method="execute">
+            <schedule>*/10 * * * *</schedule>
+        </job>
+        <job name="update_instant_refund_flag" instance="Pratech\Return\Cron\UpdateInstantRefundFlag" method="execute">
+            <schedule>* 6 * * *</schedule>
+        </job>
+    </group>
+</config>

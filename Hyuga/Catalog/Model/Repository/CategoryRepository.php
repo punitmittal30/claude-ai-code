@@ -1,10 +1,21 @@
 <?php
+/**
+ * Hyuga_Catalog
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Hyuga\Catalog
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 
 namespace Hyuga\Catalog\Model\Repository;
 
 use Exception;
 use Hyuga\Catalog\Api\CategoryRepositoryInterface;
-use Hyuga\CustomLogging\Logger\CachingLogger;
+use Hyuga\LogManagement\Logger\CachingLogger;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magento\Framework\App\CacheInterface;
@@ -37,8 +48,7 @@ class CategoryRepository implements CategoryRepositoryInterface
         private CacheInterface            $cache,
         private SerializerInterface       $serializer,
         private CachingLogger             $cachingLogger
-    )
-    {
+    ) {
     }
 
     /**

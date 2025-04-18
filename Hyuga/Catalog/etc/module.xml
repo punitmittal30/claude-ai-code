@@ -16,7 +16,7 @@
         <sequence>
             <module name="Magento_Webapi"/>
             <module name="Magento_Catalog"/>
-            <module name="Hyuga_CustomLogging"/>
+            <module name="Hyuga_LogManagement"/>
         </sequence>
     </module>
 </config>

@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_LogManagement
+ *
+ * @category  XML
+ * @package   Hyuga\LogManagement
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Define Logger for Custom Caching -->
+    <type name="Hyuga\LogManagement\Logger\CachingHandler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Hyuga\LogManagement\Logger\CachingLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">custom_caching</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Hyuga\LogManagement\Logger\CachingHandler</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Define Logger for GraphQl Resolver Caching -->
+    <type name="Hyuga\LogManagement\Logger\GraphQlResolverHandler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Hyuga\LogManagement\Logger\GraphQlResolverLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">graphql_resolver</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Hyuga\LogManagement\Logger\GraphQlResolverHandler</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>

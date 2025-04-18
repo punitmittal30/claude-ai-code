@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+	<argument name="data" xsi:type="array">
+		<item name="js_config" xsi:type="array">
+			<item name="provider" xsi:type="string">sales_shipment_track_updates_listing.sales_shipment_track_updates_listing_data_source</item>
+		</item>
+	</argument>
+	<settings>
+		<spinner>sales_shipment_track_updates_columns</spinner>
+		<deps>
+			<dep>sales_shipment_track_updates_listing.sales_shipment_track_updates_listing_data_source</dep>
+		</deps>
+	</settings>
+	<dataSource name="sales_shipment_track_updates_listing_data_source" component="Magento_Ui/js/grid/provider">
+		<settings>
+			<storageConfig>
+				<param name="indexField" xsi:type="string">entity_id</param>
+			</storageConfig>
+			<updateUrl path="mui/index/render"/>
+		</settings>
+		<aclResource>Pratech_Order::shipment_track_updates</aclResource>
+		<dataProvider name="sales_shipment_track_updates_listing_data_source" class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+			<settings>
+				<requestFieldName>id</requestFieldName>
+				<primaryFieldName>entity_id</primaryFieldName>
+			</settings>
+		</dataProvider>
+	</dataSource>
+	<listingToolbar name="listing_top">
+		<settings>
+			<sticky>true</sticky>
+		</settings>
+		<bookmark name="bookmarks"/>
+		<columnsControls name="columns_controls"/>
+        <exportButton name="export_button"/>
+		<filters name="listing_filters"/>
+		<paging name="listing_paging"/>
+	</listingToolbar>
+	<columns name="sales_shipment_track_updates_columns">
+		<column name="entity_id">
+			<settings>
+				<filter>text</filter>
+				<sorting>asc</sorting>
+				<label translate="true">ID</label>
+			</settings>
+		</column>
+        <column name="parent_id" class="Pratech\Order\Ui\Component\Listing\Column\ShipmentLink">
+			<settings>
+				<filter>text</filter>
+				<bodyTmpl>ui/grid/cells/html</bodyTmpl>
+				<label translate="true">Shipment Id</label>
+			</settings>
+		</column>
+         <column name="status_id" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Pratech\Order\Ui\Component\Listing\Column\ShipmentStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Status</label>
+            </settings>
+        </column>
+        <column name="track_number">
+			<settings>
+				<filter>text</filter>
+				<label translate="true">Track Number</label>
+			</settings>
+		</column>
+        <column name="location">
+			<settings>
+				<filter>text</filter>
+				<label translate="true">Location</label>
+			</settings>
+		</column>
+		<column name="created_at">
+			<settings>
+				<filter>dateRange</filter>
+				<label translate="true">Create Date</label>
+			</settings>
+		</column>
+        <column name="remark">
+			<settings>
+				<filter>text</filter>
+				<label translate="true">Remark</label>
+			</settings>
+		</column>
+	</columns>
+</listing>

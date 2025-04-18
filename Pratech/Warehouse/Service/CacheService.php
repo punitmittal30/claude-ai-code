@@ -28,7 +28,6 @@ class CacheService
      */
     public const CACHE_TAG_DYNAMIC = 'warehouse_products_dynamic';
     public const CACHE_TAG_FILTERS = 'warehouse_filters';
-    public const CACHE_TAG_PINCODE = 'pratech_serviceable_pincodes';
     public const CACHE_TAG_DARK_STORE = 'dark_store';
 
     /**
@@ -169,17 +168,6 @@ class CacheService
         return "category_listing_{$pincode}_{$categorySlug}_p{$pageSize}_c{$currentPage}" .
             "_s" . ($sortField ?? 'default') . "_" . ($sortDirection ?? 'ASC') .
             "_{$filterHash}";
-    }
-
-    /**
-     * Get cache key for pincode serviceability
-     *
-     * @param int $pincode
-     * @return string
-     */
-    public function getPincodeCacheKey(int $pincode): string
-    {
-        return self::CACHE_TAG_PINCODE . '_' . $pincode;
     }
 
     /**
