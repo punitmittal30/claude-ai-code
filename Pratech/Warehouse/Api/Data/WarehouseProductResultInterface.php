@@ -46,19 +46,19 @@ interface WarehouseProductResultInterface
     public function setWarehouseName(string $warehouseName);
 
     /**
-     * Get category name
+     * Get category title
      *
      * @return string|null
      */
-    public function getCategoryName();
+    public function getTitle();
 
     /**
-     * Set category name
+     * Set category title
      *
-     * @param string $categoryName
+     * @param string $title
      * @return $this
      */
-    public function setCategoryName(string $categoryName);
+    public function setTitle(string $title);
 
     /**
      * Get items

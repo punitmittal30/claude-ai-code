@@ -98,4 +98,20 @@ class CategoryListResult extends AbstractExtensibleObject implements CategoryLis
     {
         return $this->setData('total_count', $totalCount);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTitle()
+    {
+        return $this->_get('title');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setTitle(string $title)
+    {
+        return $this->setData('title', $title);
+    }
 }

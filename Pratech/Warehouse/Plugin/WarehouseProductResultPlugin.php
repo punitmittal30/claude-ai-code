@@ -58,6 +58,7 @@ class WarehouseProductResultPlugin
         // Only apply to CategoryListResult objects
         if ($data instanceof CategoryListResultInterface) {
             return [
+                'title' => $data->getTitle(),
                 'warehouse_code' => $data->getWarehouseCode(),
                 'warehouse_name' => $data->getWarehouseName(),
                 'categories' => $data->getCategories(),

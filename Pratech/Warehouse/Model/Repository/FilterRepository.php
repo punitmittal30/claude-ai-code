@@ -26,7 +26,6 @@ use Pratech\Warehouse\Api\Data\CategoryFilterInterface;
 use Pratech\Warehouse\Api\Data\CategoryFilterInterfaceFactory;
 use Pratech\Warehouse\Api\Data\FilterResultInterface;
 use Pratech\Warehouse\Api\Data\FilterResultInterfaceFactory;
-use Pratech\Warehouse\Api\Data\PriceRangeInterface;
 use Pratech\Warehouse\Api\Data\PriceRangeInterfaceFactory;
 use Pratech\Warehouse\Api\Data\WarehouseInterface;
 use Pratech\Warehouse\Api\FilterRepositoryInterface;
@@ -45,7 +44,6 @@ class FilterRepository implements FilterRepositoryInterface
      * @param FilterHelper $filterHelper
      * @param ResourceConnection $resource
      * @param FilterResultInterfaceFactory $filterResultFactory
-     * @param PriceRangeInterfaceFactory $priceRangeFactory
      * @param CategoryFilterInterfaceFactory $categoryFilterFactory
      * @param AttributeFilterInterfaceFactory $attributeFilterFactory
      * @param AttributeOptionInterfaceFactory $attributeOptionFactory
@@ -57,7 +55,6 @@ class FilterRepository implements FilterRepositoryInterface
         private FilterHelper                    $filterHelper,
         private ResourceConnection              $resource,
         private FilterResultInterfaceFactory    $filterResultFactory,
-        private PriceRangeInterfaceFactory      $priceRangeFactory,
         private CategoryFilterInterfaceFactory  $categoryFilterFactory,
         private AttributeFilterInterfaceFactory $attributeFilterFactory,
         private AttributeOptionInterfaceFactory $attributeOptionFactory,
@@ -167,10 +164,6 @@ class FilterRepository implements FilterRepositoryInterface
             $result->setWarehouseCode($warehouseCode);
             $result->setWarehouseName($warehouse->getName());
 
-            // Set price ranges
-            $priceRanges = $this->createPriceRanges($filters['price'] ?? []);
-            $result->setPriceRanges($priceRanges);
-
             // Set categories
             $categories = $this->createCategoryFilters($filters['category'] ?? []);
             $result->setCategories($categories);
@@ -229,29 +222,6 @@ class FilterRepository implements FilterRepositoryInterface
     }
 
     /**
-     * Create price range objects
-     *
-     * @param array $priceRanges
-     * @return PriceRangeInterface[]
-     */
-    private function createPriceRanges(array $priceRanges): array
-    {
-        $result = [];
-
-        foreach ($priceRanges as $range) {
-            /** @var PriceRangeInterface $priceRange */
-            $priceRange = $this->priceRangeFactory->create();
-            $priceRange->setFrom((float)$range['from']);
-            $priceRange->setTo((float)$range['to']);
-            $priceRange->setLabel($range['label']);
-
-            $result[] = $priceRange;
-        }
-
-        return $result;
-    }
-
-    /**
      * Create category filter objects
      *
      * @param array $categories
@@ -287,9 +257,9 @@ class FilterRepository implements FilterRepositoryInterface
         foreach ($attributes as $attribute) {
             /** @var AttributeFilterInterface $attributeFilter */
             $attributeFilter = $this->attributeFilterFactory->create();
-            $attributeFilter->setAttributeId((int)$attribute['attribute_id']);
+            $attributeFilter->setAttributeId((int)($attribute['attribute_id'] ?? 0));
             $attributeFilter->setAttributeCode($attribute['attribute_code']);
-            $attributeFilter->setAttributeLabel($attribute['attribute_label']);
+            $attributeFilter->setAttributeLabel($attribute['label']);
 
             // Create options
             $options = [];
@@ -298,7 +268,7 @@ class FilterRepository implements FilterRepositoryInterface
                 $attributeOption = $this->attributeOptionFactory->create();
                 $attributeOption->setValue((string)$option['value']);
                 $attributeOption->setLabel($option['label']);
-                $attributeOption->setCount((int)$option['count']);
+                $attributeOption->setCount((int)($option['count'] ?? 0));
 
                 $options[] = $attributeOption;
             }

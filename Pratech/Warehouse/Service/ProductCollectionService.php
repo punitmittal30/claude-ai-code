@@ -76,6 +76,12 @@ class ProductCollectionService
                 continue;
             }
 
+            if ($field === 'price' && is_array($condition) && isset($condition['value'])) {
+                // Handle new price filter format (from_to)
+                $this->applyPriceRangeFilter($collection, $condition['value']);
+                continue;
+            }
+
             if (is_array($condition)) {
                 // If the condition is an array with value and condition type
                 if (isset($condition['value'])) {
@@ -124,6 +130,34 @@ class ProductCollectionService
             }
         } catch (Exception $e) {
             $this->logger->error('Error applying subcategory filter: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Apply price range filter with from_to format
+     *
+     * @param Collection $collection
+     * @param string $priceRange
+     * @return void
+     */
+    private function applyPriceRangeFilter(Collection $collection, string $priceRange): void
+    {
+        try {
+            // Parse the price range value (from_to format)
+            $rangeParts = explode('_', $priceRange);
+
+            if (count($rangeParts) === 2) {
+                $fromPrice = (float)$rangeParts[0];
+                $toPrice = (float)$rangeParts[1];
+
+                // Apply the price filter
+                $collection->addFieldToFilter('price', [
+                    'from' => $fromPrice,
+                    'to' => $toPrice
+                ]);
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error applying price range filter: ' . $e->getMessage());
         }
     }
 

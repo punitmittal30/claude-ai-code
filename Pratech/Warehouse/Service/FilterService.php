@@ -262,9 +262,11 @@ class FilterService
                     continue;
                 }
 
+                // Create value in the format "from_to"
+                $rangeValue = $rangeStart . '_' . $rangeEnd;
+
                 $priceRanges[] = [
-                    'from' => $rangeStart,
-                    'to' => $rangeEnd,
+                    'value' => $rangeValue,
                     'label' => $rangeStart . ' - ' . $rangeEnd,
                     'count' => $this->getPriceRangeCount($collection, $rangeStart, $rangeEnd, $priceAttributeId)
                 ];

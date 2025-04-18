@@ -40,6 +40,11 @@ use Psr\Log\LoggerInterface;
 class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 {
     /**
+     * Constant for Category By Pincode Title
+     */
+    public const CATEGORY_BY_PINCODE_TITLE = 'Our Top Categories';
+
+    /**
      * WarehouseProductRepository Constructor
      *
      * @param CollectionFactory $productCollectionFactory
@@ -91,7 +96,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $result = $this->resultFactory->create();
                 $result->setWarehouseCode($cachedResult['warehouse_code']);
                 $result->setWarehouseName($cachedResult['warehouse_name']);
-                $result->setCategoryName($cachedResult['category_name'] ?? '');
+                $result->setTitle($cachedResult['title'] ?? '');
                 $result->setItems($cachedResult['items']);
                 $result->setTotalCount($cachedResult['total_count']);
                 return $result;
@@ -138,7 +143,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $result = $this->resultFactory->create();
             $result->setWarehouseCode($warehouseCode);
             $result->setWarehouseName($darkStore['warehouse_name']);
-            $result->setCategoryName($categoryName);
+            $result->setTitle($categoryName);
             $result->setItems($formattedItems);
             $result->setTotalCount($totalCount);
 
@@ -148,7 +153,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 [
                     'warehouse_code' => $warehouseCode,
                     'warehouse_name' => $darkStore['warehouse_name'],
-                    'category_name' => $categoryName,
+                    'title' => $categoryName,
                     'items' => $formattedItems,
                     'total_count' => $totalCount
                 ],
@@ -469,6 +474,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             if ($cachedResult) {
                 $result = $this->categoryListResultFactory->create();
+                $result->setTitle($cachedResult['title']);
                 $result->setWarehouseCode($cachedResult['warehouse_code']);
                 $result->setWarehouseName($cachedResult['warehouse_name']);
                 $result->setCategories($cachedResult['categories']);
@@ -496,6 +502,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Create result object
             $result = $this->categoryListResultFactory->create();
+            $result->setTitle(self::CATEGORY_BY_PINCODE_TITLE);
             $result->setWarehouseCode($warehouseCode);
             $result->setWarehouseName($darkStore['warehouse_name']);
             $result->setCategories($categories);
@@ -503,6 +510,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Cache the result - store raw data
             $cacheData = [
+                'title' => self::CATEGORY_BY_PINCODE_TITLE,
                 'warehouse_code' => $warehouseCode,
                 'warehouse_name' => $darkStore['warehouse_name'],
                 'categories' => $categories,

@@ -29,6 +29,7 @@ use Pratech\Warehouse\Logger\InventorySyncLogger;
 use Pratech\Warehouse\Model\ResourceModel\Pincode as ResourcePincode;
 use Pratech\Warehouse\Model\ResourceModel\Pincode\CollectionFactory as PincodeCollectionFactory;
 use Pratech\Warehouse\Service\CacheService;
+use Pratech\Warehouse\Service\DarkStoreLocatorService;
 
 class PincodeRepository implements PincodeRepositoryInterface
 {
@@ -40,16 +41,19 @@ class PincodeRepository implements PincodeRepositoryInterface
      * @param InventorySyncLogger $inventorySyncLogger
      * @param CacheService $cacheService
      * @param WarehouseSlaRepositoryInterface $warehouseSlaRepository
+     * @param DarkStoreLocatorService $darkStoreLocator
      */
     public function __construct(
-        private ResourcePincode $resource,
-        private PincodeFactory $pincodeFactory,
-        private PincodeCollectionFactory $pincodeCollectionFactory,
-        private SearchResultsInterfaceFactory $searchResultsFactory,
-        private InventorySyncLogger $inventorySyncLogger,
-        private CacheService $cacheService,
+        private ResourcePincode                 $resource,
+        private PincodeFactory                  $pincodeFactory,
+        private PincodeCollectionFactory        $pincodeCollectionFactory,
+        private SearchResultsInterfaceFactory   $searchResultsFactory,
+        private InventorySyncLogger             $inventorySyncLogger,
+        private CacheService                    $cacheService,
         private WarehouseSlaRepositoryInterface $warehouseSlaRepository,
-    ) {
+        private DarkStoreLocatorService         $darkStoreLocator
+    )
+    {
     }
 
     /**
@@ -168,13 +172,25 @@ class PincodeRepository implements PincodeRepositoryInterface
             }
 
             $earliestAt = $this->warehouseSlaRepository->getEarliestAtByPincode($pincodeData->getPincode());
+            try {
+                $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+                $store = [
+                    'is_dark_store' => true,
+                    'name' => $darkStore['warehouse_name']
+                ];
+            } catch (NoSuchEntityException $e) {
+                $store = [
+                    'is_dark_store' => false
+                ];
+            }
 
             $result = [
                 'pincode' => $pincode,
                 'city' => $pincodeData->getCity(),
                 'state' => $pincodeData->getState(),
                 'is_serviceable' => $pincodeData->getIsServiceable(),
-                'earliest_at' => $earliestAt
+                'earliest_at' => $earliestAt,
+                'store' => $store
             ];
 
             $this->cacheService->save(

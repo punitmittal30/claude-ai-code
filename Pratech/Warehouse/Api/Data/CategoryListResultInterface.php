@@ -18,6 +18,21 @@ namespace Pratech\Warehouse\Api\Data;
 interface CategoryListResultInterface
 {
     /**
+     * Get category title
+     *
+     * @return string|null
+     */
+    public function getTitle();
+
+    /**
+     * Set category title
+     *
+     * @param string $title
+     * @return $this
+     */
+    public function setTitle(string $title);
+
+    /**
      * Get warehouse code
      *
      * @return string|null
