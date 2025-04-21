@@ -4,6 +4,7 @@ namespace Hyuga\Catalog\Model\Repository;
 
 use Exception;
 use Hyuga\Catalog\Api\ProductRepositoryInterface;
+use Hyuga\Catalog\Service\ProductAttributeService;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
@@ -63,6 +64,7 @@ class ProductRepository implements ProductRepositoryInterface
      * @param CalculatePricePerAttributes $calculatePricePerAttributes
      * @param Attribute $attribute
      * @param DeliveryDateCalculator $deliveryDateCalculator
+     * @param ProductAttributeService $productAttributeService
      */
     public function __construct(
         private StockRegistryInterface                          $stockItemRepository,
@@ -78,7 +80,8 @@ class ProductRepository implements ProductRepositoryInterface
         private ScopeConfigInterface                            $scopeConfig,
         private CalculatePricePerAttributes                     $calculatePricePerAttributes,
         private Attribute                                       $attribute,
-        private DeliveryDateCalculator                          $deliveryDateCalculator
+        private DeliveryDateCalculator                          $deliveryDateCalculator,
+        private ProductAttributeService                         $productAttributeService,
     )
     {
     }
@@ -88,8 +91,32 @@ class ProductRepository implements ProductRepositoryInterface
      */
     public function getProductById(int $productId, int $pincode = null, string $section = ''): array
     {
+        $productData = [];
+
         $product = $this->productRepository->getById($productId);
-        $productData = $this->getProductAttributes($product, $pincode);
+
+        switch ($section) {
+            case 'carousel':
+                $this->loadCarouselProductData($product, $pincode);
+                break;
+            case 'plp':
+                $this->loadCarouselProductData($product, $pincode);
+                break;
+            case 'pdp':
+                $this->loadCarouselProductData($product, $pincode);
+                break;
+            case 'search':
+                $this->loadCarouselProductData($product, $pincode);
+                break;
+            case 'related':
+                $this->loadCarouselProductData($product, $pincode);
+                break;
+            case 'minicart':
+                $this->loadCarouselProductData($product, $pincode);
+                break;
+            default:
+                $this->loadCarouselProductData($product, $pincode);
+        }
 
         if ($product->getTypeId() == 'configurable') {
             $productData['configurable_product_options'] = $this->getConfigurableProductOptions($product, $pincode);
@@ -118,15 +145,22 @@ class ProductRepository implements ProductRepositoryInterface
         return $productData;
     }
 
+    public function loadCarouselProductData(ProductInterface $product, int $pincode = null)
+    {
+        $allAttributes = $this->productAttributeService->getAllAttributes($product->getId());
+        \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
+            ->debug('CUSTOM_LOGGING', ['$allAttributes' => $allAttributes]);
+    }
+
     /**
-     * Get Product Attributes
+     * Get Static Product Attributes
      *
      * @param ProductInterface $product
      * @param int|null $pincode
      * @return array
      * @throws NoSuchEntityException
      */
-    private function getProductAttributes(ProductInterface $product, int $pincode = null): array
+    private function loadStableProductAttributes(ProductInterface $product, int $pincode = null): array
     {
         $productStock = $this->getProductStockInfo($product->getId());
         $productData = [
@@ -459,7 +493,7 @@ class ProductRepository implements ProductRepositoryInterface
                     $simpleProduct = $this->productRepository->get($variant['sku']);
 
                     $productStock = $this->getProductStockInfo($simpleProduct->getId());
-                    $variant = array_merge($variant, $this->getProductAttributes($simpleProduct, $pincode));
+                    $variant = array_merge($variant, $this->loadStableProductAttributes($simpleProduct, $pincode));
                     $variant['option_id'] = $optionId;
                     $variant['product_id'] = $simpleProduct->getId();
                     $variant['stock_status'] = $productStock->getIsInStock() && $simpleProduct->getStatus() == 1;
@@ -562,13 +596,5 @@ class ProductRepository implements ProductRepositoryInterface
             return $product[0];
         }
         return "";
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getProductBySlug(string $slug, int $pincode = null, string $section = ''): array
-    {
-        return [];
     }
 }

@@ -123,7 +123,7 @@ class CartManagement implements CartManagementInterface
                             break 2;
                         }
 
-                        $crossSellProducts[] = $this->productHelper->formatProductForCarousel($productId, $pincode);
+                        $crossSellProducts[] = $this->cartService->getProductData($productId, $pincode);
                         $processedProductIds[] = $productId;
                     }
                 }
@@ -141,7 +141,7 @@ class CartManagement implements CartManagementInterface
                             break;
                         }
 
-                        $crossSellProducts[] = $this->productHelper->formatProductForCarousel($productId, $pincode);
+                        $crossSellProducts[] = $this->cartService->getProductData($productId, $pincode);
                     }
                 }
             } else {
@@ -156,7 +156,7 @@ class CartManagement implements CartManagementInterface
                 $crossSellIds = array_slice($crossSellIds, 0, $maxCrossSellCount);
 
                 foreach ($crossSellIds as $productId) {
-                    $crossSellProducts[] = $this->productHelper->formatProductForCarousel($productId, $pincode);
+                    $crossSellProducts[] = $this->cartService->getProductData($productId, $pincode);
                 }
             }
 
