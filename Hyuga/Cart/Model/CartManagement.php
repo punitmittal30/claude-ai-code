@@ -1,4 +1,15 @@
 <?php
+/**
+ * Hyuga_Cart
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Hyuga\Cart
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 
 namespace Hyuga\Cart\Model;
 
@@ -182,5 +193,4 @@ class CartManagement implements CartManagementInterface
 
         return $stockItems;
     }
-
 }

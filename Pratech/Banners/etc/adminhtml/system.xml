@@ -46,6 +46,12 @@
                     <frontend_model>Pratech\Banners\Block\Adminhtml\System\Config\Types</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
+                <field id="hyuga_quick_store" translate="label" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Hyuga Quick Store</label>
+                    <frontend_model>Pratech\Banners\Block\Adminhtml\System\Config\Types</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
             </group>
         </section>
     </system>

@@ -1,0 +1,57 @@
+<?php
+
+namespace Pratech\Recurring\Observer;
+
+use Exception;
+use Magento\Framework\Event\ObserverInterface;
+use Pratech\Recurring\Model\Config\Source\Status as SubscriptionStatus;
+use Pratech\Recurring\Model\SubscriptionFactory;
+
+class SalesOrderCancelAfter implements ObserverInterface
+{
+    /**
+     * @var SubscriptionFactory
+     */
+    private $subscriptionFactory;
+    
+    /**
+     * @param SubscriptionFactory $subscriptionFactory
+     */
+    public function __construct(
+        SubscriptionFactory $subscriptionFactory
+    ) {
+        $this->subscriptionFactory = $subscriptionFactory;
+    }
+
+    /**
+     * Observer action for Sales order cancel after.
+     *
+     * @param \Magento\Framework\Event\Observer $observer
+     */
+    public function execute(\Magento\Framework\Event\Observer $observer)
+    {
+        try {
+            $orderId = $observer->getOrder()->getId();
+            $subscriptionColllection = $this->subscriptionFactory->create()->getCollection();
+            $subscriptionColllection->addFieldToFilter('order_id', $orderId);
+            foreach ($subscriptionColllection as $model) {
+                $this->setStatus($model, $model->getId());
+            }
+        } catch (Exception $e) {
+            return;
+        }
+    }
+
+    /**
+     * Updates the status of the subscription
+     *
+     * @param object $model
+     * @param integer $id
+     */
+    private function setStatus($model, $id)
+    {
+        $model->setStatus(SubscriptionStatus::DISABLED);
+        $model->setId($id);
+        $model->save();
+    }
+}

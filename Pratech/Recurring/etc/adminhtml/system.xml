@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="recurring" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Recurring</label>
+            <tab>pratech</tab>
+            <resource>Pratech_Recurring::config_recurring</resource>
+            <group id="general_settings" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General Settings</label>
+                <field id="enable" translate="label comment" sortOrder="1" type="select" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="enable_discount" translate="label comment" sortOrder="15" type="select" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Discount on Subscriptions</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>If set as 'Yes', the discount will be applied on the subscription order</comment>
+                </field>             
+            </group>
+            <group id="customer_control_settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Manage Customer Control Settings</label>
+                <field id="cancel_subscription" translate="label comment" sortOrder="1" type="select" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Allow Customer to Cancel Subscription</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>                
+                <field id="multiple_subscription" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Allow Customer to Subscribe multiple times for same product</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>                    
+                </field>               
+            </group>
+        </section>
+    </system>
+</config>

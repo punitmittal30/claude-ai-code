@@ -148,17 +148,4 @@ class CustomerCartManagement implements \Pratech\Cart\Api\CustomerCartInterface
             ]
         );
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getCartCrossSellProducts(string $type, string $cartId, int $pincode = null): array
-    {
-        return $this->response->getResponse(
-            self::SUCCESS_CODE,
-            'success',
-            self::CART_API_RESOURCE,
-            $this->customerCartHelper->getCartCrossSellProducts($type, $cartId, $pincode)
-        );
-    }
 }

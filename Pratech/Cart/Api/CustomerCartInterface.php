@@ -111,15 +111,4 @@ interface CustomerCartInterface
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     public function mergeCart(int $customerId, string $cartId): \Magento\Quote\Api\Data\CartInterface;
-
-    /**
-     * Get cross sell products of cart items
-     *
-     * @param string $type Possible values: customer|guest
-     * @param string $cartId The cart ID.
-     * @param int|null $pincode
-     * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getCartCrossSellProducts(string $type, string $cartId, int $pincode = null): array;
 }

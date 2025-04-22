@@ -1,0 +1,23 @@
+<?php
+/**
+ * Copyright ©  All rights reserved.
+ * See COPYING.txt for license details.
+ */
+declare(strict_types=1);
+
+namespace Pratech\Recurring\Model\ResourceModel;
+
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+
+class Subscription extends AbstractDb
+{
+
+    /**
+     * @inheritDoc
+     */
+    protected function _construct()
+    {
+        $this->_init('pratech_recurring_subscription', 'subscription_id');
+    }
+}
+

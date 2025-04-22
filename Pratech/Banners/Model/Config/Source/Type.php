@@ -73,6 +73,10 @@ class Type implements OptionSourceInterface
             [
                 'label' => 'Brand',
                 'value' => $this->getSubElements('brand')
+            ],
+            [
+                'label' => 'Hyuga Quick Store',
+                'value' => $this->getSubElements('hyuga_quick_store')
             ]
         ];
     }

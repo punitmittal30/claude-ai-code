@@ -27,6 +27,8 @@ class ExpireBalances
      */
     public const IS_CRON_ENABLED = 'cron_schedule/expire_store_credit/status';
 
+    public const ACTION_EXPIRED = 6;
+
     /**
      * @param ResourceConnection   $resource
      * @param CronLogger           $logger
@@ -102,6 +104,28 @@ class ExpireBalances
                             ['amount' => new \Zend_Db_Expr("GREATEST(amount - {$toExpire}, 0)")],
                             ['balance_id = ?' => $balanceId]
                         );
+
+                        $newBalance = $conn->fetchOne(
+                            $conn->select()
+                                ->from($tBalance, 'amount')
+                                ->where('balance_id = ?', $balanceId)
+                        );
+
+                        $conn->insert(
+                            $tHistory,
+                            [
+                                'balance_id' => $balanceId,
+                                'updated_at' => $now,
+                                'action' => self::ACTION_EXPIRED,
+                                'balance_amount' => $newBalance,
+                                'balance_delta' => -$toExpire,
+                                'additional_info' => "Expired credit",
+                                'is_customer_notified' => 0,
+                                'expiry_date' => null,
+                                'is_expired' => 0
+                            ]
+                        );
+
                         $this->logger->info("Expired {$toExpire} points for balance_id={$balanceId}.");
                     }
 

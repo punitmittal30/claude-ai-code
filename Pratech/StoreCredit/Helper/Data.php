@@ -193,6 +193,7 @@ class Data
             3 => 'Used',
             4 => 'Refunded',
             5 => 'Reverted',
+            6 => 'Expired',
             default => '',
         };
     }
@@ -204,13 +205,15 @@ class Data
      * @param float $fixedAmount
      * @param string $comment
      * @param array $event
+     * @param int $expiryDays
      * @return void
      */
     public function addStoreCredit(
         int    $customerId,
         float  $fixedAmount,
         string $comment,
-        array  $event
+        array  $event,
+        int $expiryDays = 0
     ): void {
         /** @var Balance $balance */
         $balance = $this->balanceFactory->create()->setCustomerId(
@@ -223,6 +226,8 @@ class Data
             History::ACTION_CREATED
         )->setUpdatedActionAdditionalInfo(
             $comment
+        )->setExpiryDays(
+            $expiryDays
         )->save();
 
         if ($balance->getId()) {

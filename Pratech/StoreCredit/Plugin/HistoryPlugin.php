@@ -10,6 +10,7 @@
  * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  **/
+
 namespace Pratech\StoreCredit\Plugin;
 
 use Magento\CustomerBalance\Model\Balance\History;
@@ -35,26 +36,28 @@ class HistoryPlugin
 
     /**
      * Update expiry_date in store credit.
+     *
+     * @param  History $subject
+     * @return void
      */
-    public function beforeBeforeSave(History $subject)
+    public function beforeBeforeSave(History $subject): void
     {
         $balance = $subject->getBalanceModel();
-        $action = (int)$balance->getHistoryAction();
-        $delta = (float)$balance->getAmountDelta();
 
-        if ($delta > 0 && in_array($action, [History::ACTION_CREATED, History::ACTION_UPDATED], true)) {
-            $days = (int)$this->scopeConfig->getValue(
-                self::CONFIG_PATH_EXPIRY_DAYS,
-                ScopeInterface::SCOPE_STORE
-            );
+        if ($balance->getAmountDelta() <= 0 
+            || !in_array((int)$balance->getHistoryAction(), [History::ACTION_CREATED, History::ACTION_UPDATED], true)
+        ) {
+            return;
+        }
 
-            if ($days > 0) {
-                $expiry = $this->dateTime->gmtDate(
-                    'Y-m-d H:i:s',
-                    strtotime("+{$days} days")
-                );
-                $subject->setData('expiry_date', $expiry);
-            }
+        $days = (int)($balance->getExpiryDays() ?: $this->scopeConfig->getValue(
+            self::CONFIG_PATH_EXPIRY_DAYS,
+            ScopeInterface::SCOPE_STORE
+        ));
+
+        if ($days > 0) {
+            $expiryDate = $this->dateTime->gmtDate('Y-m-d H:i:s', "+$days days");
+            $subject->setData('expiry_date', $expiryDate);
         }
     }
 }

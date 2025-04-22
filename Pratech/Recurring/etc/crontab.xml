@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<config>
+	<group id="default">
+        <job name="pratech_recurring_cron_job" instance="\Pratech\Recurring\Cron\Order" method="recurringOrder">
+            <schedule>0 * * * *</schedule>
+        </job>
+    </group>
+</config>

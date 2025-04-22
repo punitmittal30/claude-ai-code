@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- Order cancel after -->
+    <event name="order_cancel_after">
+        <observer name="pratech_recurring_sales_order_cancel_after" instance="Pratech\Recurring\Observer\SalesOrderCancelAfter" />
+    </event>
+</config>

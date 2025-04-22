@@ -1,0 +1,119 @@
+<?php
+
+    $model = $block->getSubscription();
+    $order = $block->getOrder();
+    $product  = $block->getProduct();
+    $customer = $block->getCustomer();
+?>
+<div class="subscriptions-information">
+    <table class="admin__table-secondary">
+        <tbody>
+        <?= $block->getChildHtml() ?>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Subscription Type :')) ?></th>
+            <td>            
+                <?= $escaper->escapeHtml($block->getRecurringProductFrequency()) ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Max Repeat :')) ?></th>
+            <td>            
+                <?= $escaper->escapeHtml($block->getFrequencyMaxRepeat()) ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Master Order ID :')) ?></th>
+            <td>
+                <a href="<?= $escaper->escapeUrl($block->getOrderUrl()) ?>" target="_blank" >
+                <?= $escaper->escapeHtml($block->getOrderId()) ?>
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Product Name :')) ?></th>
+            <td>
+            <?php if ($product->getId()): ?>
+                <a href="<?= $escaper->escapeUrl($block->getProductUrl()) ?>" target="_blank" >
+                <?= $escaper->escapeHtml($product->getName()) ?>
+                </a>
+            <?php else: ?>
+                <?= $escaper->escapeHtml($model->getProductName()) ?>
+            <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Product SKU :')) ?></th>
+            <td>            
+                <?= $escaper->escapeHtml($model->getProductSku()) ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Customer Name :')) ?></th>
+            <td>
+            <?php if ($customer->getId()): ?>
+                <a href="<?= $escaper->escapeUrl($block->getCustomerUrl($customer->getId())) ?>" target="_blank" >
+                <?= $escaper->escapeHtml($customer->getFirstname()." ".$customer->getLastname()) ?>
+                </a>
+            <?php else: ?>
+                <?= $escaper->escapeHtml($model->getCustomerName()) ?>
+            <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Created At :')) ?></th>
+            <td>         
+                <?= $escaper->escapeHtml($block->getCreateDate()) ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Status :')) ?></th>
+            <td>         
+                <?= $escaper->escapeHtml($block->getStatus($model->getStatus())) ?>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="payment-information">
+<label class="wk_label"><?= $escaper->escapeHtml(__('Payment and Shipping information'))?></label>
+<hr>
+    <div class="wk_table">
+        <table class="admin__table-secondary">
+            <tbody>
+            <?= $block->getChildHtml() ?>
+            <tr>
+                <th><?= $escaper->escapeHtml(__('Locked Price :')) ?></th>
+                <td>         
+                    <?= /* @noEscape */$block->getSubscriptionCharge() ?>
+                </td>
+            </tr>
+            <tr>
+                <th><?= $escaper->escapeHtml(__('Next Order Date :')) ?></th>
+                <td>
+                    <?= $escaper->escapeHtml($block->getValidTill()) ?>
+                </td>
+            </tr>
+            <tr>
+                <th><?= $escaper->escapeHtml(__('Payment Method :')) ?></th>
+                <td>         
+                    <?= $escaper->escapeHtml($model->getPaymentCode()); ?>
+                </td>
+            </tr>
+            <tr>
+                <th><?= $escaper->escapeHtml(__('Shipping Address :')) ?></th>
+                <td>         
+                
+                <?= /* @noEscape */ $block->getFormattedAddress($order->getShippingAddress())?>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php if ($model->getCancellationReason()): ?>
+    <div class="payment-information">
+    <label class="wk_label"><?=$escaper->escapeHtml(__('Reason of Cancellation'))?></label>
+    <hr>
+    <label><?=  $escaper->escapeHtml($model->getCancellationReason());?></label>  
+    </div>
+<?php endif; ?>

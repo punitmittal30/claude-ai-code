@@ -13,7 +13,6 @@
 
 namespace Pratech\Cart\Helper;
 
-use Exception;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
@@ -41,7 +40,6 @@ use Magento\Store\Model\ScopeInterface;
 use Pratech\Base\Helper\Data as BaseHelper;
 use Pratech\Base\Logger\Logger;
 use Pratech\Cart\Api\CustomerPaymentManagementInterface;
-use Pratech\Catalog\Helper\Product as ProductHelper;
 use Pratech\Warehouse\Service\DeliveryDateCalculator;
 
 /**
@@ -49,21 +47,6 @@ use Pratech\Warehouse\Service\DeliveryDateCalculator;
  */
 class CustomerCart
 {
-    /**
-     * Cross Sell Status on Cart page
-     */
-    public const CROSS_SELL_ENABLE_CONFIG_PATH = 'cart/cross_sell/enable';
-
-    /**
-     * Cross Sell Max Number on Cart Page
-     */
-    public const CROSS_SELL_MAX_NUMBER_CONFIG_PATH = 'cart/cross_sell/max_number';
-
-    /**
-     * Cross Sell Mode on Cart page
-     */
-    public const CROSS_SELL_MODE_CONFIG_PATH = 'cart/cross_sell/mode';
-
     /**
      * Cart Helper Constructor
      *
@@ -83,7 +66,6 @@ class CustomerCart
      * @param QuoteFactory $quoteFactory
      * @param Configurable $configurableType
      * @param DeliveryDateCalculator $deliveryDateCalculator
-     * @param ProductHelper $productHelper
      * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
@@ -103,7 +85,6 @@ class CustomerCart
         private QuoteFactory                       $quoteFactory,
         private Configurable                       $configurableType,
         private DeliveryDateCalculator             $deliveryDateCalculator,
-        private ProductHelper                      $productHelper,
         private ScopeConfigInterface               $scopeConfig
     )
     {
@@ -449,63 +430,6 @@ class CustomerCart
     }
 
     /**
-     * Get cross-sell products of cart items
-     *
-     * @param string $type Possible values: customer|guest
-     * @param string $cartId
-     * @param int|null $pincode
-     * @return array
-     * @throws Exception|NoSuchEntityException
-     */
-    public function getCartCrossSellProducts(string $type, string $cartId, int $pincode = null): array
-    {
-        $crossSellProducts = [];
-        try {
-            if (!$this->getConfigValue(self::CROSS_SELL_ENABLE_CONFIG_PATH)) {
-                return [];
-            }
-
-            $cartDetails = ($type == 'guest') ?
-                $this->getGuestCart($cartId)
-                : $this->quoteRepository->get($cartId);
-            $cartItems = $cartDetails->getItems();
-            if (empty($cartItems)) {
-                return [];
-            }
-
-            // Get cart item product IDs and the last item
-            $cartItemProductIds = array_map(fn($item) => $item->getProductId(), $cartItems);
-            $lastItem = max($cartItems, fn($a, $b) => $a->getId() <=> $b->getId());
-
-            // Get cross-sell configuration
-            $noOfCrossSellToDisplay = (int)$this->getConfigValue(self::CROSS_SELL_MAX_NUMBER_CONFIG_PATH);
-            $crossSellMode = $this->getConfigValue(self::CROSS_SELL_MODE_CONFIG_PATH);
-
-            return match ($crossSellMode) {
-                'allcartitems' => $this->processCrossSellForAllItems(
-                    $cartItems,
-                    $cartItemProductIds,
-                    $noOfCrossSellToDisplay,
-                    $pincode
-                ),
-                'lastcartitem' => $lastItem ? $this->processCrossSellForLastItem(
-                    $lastItem,
-                    $cartItemProductIds,
-                    $noOfCrossSellToDisplay,
-                    $pincode
-                ) : [],
-                default => []
-            };
-        } catch (Exception|NoSuchEntityException $e) {
-            $this->apiLogger->error(
-                "Cart Cross-Sell Products Issue: " . $e->getMessage() . " in " . __METHOD__
-            );
-        }
-
-        return $crossSellProducts;
-    }
-
-    /**
      * Get Scope Config Value.
      *
      * @param string $config
@@ -517,91 +441,5 @@ class CustomerCart
             $config,
             ScopeInterface::SCOPE_STORE
         );
-    }
-
-    /**
-     * Process cross-sell products for all cart items
-     *
-     * @param array $cartItems
-     * @param array $cartItemProductIds
-     * @param int $noOfCrossSellToDisplay
-     * @param int|null $pincode
-     * @return array
-     * @throws NoSuchEntityException
-     */
-    private function processCrossSellForAllItems(array $cartItems, array $cartItemProductIds, int $noOfCrossSellToDisplay, ?int $pincode): array
-    {
-        $crossSellProducts = [];
-        $productIdsProcessed = [];
-        $productIdsToProcess = [];
-        $noOfCrossSellPerItem = (int)($noOfCrossSellToDisplay / count($cartItems));
-
-        foreach ($cartItems as $item) {
-            $crossSellPerItemCount = 0;
-            $crossSellProductIds = $item->getProduct()->getCrossSellProductIds();
-            $productIdsToProcess = array_merge($productIdsToProcess, $crossSellProductIds);
-            foreach (array_diff(
-                         $crossSellProductIds,
-                         $cartItemProductIds,
-                         $productIdsProcessed
-                     ) as $productId) {
-                $productStock = $this->productHelper->getProductStockInfo($productId);
-                if ($productStock->getIsInStock()) {
-                    $crossSellProducts[] = $this->productHelper->formatProductForCarousel($productId, $pincode);
-                }
-                $productIdsProcessed[] = $productId;
-                $crossSellPerItemCount++;
-                if ($crossSellPerItemCount == $noOfCrossSellPerItem) {
-                    break;
-                }
-                if (count($crossSellProducts) >= $noOfCrossSellToDisplay) {
-                    break 2;
-                }
-            }
-        }
-        if (count($crossSellProducts) < $noOfCrossSellToDisplay) {
-            $productIdsToInclude = array_diff($productIdsToProcess, $productIdsProcessed);
-            shuffle($productIdsToInclude);
-            foreach ($productIdsToInclude as $productId) {
-                $productStock = $this->productHelper->getProductStockInfo($productId);
-                if ($productStock->getIsInStock()) {
-                    $crossSellProducts[] = $this->productHelper->formatProductForCarousel($productId, $pincode);
-                }
-                if (count($crossSellProducts) >= $noOfCrossSellToDisplay) {
-                    break;
-                }
-            }
-        }
-        return $crossSellProducts;
-    }
-
-    /**
-     * Process cross-sell products for the last cart item
-     *
-     * @param mixed $lastItem
-     * @param array $cartItemProductIds
-     * @param int $noOfCrossSellToDisplay
-     * @param int|null $pincode
-     * @return array
-     * @throws NoSuchEntityException
-     */
-    private function processCrossSellForLastItem(mixed $lastItem, array $cartItemProductIds, int $noOfCrossSellToDisplay, ?int $pincode): array
-    {
-        $crossSellProducts = [];
-        $productIds = $lastItem->getProduct()->getCrossSellProductIds();
-
-        foreach ($productIds as $productId) {
-            if (in_array($productId, $cartItemProductIds)) {
-                continue;
-            }
-            $productStock = $this->getProductStockInfo($productId);
-            if (!$productStock || !$productStock->getIsInStock()) {
-                $crossSellProducts[] = $this->productHelper->formatProductForCarousel($productId, $pincode);
-            }
-            if (count($crossSellProducts) >= $noOfCrossSellToDisplay) {
-                break;
-            }
-        }
-        return $crossSellProducts;
     }
 }

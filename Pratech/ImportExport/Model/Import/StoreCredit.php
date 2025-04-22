@@ -54,7 +54,8 @@ class StoreCredit extends AbstractEntity
         'amount',
         'comment',
         'is_refund',
-        'order_id'
+        'order_id',
+        'expiry_days'
     ];
 
     /**
@@ -316,7 +317,8 @@ class StoreCredit extends AbstractEntity
                             $row['comment'],
                             [
                                 'event_name' => 'import'
-                            ]
+                            ],
+                            $row['expiry_days']
                         );
                     } else {
                         $this->storeCreditHelper->refundStoreCredit(

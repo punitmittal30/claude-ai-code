@@ -1,8 +1,17 @@
 <?xml version="1.0"?>
-
+<!--
+/**
+ * Hyuga_Cart
+ *
+ * @category  XML
+ * @package   Hyuga\Cart
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
-
     <!-- Get Cross-sell products for cart items -->
     <route url="/V1/carts/:type/:cartId/cross-sell" method="GET">
         <service class="Hyuga\Cart\Api\CartManagementInterface" method="getCartCrossSellProducts"/>

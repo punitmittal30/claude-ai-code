@@ -278,12 +278,4 @@
             <resource ref="Magento_Cart::manage"/>
         </resources>
     </route>
-
-    <!-- Get Cross Sell Products for Cart -->
-    <route url="/V1/carts/:type/:cartId/cross-sell" method="GET">
-        <service class="Pratech\Cart\Api\CustomerCartInterface" method="getCartCrossSellProducts"/>
-        <resources>
-            <resource ref="Magento_Cart::manage"/>
-        </resources>
-    </route>
 </routes>
