@@ -25,12 +25,10 @@ class CartManagement implements CartManagementInterface
         $crossSellProducts = [];
 
         try {
-            // Early return if cross-sell is disabled in configuration
             if (!$this->cartService->getConfigValue(CartService::CROSS_SELL_ENABLE_CONFIG_PATH)) {
                 return [];
             }
 
-            // Get cart details
             $cartDetails = ($type == 'guest')
                 ? $this->cartService->getGuestCart($cartId)
                 : $this->cartService->getCart($cartId);
@@ -40,11 +38,9 @@ class CartManagement implements CartManagementInterface
                 return [];
             }
 
-            // Get configuration settings
             $maxCrossSellCount = (int)$this->cartService->getConfigValue(CartService::CROSS_SELL_MAX_NUMBER_CONFIG_PATH);
             $crossSellMode = $this->cartService->getConfigValue(CartService::CROSS_SELL_MODE_CONFIG_PATH);
 
-            // Get cart item product IDs and create a mapping of product IDs to cart items
             $cartItemProductIds = [];
             $cartItemMap = [];
 

@@ -81,7 +81,7 @@ class ProductRepository implements ProductRepositoryInterface
         private CalculatePricePerAttributes                     $calculatePricePerAttributes,
         private Attribute                                       $attribute,
         private DeliveryDateCalculator                          $deliveryDateCalculator,
-        private ProductAttributeService                         $productAttributeService,
+        private ProductAttributeService                         $productAttributeService
     )
     {
     }
@@ -97,8 +97,7 @@ class ProductRepository implements ProductRepositoryInterface
 
         switch ($section) {
             case 'carousel':
-                $this->loadCarouselProductData($product, $pincode);
-                break;
+                return $this->loadCarouselProductData($product, $pincode);
             case 'plp':
                 $this->loadCarouselProductData($product, $pincode);
                 break;
@@ -112,8 +111,7 @@ class ProductRepository implements ProductRepositoryInterface
                 $this->loadCarouselProductData($product, $pincode);
                 break;
             case 'minicart':
-                $this->loadCarouselProductData($product, $pincode);
-                break;
+                return $this->loadCarouselProductData($product, $pincode);
             default:
                 $this->loadCarouselProductData($product, $pincode);
         }
@@ -147,9 +145,7 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function loadCarouselProductData(ProductInterface $product, int $pincode = null)
     {
-        $allAttributes = $this->productAttributeService->getAllAttributes($product->getId());
-        \Magento\Framework\App\ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class)
-            ->debug('CUSTOM_LOGGING', ['$allAttributes' => $allAttributes]);
+        return $this->productAttributeService->getCommonAttributes($product->getId(), $pincode);
     }
 
     /**

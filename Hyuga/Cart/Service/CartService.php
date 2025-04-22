@@ -136,9 +136,8 @@ class CartService
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getProductData(int $productId, int $pincode = null)
+    public function getProductData(int $productId, int $pincode = null): array
     {
-        $this->productRepository->getProductById($productId, $pincode,'carousel');
-        return [];
+        return $this->productRepository->getProductById($productId, $pincode,'minicart');
     }
 }
