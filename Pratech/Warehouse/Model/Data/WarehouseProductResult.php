@@ -63,7 +63,7 @@ class WarehouseProductResult extends AbstractExtensibleObject implements Warehou
     /**
      * @inheritDoc
      */
-    public function setTitle(string $title)
+    public function setTitle(string|null $title)
     {
         return $this->setData('title', $title);
     }
@@ -114,5 +114,21 @@ class WarehouseProductResult extends AbstractExtensibleObject implements Warehou
     public function setAvailableFilters(array $filters)
     {
         return $this->setData('available_filters', $filters);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCategoryIcon(): ?string
+    {
+        return $this->_get('image_url');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setCategoryIcon(string|null $imageUrl)
+    {
+        return $this->setData('image_url', $imageUrl);
     }
 }

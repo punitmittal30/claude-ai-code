@@ -59,6 +59,7 @@ use Pratech\Cart\Model\Config\Source\PlatformUsed;
 use Pratech\Cart\Model\Config\Source\RuleType;
 use Pratech\Catalog\Model\AttributeMappingFactory;
 use Pratech\Catalog\Model\CalculatePricePerAttributes;
+use Pratech\Catalog\Model\ResourceModel\LinkedProduct;
 use Pratech\CustomDeliveryCharges\Helper\Data as CustomDeliveryHelper;
 use Pratech\ReviewRatings\Model\ProductRatings;
 use Pratech\Warehouse\Service\DeliveryDateCalculator;
@@ -209,6 +210,7 @@ class Product
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param ShipmentCollectionFactory $shipmentCollectionFactory
      * @param DeliveryDateCalculator $deliveryDateCalculator
+     * @param LinkedProduct $linkedProductResource
      */
     public function __construct(
         private StockRegistryInterface               $stockItemRepository,
@@ -242,7 +244,8 @@ class Product
         private RuleType                             $ruleType,
         private OrderCollectionFactory               $orderCollectionFactory,
         private ShipmentCollectionFactory            $shipmentCollectionFactory,
-        private DeliveryDateCalculator               $deliveryDateCalculator
+        private DeliveryDateCalculator               $deliveryDateCalculator,
+        private LinkedProduct                        $linkedProductResource,
     ) {
     }
 
@@ -970,6 +973,9 @@ class Product
         if ($product->getTypeId() == 'configurable') {
             $productData['configurable_product_links'] = $this->getChildProductIds($product);
             $productData['configurable_product_options'] = $this->getConfigurableProductOptions($product);
+
+            $productData = $this->mergeLinkedConfigurableProducts($product, $productData);
+
             $productData['price'] = $productData['configurable_product_options'][0]['values']['minimum_price'];
             if (isset($productData['configurable_product_options'][0]['values']['minimum_special_price'])) {
                 $productData['special_price'] = $productData['configurable_product_options'][0]
@@ -1023,6 +1029,85 @@ class Product
             $product,
             self::CUSTOM_ATTRIBUTE_CONFIG_PATH
         );
+
+        return $productData;
+    }
+
+    /**
+     * Merge linked configurable product children and options
+     *
+     * @param ProductInterface $product
+     * @param array $productData
+     * @return array
+     */
+    private function mergeLinkedConfigurableProducts(ProductInterface $product, array $productData): array
+    {
+        $linkedProductIds = $this->linkedProductResource->getLinkedProducts((int)$product->getId());
+
+        if (!empty($linkedProductIds)) {
+            foreach ($linkedProductIds as $linkedProductId) {
+                try {
+                    $linkedProduct = $this->productRepository->getById($linkedProductId);
+
+                    $linkedChildIds = $this->getChildProductIds($linkedProduct);
+                    if (!empty($linkedChildIds)) {
+                        $productData['configurable_product_links'] = array_merge(
+                            $productData['configurable_product_links'] ?? [],
+                            $linkedChildIds
+                        );
+                    }
+
+                    $linkedOptions = $this->getConfigurableProductOptions($linkedProduct);
+                    if (!empty($linkedOptions)) {
+                        $productData['configurable_product_options'] = array_merge(
+                            $productData['configurable_product_options'] ?? [],
+                            $linkedOptions
+                        );
+                    }
+                } catch (NoSuchEntityException $exception) {
+                    $this->logger->error("Error | Fetching linked product | Product ID: " . $productId
+                        . " | Type: " . $type . " | " . __METHOD__ . $exception->getMessage());
+                }
+            }
+        }
+
+        if (!empty($productData['configurable_product_links'])) {
+            $productData['configurable_product_links'] = array_values(
+                    array_unique($productData['configurable_product_links'])
+                );
+        }
+
+        if (!empty($productData['configurable_product_options'])) {
+            $groupedOptions = [];
+
+            foreach ($productData['configurable_product_options'] as $option) {
+                $attributeCode = $option['attribute_code'] ?? null;
+
+                if ($attributeCode) {
+                    if (!isset($groupedOptions[$attributeCode])) {
+                        $groupedOptions[$attributeCode] = $option;
+                    } else {
+                        if (isset($option['values']['variants'])) {
+                            $groupedOptions[$attributeCode]['values']['variants'] = array_merge(
+                                $groupedOptions[$attributeCode]['values']['variants'] ?? [],
+                                $option['values']['variants']
+                            );
+                        }
+                    }
+                }
+            }
+
+            foreach ($groupedOptions as &$groupedOption) {
+                if (isset($groupedOption['values']['variants'])) {
+                    $groupedOption['values']['variants'] = array_map(
+                        'unserialize',
+                        array_unique(array_map('serialize', $groupedOption['values']['variants']))
+                    );
+                }
+            }
+
+            $productData['configurable_product_options'] = array_values($groupedOptions);
+        }
 
         return $productData;
     }

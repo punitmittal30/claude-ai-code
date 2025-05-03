@@ -10,7 +10,6 @@
  * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  **/
-
 namespace Pratech\Recurring\Api\Data;
 
 /**

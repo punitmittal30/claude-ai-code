@@ -13,7 +13,11 @@
 
 namespace Pratech\Order\Model;
 
+use Exception;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\ShipmentInterface;
 use Magento\Sales\Api\ShipmentRepositoryInterface;
 use Magento\Sales\Model\Order\Shipment\Comment;
@@ -29,6 +33,11 @@ use Pratech\Refund\Helper\Data as RefundHelper;
 class ShipmentModifier
 {
     /**
+     * Status code constants
+     */
+    private const STATUS_DELIVERED = 'delivered';
+
+    /**
      * Change Shipment Status Constructor
      *
      * @param CommentFactory $shipmentCommentFactory
@@ -37,6 +46,7 @@ class ShipmentModifier
      * @param CollectionFactory $collectionFactory
      * @param RefundHelper $refundHelper
      * @param Logger $apiLogger
+     * @param CustomerRepositoryInterface $customerRepository
      */
     public function __construct(
         private CommentFactory              $shipmentCommentFactory,
@@ -45,7 +55,9 @@ class ShipmentModifier
         private CollectionFactory           $collectionFactory,
         private RefundHelper                $refundHelper,
         private Logger                      $apiLogger,
-    ) {
+        private CustomerRepositoryInterface $customerRepository
+    )
+    {
     }
 
     /**
@@ -62,17 +74,26 @@ class ShipmentModifier
 
         /** @var Comment $shipmentComment */
         $shipmentComment = $this->shipmentCommentFactory->create();
+        $shipmentComment->setParentId($shipmentId);
+        $shipmentComment->setIsCustomerNotified(0);
+        $shipmentComment->setIsVisibleOnFront(1);
 
+        // Get status from collection
         $statusCollection = $this->collectionFactory->create()
             ->addFieldToFilter('clickpost_status', $shipmentStatusCode);
+
         if ($statusCollection->getSize() > 0) {
             $status = $statusCollection->getFirstItem();
-            // Storing shipment status as 12 in case of any RTO status received so that FE does not break.
-            if (in_array($status->getStatusId(), RefundHelper::RTO_REFUND_CLICKPOST_STATUS)) {
-                $statusId = 12;
-            } else {
-                $statusId = $status->getStatusId();
-            }
+
+            // Determine the proper status ID
+            $statusId = in_array(
+                $status->getStatusId(),
+                RefundHelper::RTO_REFUND_CLICKPOST_STATUS
+            ) ? 12 : (int)$status->getStatusId();
+
+            // Update Customer Scoring Attributes if status has changed
+            $this->updateCustomerScoringAttributes($shipmentDetails, $statusId, $status->getStatusCode());
+
             $shipmentDetails->setShipmentStatus($statusId);
             $shipmentComment->setComment($status->getStatus());
             $shipmentComment->setStatus($status->getStatusCode());
@@ -81,13 +102,10 @@ class ShipmentModifier
             $shipmentComment->setComment('Status not found (Default Status: Shipped)');
             $shipmentComment->setStatus('shipped');
             $this->apiLogger->error(
-                "No status found for clickpost_status_code: " . $shipmentStatusCode .
-                 __METHOD__
+                "No status found for clickpost_status_code: {$shipmentStatusCode} for shipment id:  {$shipmentId} " . __METHOD__
             );
         }
-        $shipmentComment->setParentId($shipmentId);
-        $shipmentComment->setIsCustomerNotified(0);
-        $shipmentComment->setIsVisibleOnFront(1);
+
         $this->shipmentCommentResource->save($shipmentComment);
         $savedShipment = $this->shipmentRepository->save($shipmentDetails);
         $order = $savedShipment->getOrder();
@@ -99,6 +117,68 @@ class ShipmentModifier
                 'CLICKPOST_RTO_REFUND'
             );
         }
+
         return $savedShipment;
+    }
+
+    /**
+     * Update Customer Scoring Attributes
+     *
+     * @param ShipmentInterface $shipmentDetails
+     * @param integer $statusId
+     * @param string $statusCode
+     * @return void
+     */
+    private function updateCustomerScoringAttributes(
+        ShipmentInterface $shipmentDetails,
+        int               $statusId,
+        string            $statusCode
+    ): void
+    {
+        // Skip if status didn't change
+        if ($shipmentDetails->getShipmentStatus() == $statusId ||
+            in_array($shipmentDetails->getShipmentStatus(), RefundHelper::RTO_REFUND_CLICKPOST_STATUS) ||
+            $shipmentDetails->getShipmentStatus() == self::STATUS_DELIVERED
+        ) {
+            return;
+        }
+
+        $customerId = $shipmentDetails->getCustomerId();
+        if (!$customerId) {
+            return;
+        }
+
+        try {
+            if ($statusCode === self::STATUS_DELIVERED) {
+                $this->incrementCustomerAttribute($customerId, 'total_delivered_shipments');
+            } elseif (in_array($statusId, RefundHelper::RTO_REFUND_CLICKPOST_STATUS)) {
+                $this->incrementCustomerAttribute($customerId, 'total_rto_shipments');
+            }
+        } catch (Exception $exception) {
+            $this->apiLogger->error(
+                "Error saving customer scoring attributes for shipment with ID: "
+                . $shipmentDetails->getIncrementId() . " | " . $exception->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Increment a customer attribute value
+     *
+     * @param int $customerId
+     * @param string $attributeCode
+     * @return void
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    private function incrementCustomerAttribute(int $customerId, string $attributeCode): void
+    {
+        $customerData = $this->customerRepository->getById($customerId);
+        $currentValue = $customerData->getCustomAttribute($attributeCode)
+            ? (int)$customerData->getCustomAttribute($attributeCode)->getValue()
+            : 0;
+
+        $customerData->setCustomAttribute($attributeCode, $currentValue + 1);
+        $this->customerRepository->save($customerData);
     }
 }

@@ -263,6 +263,7 @@ class Filter
             $formattedFilter = [
                 'key' => $filter['attribute_type'],
                 'header' => $filter['attribute_label'],
+                'sort_order' => $filter['sort_order'],
                 'value' => []
             ];
 

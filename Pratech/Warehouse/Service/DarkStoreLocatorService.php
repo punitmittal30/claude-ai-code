@@ -49,7 +49,6 @@ class DarkStoreLocatorService
     public function findNearestDarkStore(int $pincode): array
     {
         $cacheKey = $this->cacheService->getNearestDarkStoreCacheKey($pincode);
-
         $cachedData = $this->cacheService->get($cacheKey);
 
         if ($cachedData) {
@@ -60,7 +59,7 @@ class DarkStoreLocatorService
             $darkStores = $this->warehouseRepository->getAvailableDarkStores();
 
             if (empty($darkStores)) {
-                throw new NoSuchEntityException(__('No dark stores available'));
+                return [];
             }
 
             $warehousePincodes = array_column($darkStores, 'warehouse_pincode');
@@ -81,7 +80,7 @@ class DarkStoreLocatorService
             $darkStore = null;
 
             if (!$slaData) {
-                throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
+                return [];
             } else {
                 $warehousePincode = $slaData['warehouse_pincode'];
 
@@ -92,9 +91,8 @@ class DarkStoreLocatorService
                     }
                 }
 
-                // If no matching warehouse found, return first dark store
                 if (!$darkStore) {
-                    throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
+                    return [];
                 }
             }
 
@@ -106,9 +104,6 @@ class DarkStoreLocatorService
             );
 
             return $darkStore;
-        } catch (NoSuchEntityException $e) {
-            $this->logger->error('Dark store not found: ' . $e->getMessage());
-            throw $e;
         } catch (Exception $e) {
             $this->logger->error('Error finding nearest dark store: ' . $e->getMessage());
             throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));

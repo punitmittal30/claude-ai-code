@@ -1,8 +1,15 @@
 <?php
 /**
- * Copyright ©  All rights reserved.
- * See COPYING.txt for license details.
- */
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 declare(strict_types=1);
 
 namespace Pratech\Recurring\Model;
@@ -20,33 +27,6 @@ use Pratech\Recurring\Model\ResourceModel\SubscriptionMapping\CollectionFactory 
 
 class SubscriptionMappingRepository implements SubscriptionMappingRepositoryInterface
 {
-
-    /**
-     * @var SubscriptionMappingInterfaceFactory
-     */
-    protected $subscriptionMappingFactory;
-
-    /**
-     * @var CollectionProcessorInterface
-     */
-    protected $collectionProcessor;
-
-    /**
-     * @var SubscriptionMapping
-     */
-    protected $searchResultsFactory;
-
-    /**
-     * @var SubscriptionMappingCollectionFactory
-     */
-    protected $subscriptionMappingCollectionFactory;
-
-    /**
-     * @var ResourceSubscriptionMapping
-     */
-    protected $resource;
-
-
     /**
      * @param ResourceSubscriptionMapping $resource
      * @param SubscriptionMappingInterfaceFactory $subscriptionMappingFactory
@@ -55,17 +35,12 @@ class SubscriptionMappingRepository implements SubscriptionMappingRepositoryInte
      * @param CollectionProcessorInterface $collectionProcessor
      */
     public function __construct(
-        ResourceSubscriptionMapping $resource,
-        SubscriptionMappingInterfaceFactory $subscriptionMappingFactory,
-        SubscriptionMappingCollectionFactory $subscriptionMappingCollectionFactory,
-        SubscriptionMappingSearchResultsInterfaceFactory $searchResultsFactory,
-        CollectionProcessorInterface $collectionProcessor
+        protected ResourceSubscriptionMapping $resource,
+        protected SubscriptionMappingInterfaceFactory $subscriptionMappingFactory,
+        protected SubscriptionMappingCollectionFactory $subscriptionMappingCollectionFactory,
+        protected SubscriptionMappingSearchResultsInterfaceFactory $searchResultsFactory,
+        protected CollectionProcessorInterface $collectionProcessor
     ) {
-        $this->resource = $resource;
-        $this->subscriptionMappingFactory = $subscriptionMappingFactory;
-        $this->subscriptionMappingCollectionFactory = $subscriptionMappingCollectionFactory;
-        $this->searchResultsFactory = $searchResultsFactory;
-        $this->collectionProcessor = $collectionProcessor;
     }
 
     /**
@@ -93,7 +68,9 @@ class SubscriptionMappingRepository implements SubscriptionMappingRepositoryInte
         $subscriptionMapping = $this->subscriptionMappingFactory->create();
         $this->resource->load($subscriptionMapping, $subscriptionMappingId);
         if (!$subscriptionMapping->getId()) {
-            throw new NoSuchEntityException(__('SubscriptionMapping with id "%1" does not exist.', $subscriptionMappingId));
+            throw new NoSuchEntityException(
+                __('SubscriptionMapping with id "%1" does not exist.', $subscriptionMappingId)
+            );
         }
         return $subscriptionMapping;
     }
@@ -148,4 +125,3 @@ class SubscriptionMappingRepository implements SubscriptionMappingRepositoryInte
         return $this->delete($this->get($subscriptionMappingId));
     }
 }
-

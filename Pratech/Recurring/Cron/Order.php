@@ -1,6 +1,16 @@
 <?php
-
-namespace Partech\Recurring\Cron;
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
+namespace Pratech\Recurring\Cron;
 
 use Exception;
 use Magento\Sales\Model\Order as SalesOrder;
@@ -8,7 +18,7 @@ use Magento\Sales\Model\OrderFactory;
 use Magento\Framework\Stdlib\DateTime\DateTime as Date;
 use Pratech\Base\Logger\CronLogger;
 use Pratech\Recurring\Api\SubscriptionRepositoryInterface;
-use Pratech\Recurring\Helper\Recurring as RecurringHelper;
+use Pratech\Recurring\Helper\Order as RecurringOrderHelper;
 use Pratech\Recurring\Model\Config\Source\Duration as RecurringDuration;
 use Pratech\Recurring\Model\Config\Source\DurationType as RecurringDurationType;
 use Pratech\Recurring\Model\Config\Source\Status as SubscriptionStatus;
@@ -23,7 +33,7 @@ class Order
      * @param OrderFactory $orderFactory
      * @param Date $date
      * @param CronLogger $cronLogger
-     * @param RecurringHelper $recurringHelper
+     * @param RecurringOrderHelper $recurringOrderHelper
      * @param SubscriptionFactory $subscriptionFactory
      * @param SubscriptionCollectionFactory $subscriptionCollectionFactory
      * @param SubscriptionMappingFactory $subscriptionMappingFactory
@@ -32,7 +42,7 @@ class Order
         private OrderFactory $orderFactory,
         private Date $date,
         private CronLogger $cronLogger,
-        private RecurringHelper $recurringHelper,
+        private RecurringOrderHelper $recurringOrderHelper,
         private SubscriptionFactory $subscriptionFactory,
         private SubscriptionCollectionFactory $subscriptionCollectionFactory,
         private SubscriptionMappingFactory $subscriptionMappingFactory
@@ -64,7 +74,7 @@ class Order
     private function reProcessSubscription(Subscription $subscription)
     {
         $canOrder = $this->canOrder($subscription);
-        $order = $this->orderFactory->create()->load($orderId);
+        $order = $this->orderFactory->create()->load($subscription->getOrderId());
         if ($canOrder) {
             $this->createOrder($order, $subscription);
         }
@@ -79,15 +89,17 @@ class Order
     private function createOrder(SalesOrder $order, Subscription $subscription)
     {
         try {
-            $result = $this->recurringHelper->createMageOrder($order, $subscription);
+            $result = $this->recurringOrderHelper->createMageOrder($order, $subscription);
             if (isset($result['error']) && $result['error'] == 0) {
-                $this->saveMapping($result['id'], $subscription->getId());
+                $this->saveMapping($result['order_id'], $subscription->getId());
                 $this->updateSubscription($subscription);
             } else {
-                $this->cronLogger->error($result['msg'] . __METHOD__);
+                $this->cronLogger->error('Subscription ID: ' . $subscription->getId() . ' | '
+                    . $result['msg'] . __METHOD__);
             }
         } catch (Exception $e) {
-            $this->cronLogger->error($e->getMessage() . __METHOD__);
+            $this->cronLogger->error('Subscription ID: ' . $subscription->getId() . ' | '
+                . $e->getMessage() . __METHOD__);
         }
     }
 
@@ -144,9 +156,36 @@ class Order
         } else {
             $duration = $subscription->getDuration();
             $durationType = $subscription->getDurationType();
-            $validTill = $this->recurringHelper->getValidTill($duration, $durationType);
+            $validTill = $this->getValidTill($duration, $durationType);
             $subscription->setValidTill($validTill);
         }
         $subscription->setId($subscription->getId())->save();
+    }
+
+    /**
+     * Get Valid Till Date of subscription
+     *
+     * @param string $duration
+     * @param string $durationType
+     * @return string
+     */
+    private function getValidTill($duration, $durationType)
+    {
+        $validTill = '';
+        switch ($durationType) {
+            case RecurringDurationType::DAY:
+                $validTill = date('Y-m-d', strtotime(' + ' . $duration . RecurringDurationType::DAY));
+                break;
+            case RecurringDurationType::WEEK:
+                $validTill = date('Y-m-d', strtotime(' + ' . $duration . RecurringDurationType::WEEK));
+                break;
+            case RecurringDurationType::MONTH:
+                $validTill = date('Y-m-d', strtotime(' + ' . $duration . RecurringDurationType::MONTH));
+                break;
+            case RecurringDurationType::YEAR:
+                $validTill = date('Y-m-d', strtotime(' + ' . $duration . RecurringDurationType::YEAR));
+                break;
+        }
+        return $validTill;
     }
 }

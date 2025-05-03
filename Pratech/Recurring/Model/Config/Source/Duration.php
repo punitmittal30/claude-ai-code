@@ -1,14 +1,23 @@
 <?php
 /**
- * Copyright ©  All rights reserved.
- * See COPYING.txt for license details.
- */
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Model\Config\Source;
+
+use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
 
 /**
  * Custom Attribute Renderer
  */
-class Duration extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
+class Duration extends AbstractSource
 {
     /**
      * Get all options

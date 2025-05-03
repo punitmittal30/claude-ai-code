@@ -1,5 +1,15 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Ui\Component\Listing\Column;
 
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
@@ -13,11 +23,6 @@ use Magento\Framework\UrlInterface;
 class SubscriptionActions extends Column
 {
     /**
-     * @var UrlInterface
-     */
-    protected $urlBuilder;
-
-    /**
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param UrlInterface $urlBuilder
@@ -27,11 +32,10 @@ class SubscriptionActions extends Column
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
-        UrlInterface $urlBuilder,
+        protected UrlInterface $urlBuilder,
         array $components = [],
         array $data = []
     ) {
-        $this->urlBuilder = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 

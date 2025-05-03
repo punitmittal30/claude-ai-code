@@ -22,10 +22,6 @@
                 <start_time_after_processing>5</start_time_after_processing> 
                 <end_time_after_processing>12</end_time_after_processing>
             </packed_order_status>
-            <shipment_status_counter>
-                <status>0</status>
-                <mode>initial</mode>
-            </shipment_status_counter>
         </cron_schedule>
         <customers>
             <orders>

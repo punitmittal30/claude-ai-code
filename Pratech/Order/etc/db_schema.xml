@@ -59,11 +59,6 @@
         <column xsi:type="varchar" name="keywords" nullable="true" length="255" comment="Review Keywords"/>
         <column xsi:type="decimal" name="refunded_amount" scale="4" precision="20" unsigned="false" nullable="true"
                 comment="Refunded Amount"/>
-        <column name="is_counted" xsi:type="boolean" nullable="true" comment="Is counted for customer tracking attributes?"/>
-        <index referenceId="SALES_SHIPMENT_CUSTOMER_ID_SHIPMENT_STATUS" indexType="btree">
-            <column name="customer_id"/>
-            <column name="shipment_status"/>
-        </index>
     </table>
     <table name="sales_shipment_grid" resource="sales" engine="innodb" comment="Sales Flat Shipment Grid">
         <column xsi:type="int" name="rating" unsigned="true" nullable="true" identity="false"

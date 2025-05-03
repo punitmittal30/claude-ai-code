@@ -1,6 +1,22 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Block\Adminhtml\Subscription\Edit\Tab;
+
+use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Helper\Data as BackendHelper;
+use Magento\Framework\Registry;
+use Pratech\Recurring\Block\Adminhtml\Customer\OrderIncrementId;
+use Pratech\Recurring\Model\SubscriptionMappingFactory;
 
 /**
  * Adminhtml Orders grid block
@@ -10,31 +26,19 @@ namespace Pratech\Recurring\Block\Adminhtml\Subscription\Edit\Tab;
 class Orders extends \Magento\Backend\Block\Widget\Grid\Extended
 {
     /**
-     * @var \Magento\Framework\Registry
-     */
-    protected $coreRegistry = null;
-
-    /**
-     * @var \Pratech\Recurring\Model\SubscriptionMappingFactory
-     */
-    protected $subscriptionMappingFactory;
-
-    /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Backend\Helper\Data $backendHelper
-     * @param \Pratech\Recurring\Model\SubscriptionMappingFactory $subscriptionMappingFactory
-     * @param \Magento\Framework\Registry $coreRegistry
+     * @param Context $context
+     * @param BackendHelper $backendHelper
+     * @param SubscriptionMappingFactory $subscriptionMappingFactory
+     * @param Registry $coreRegistry
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Backend\Helper\Data $backendHelper,
-        \Pratech\Recurring\Model\SubscriptionMappingFactory $subscriptionMappingFactory,
-        \Magento\Framework\Registry $coreRegistry,
+        Context $context,
+        BackendHelper $backendHelper,
+        protected SubscriptionMappingFactory $subscriptionMappingFactory,
+        protected Registry $coreRegistry,
         array $data = []
     ) {
-        $this->coreRegistry = $coreRegistry;
-        $this->subscriptionMappingFactory = $subscriptionMappingFactory;
         parent::__construct($context, $backendHelper, $data);
     }
 
@@ -87,7 +91,7 @@ class Orders extends \Magento\Backend\Block\Widget\Grid\Extended
                 'header' => __('Order ID'),
                 'width' => '100',
                 'index' => 'order_id',
-                'renderer' => \Pratech\Recurring\Block\Adminhtml\Customer\OrderIncrementId::class
+                'renderer' => OrderIncrementId::class
             ]
         );
 

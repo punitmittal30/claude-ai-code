@@ -1,32 +1,40 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Block\Adminhtml\Subscription;
 
+use Magento\Backend\Block\Widget\Context;
+use Magento\Customer\Block\Adminhtml\Edit\GenericButton;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Registry;
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 
-class UnsubscribeButton extends \Magento\Customer\Block\Adminhtml\Edit\GenericButton implements ButtonProviderInterface
+class UnsubscribeButton extends GenericButton implements ButtonProviderInterface
 {
     public const REQUEST_KEY = "id";
 
     /**
-     * @var \Magento\Framework\App\RequestInterface
-     */
-    private $request;
-
-    /**
      * Construct function
      *
-     * @param \Magento\Backend\Block\Widget\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\App\RequestInterface $request
+     * @param Context $context
+     * @param Registry $registry
+     * @param RequestInterface $request
      */
     public function __construct(
-        \Magento\Backend\Block\Widget\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\RequestInterface $request
+        Context $context,
+        Registry $registry,
+        private RequestInterface $request
     ) {
         parent::__construct($context, $registry);
-        $this->request = $request;
     }
     /**
      * Get button

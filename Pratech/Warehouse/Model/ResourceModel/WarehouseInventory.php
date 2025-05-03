@@ -133,9 +133,7 @@ class WarehouseInventory extends AbstractDb
 
         } catch (Exception $e) {
             throw new LocalizedException(__(
-                'Error processing inventory item: %1, Data: %2',
-                $e->getMessage(),
-                $data
+                'Error processing inventory item: ' . $e->getMessage() . ', Data: ' . json_encode($data)
             ));
         }
     }

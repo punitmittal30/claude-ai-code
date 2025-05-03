@@ -103,6 +103,7 @@ class VinculumIntegration
         $shippingAddress = $order->getShippingAddress();
         $items = $request->getRequestItems();
         $itemsData = [];
+        $returnReasons = [];
         foreach ($items as $item) {
             if ($item->getItemStatus() != 1) {
                 continue;
@@ -113,6 +114,7 @@ class VinculumIntegration
                 }
             }
             $reason = $this->reasonInterfaceFactory->create()->load($item->getReasonId());
+            $returnReasons[] = $reason->getTitle();
             $itemsData[] = [
                 "sku" => $orderItem->getSku(),
                 "return_qty" => $item->getRequestQty(),
@@ -138,8 +140,9 @@ class VinculumIntegration
                     'customer_city' => $shippingAddress->getCity(),
                     'customer_pincode' => $shippingAddress->getPostcode(),
                     'customer_email' => $shippingAddress->getEmail(),
-                    'remarks' => 'DamagedGood',
-                    'items' => $itemsData
+                    'remarks' => implode(', ', $returnReasons),
+                    'items' => $itemsData,
+                    'category' => 'Refund'
                 ]
             ]
         ];

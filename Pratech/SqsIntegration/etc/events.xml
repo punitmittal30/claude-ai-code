@@ -15,4 +15,7 @@
     <event name="sales_order_save_after">
         <observer name="send_order_to_sqs" instance="Pratech\SqsIntegration\Observer\SalesOrderSaveAfter"/>
     </event>
+    <event name="sales_order_shipment_track_save_after">
+        <observer name="track_save_observer" instance="Pratech\SqsIntegration\Observer\TrackSaveAfter" />
+    </event>
 </config>

@@ -50,7 +50,8 @@ class SqsEvent
         'REFUND_COMPLETED' => 'hyuga-refund-completed',
         'ORDER_DELIVERED' => 'hyuga-order-delivered',
         'CATALOG_PRODUCT_UPDATED' => 'hyuga-catalog-product-updated',
-        'CATALOG_PRODUCT_DELETED' => 'hyuga-catalog-product-deleted'
+        'CATALOG_PRODUCT_DELETED' => 'hyuga-catalog-product-deleted',
+        'AWB_REGISTERED' => 'hyuga-awb-registered'
     ];
 
     /**

@@ -17,6 +17,8 @@ use Exception;
 use Hyuga\CacheManagement\Api\CacheServiceInterface;
 use Hyuga\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface as CoreCategoryRepositoryInterface;
+use Magento\Catalog\Model\Category;
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -33,6 +35,7 @@ use Pratech\Warehouse\Service\FilterService;
 use Pratech\Warehouse\Service\ProductCollectionService;
 use Pratech\Warehouse\Service\ProductFormatterService;
 use Psr\Log\LoggerInterface;
+use Zend_Db_Expr;
 
 /**
  * Repository for warehouse products
@@ -115,9 +118,14 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Get nearest dark store for this pincode
             $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+
+            if (empty($darkStore)) {
+                throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
+            }
+
             $warehouseCode = $darkStore['warehouse_code'];
 
-            // Create a collection with the category filter
+            /** @var Collection $collection */
             $collection = $this->productCollectionFactory->create();
             $collection->addCategoriesFilter(['eq' => $categoryId]);
 
@@ -126,6 +134,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Add other needed attributes and conditions
             $collection->addAttributeToSelect('*');
+            $collection->setOrder('qty_sold', 'desc');
             $collection->setPageSize($this->getConfigValue('product/general/no_of_products_in_carousel'));
 
             // Count total results before loading data
@@ -234,11 +243,16 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Get nearest dark store for this pincode
             $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+
+            if (empty($darkStore)) {
+                throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
+            }
+
             $warehouseCode = $darkStore['warehouse_code'];
 
-            // Generate cache keys for the request
+            // Generate cache keys for the request - include stock sort information
             $cacheKey = $this->cacheService->getCategoryListingCacheKey(
-                $pincode,
+                $warehouseCode,
                 $categorySlug,
                 $pageSize,
                 $currentPage,
@@ -247,9 +261,12 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $filters
             );
 
-            $filtersCacheKey = $this->cacheService->getWarehouseFiltersCacheKey($warehouseCode, (array)$filters);
+            $filtersCacheKey = $this->cacheService->getWarehouseFiltersCacheKey(
+                $warehouseCode,
+                $categorySlug,
+                (array)$filters
+            );
 
-            // Try to get from cache first
             $cachedResult = $this->cacheService->get($cacheKey);
             $cachedFilters = $this->cacheService->get($filtersCacheKey);
 
@@ -257,35 +274,73 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $result = $this->resultFactory->create();
                 $result->setWarehouseCode($cachedResult['warehouse_code']);
                 $result->setWarehouseName($cachedResult['warehouse_name']);
+                $result->setTitle($cachedResult['title']);
+                $result->setCategoryIcon($cachedResult['category_icon']);
                 $result->setItems($cachedResult['items']);
                 $result->setTotalCount($cachedResult['total_count']);
                 $result->setAvailableFilters($cachedFilters);
                 return $result;
             }
 
+            $category = $this->coreCategoryRepository->get($categoryId);
+            $categoryThumbnailPath = $category->getCategoryThumbnail();
+            $categoryIcon = $this->getCategoryIcon($categoryThumbnailPath);
+
             // Create a collection with the category filter
             $collection = $this->productCollectionFactory->create();
             $collection->addCategoriesFilter(['eq' => $categoryId]);
             $collection->addAttributeToSelect('*');
+
+            // Explicitly add qty_sold attribute to ensure it's available for sorting
+            $collection->addAttributeToSelect('qty_sold');
 
             // Add filters if provided
             if (!empty($filters)) {
                 $this->collectionService->applyFilters($collection, (array)$filters);
             }
 
-            // Join with warehouse inventory and filter for active products with stock
-            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode);
+            // Join with warehouse inventory but DO NOT filter for stock
+            // This allows us to get all products, then sort by stock status later
+            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode, false);
+
+            // Add inventory quantity as a field we can sort on later
+            $collection->getSelect()->columns(['inventory_quantity' => 'inventory.quantity']);
 
             // Apply pagination
             $collection->setPageSize($pageSize);
             $collection->setCurPage($currentPage);
 
-            // Apply sorting
+            // Apply custom sorting to always keep in-stock items first
+            // We need to use a direct SQL approach for this
+
+            // First, always sort by stock status
+            $collection->getSelect()->order(new Zend_Db_Expr('IF(inventory.quantity > 0, 0, 1) ASC'));
+
             if ($sortField) {
-                $collection->setOrder($sortField, $sortDirection ?: 'ASC');
+                // Handle special case for category position
+                if ($sortField === 'position' || $sortField === 'recommended') {
+                    // Join with category product table to get position
+                    $collection->joinField(
+                        'position',
+                        'catalog_category_product',
+                        'position',
+                        'product_id=entity_id',
+                        ['category_id' => $categoryId],
+                        'left'
+                    );
+
+                    // Apply the position sort
+                    $collection->setOrder('position', $sortDirection ?: 'ASC');
+                } elseif ($sortField === 'qty_sold' || $sortField === 'popularity') {
+                    // Apply the popularity sort
+                    $collection->setOrder('qty_sold', $sortDirection ?: 'DESC');
+                } else {
+                    // Apply the requested sort field
+                    $collection->setOrder($sortField, $sortDirection ?: 'ASC');
+                }
             } else {
-                // Default sort by name
-                $collection->setOrder('name', 'ASC');
+                // Apply the popularity sort as the default
+                $collection->setOrder('qty_sold', 'DESC');
             }
 
             // Count total results before loading data
@@ -305,7 +360,6 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 ];
             }
 
-            // Cache the filters
             $this->cacheService->save(
                 $filtersCacheKey,
                 $availableFilters,
@@ -318,6 +372,10 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             foreach ($collection as $product) {
                 $staticData = $this->productFormatter->extractStaticData($product);
                 $dynamicData = $this->productFormatter->extractDynamicData($product);
+
+                // Add the inventory quantity to help with debugging if needed
+                $dynamicData['inventory_quantity'] = (int)$product->getData('inventory_quantity');
+
                 $formattedItems[] = array_merge($staticData, $dynamicData);
             }
 
@@ -325,6 +383,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             $result = $this->resultFactory->create();
             $result->setWarehouseCode($warehouseCode);
             $result->setWarehouseName($darkStore['warehouse_name']);
+            $result->setTitle($category->getName());
+            $result->setCategoryIcon($categoryIcon);
             $result->setItems($formattedItems);
             $result->setTotalCount($totalCount);
             $result->setAvailableFilters($availableFilters);
@@ -335,6 +395,8 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 [
                     'warehouse_code' => $warehouseCode,
                     'warehouse_name' => $darkStore['warehouse_name'],
+                    'title' => $category->getName(),
+                    'category_icon' => $categoryIcon,
                     'items' => $formattedItems,
                     'total_count' => $totalCount
                 ],
@@ -352,6 +414,27 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 __('Could not retrieve category products for pincode: %1', $e->getMessage())
             );
         }
+    }
+
+    /**
+     * Get Category Details.
+     *
+     * @param string|null $categoryIcon
+     * @return string
+     */
+    public function getCategoryIcon(?string $categoryIcon): string
+    {
+        $iconUrl = '';
+        try {
+            if ($categoryIcon) {
+                $categoryIcon = str_replace('/media/', '', $categoryIcon);
+                $mediaUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
+                $iconUrl = $mediaUrl . $categoryIcon;
+            }
+        } catch (NoSuchEntityException $e) {
+            $this->logger->error('Error fetching category icon: ' . $categoryIcon . " | " . $e->getMessage());
+        }
+        return $iconUrl;
     }
 
     /**
@@ -388,28 +471,19 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
                 // Only add subcategories that have products in this warehouse
                 if ($productCount > 0) {
-                    // Get category icon, if available
-                    $categoryIcon = $subCategory->getCategoryIcon();
-                    $iconUrl = '';
-
-                    // If category icon exists, get the URL
-                    if ($categoryIcon) {
-                        $categoryIcon = str_replace('/media/', '', $categoryIcon);
-                        $mediaUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
-                        $iconUrl = $mediaUrl . $categoryIcon;
-                    }
+                    $categoryIconPath = $subCategory->getCategoryIcon();
+                    $categoryIcon = $this->getCategoryIcon($categoryIconPath);
 
                     $result[] = [
                         'id' => $subcategoryId,
                         'label' => $subCategory->getName(),
                         'slug' => $subCategory->getUrlKey(),
                         'count' => $productCount,
-                        'icon' => $iconUrl  // Add the icon URL to the result
+                        'icon' => $categoryIcon
                     ];
                 }
             }
 
-            // Cache the result
             if (!empty($result)) {
                 $this->cacheService->save(
                     $cacheKey,
@@ -480,6 +554,10 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
 
+            if (empty($darkStore)) {
+                throw new NoSuchEntityException(__('No dark store available for pincode %1', $pincode));
+            }
+
             $warehouseCode = $darkStore['warehouse_code'];
 
             $rootCategoryId = $this->getCategoriesRootId();
@@ -512,7 +590,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
                 $cacheKey,
                 $cacheData,
                 ['categories_list'],
-                CacheServiceInterface::CACHE_LIFETIME_1_WEEK
+                CacheServiceInterface::CACHE_LIFETIME_1_DAY
             );
 
             return $result;
@@ -572,47 +650,58 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
         try {
             $result = [];
 
-            // Get the category
             $category = $this->coreCategoryRepository->get($categoryId);
 
-            // Get subcategories that are included in menu
             $subCategories = $category->getChildrenCategories()
                 ->addAttributeToFilter('include_in_menu', ['eq' => 1])
-                ->addAttributeToSelect(['name', 'url_key', 'category_icon']);
+                ->addAttributeToSelect(['name', 'url_key', 'shop_by_image_desktop', 'shop_by_image_mobile']);
 
-            // Add each subcategory to the result
             foreach ($subCategories as $subCategory) {
-                // Get product count for this subcategory in the current warehouse
                 $subcategoryId = (int)$subCategory->getId();
                 $productCount = $this->getProductCountForSubcategory($subcategoryId, $warehouseCode);
 
-                // Only add subcategories that have products in this warehouse
                 if ($productCount > 0) {
-                    // Get category icon if available
-                    $categoryIcon = $subCategory->getCategoryIcon();
-                    $iconUrl = '';
-
-                    // If category icon exists, get the URL
-                    if ($categoryIcon) {
-                        $categoryIcon = str_replace('/media/', '', $categoryIcon);
+                    $shopByImageDesktop = $this->removeMediaFromUrl($subCategory->getShopByImageDesktop());
+                    $shopByImageMobile = $this->removeMediaFromUrl($subCategory->getShopByImageMobile());
+                    try {
                         $mediaUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
-                        $iconUrl = $mediaUrl . $categoryIcon;
+                    } catch (LocalizedException) {
+                        $mediaUrl = 'https://assets.hyugalife.com';
                     }
-
                     $result[] = [
                         'id' => $subcategoryId,
                         'name' => $subCategory->getName(),
                         'slug' => $subCategory->getUrlKey(),
                         'product_count' => $productCount,
-                        'icon' => $iconUrl
+                        'shop_by_image_desktop' => $mediaUrl . $shopByImageDesktop,
+                        'shop_by_image_mobile' => $mediaUrl . $shopByImageMobile,
                     ];
                 }
             }
+
+            // Sort the result array by product_count in descending order
+            usort($result, function ($a, $b) {
+                return $b['product_count'] <=> $a['product_count'];
+            });
 
             return $result;
         } catch (Exception $e) {
             $this->logger->error('Error getting categories with products: ' . $e->getMessage());
             return [];
         }
+    }
+
+    /**
+     * Remove Media From Url
+     *
+     * @param string|null $url
+     * @return string|null
+     */
+    public function removeMediaFromUrl(?string $url): ?string
+    {
+        if ($url && str_contains($url, '/media/')) {
+            $url = explode('/media/', $url, 2)[1];
+        }
+        return $url;
     }
 }

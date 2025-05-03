@@ -1,8 +1,15 @@
 <?php
 /**
- * Copyright ©  All rights reserved.
- * See COPYING.txt for license details.
- */
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 declare(strict_types=1);
 
 namespace Pratech\Recurring\Api;
@@ -14,6 +21,7 @@ interface SubscriptionMappingRepositoryInterface
 
     /**
      * Save SubscriptionMapping
+     *
      * @param \Pratech\Recurring\Api\Data\SubscriptionMappingInterface $subscriptionMapping
      * @return \Pratech\Recurring\Api\Data\SubscriptionMappingInterface
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -24,6 +32,7 @@ interface SubscriptionMappingRepositoryInterface
 
     /**
      * Retrieve SubscriptionMapping
+     *
      * @param string $subscriptionMappingId
      * @return \Pratech\Recurring\Api\Data\SubscriptionMappingInterface
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -32,6 +41,7 @@ interface SubscriptionMappingRepositoryInterface
 
     /**
      * Retrieve SubscriptionMapping matching the specified criteria.
+     *
      * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
      * @return \Pratech\Recurring\Api\Data\SubscriptionMappingSearchResultsInterface
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -42,6 +52,7 @@ interface SubscriptionMappingRepositoryInterface
 
     /**
      * Delete SubscriptionMapping
+     *
      * @param \Pratech\Recurring\Api\Data\SubscriptionMappingInterface $subscriptionMapping
      * @return bool true on success
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -52,6 +63,7 @@ interface SubscriptionMappingRepositoryInterface
 
     /**
      * Delete SubscriptionMapping by ID
+     *
      * @param string $subscriptionMappingId
      * @return bool true on success
      * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -59,4 +71,3 @@ interface SubscriptionMappingRepositoryInterface
      */
     public function deleteById($subscriptionMappingId);
 }
-

@@ -14,9 +14,9 @@
 namespace Pratech\Warehouse\Service;
 
 use Exception;
+use Hyuga\Catalog\Service\GraphQlProductAttributeService;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\App\ResourceConnection;
-use Pratech\Warehouse\Model\Cache\ProductAttributeCache;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,13 +26,13 @@ class ProductFormatterService
 {
     /**
      * @param ResourceConnection $resource
-     * @param ProductAttributeCache $attributeCache
+     * @param GraphQlProductAttributeService $graphQlProductAttributeService
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private ResourceConnection    $resource,
-        private ProductAttributeCache $attributeCache,
-        private LoggerInterface       $logger
+        private ResourceConnection             $resource,
+        private GraphQlProductAttributeService $graphQlProductAttributeService,
+        private LoggerInterface                $logger
     ) {
     }
 
@@ -47,7 +47,7 @@ class ProductFormatterService
         $productId = (int)$product->getId();
 
         // Load all attributes from cache
-        $allAttributes = $this->attributeCache->getAllAttributes($productId);
+        $allAttributes = $this->graphQlProductAttributeService->getAllAttributes($productId);
 
         // Extract static attributes
         return [
@@ -62,7 +62,9 @@ class ProductFormatterService
             'is_hl_verified' => (int)($allAttributes['is_hl_verified'] ?? 0),
             'is_hm_verified' => (int)($allAttributes['is_hm_verified'] ?? 0),
             'number_of_servings' => $allAttributes['number_of_servings'] ?? '',
-            'star_ratings' => (int)($allAttributes['star_ratings'] ?? 0),
+            'star_ratings' => $allAttributes['rating_summary'] ?
+                number_format(($allAttributes['rating_summary'] / 20), 1)
+                : 0,
             'review_count' => (int)($allAttributes['review_count'] ?? 0),
             'price_per_count' => $allAttributes['price_per_count'] ?? '',
             'price_per_100_ml' => $allAttributes['price_per_100_ml'] ?? '',
@@ -124,7 +126,7 @@ class ProductFormatterService
         $stockInfo = $this->getProductStockInfo($productId);
 
         // Get all cached attributes
-        $allAttributes = $this->attributeCache->getAllAttributes($productId);
+        $allAttributes = $this->graphQlProductAttributeService->getAllAttributes($productId);
 
         return [
             'price' => (float)$product->getPrice(),

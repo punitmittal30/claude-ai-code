@@ -14,9 +14,9 @@
 namespace Pratech\Warehouse\Plugin;
 
 use Magento\Framework\Webapi\ServiceOutputProcessor;
+use Pratech\Warehouse\Api\Data\CategoryListResultInterface;
 use Pratech\Warehouse\Api\Data\WarehouseProductResultInterface;
 use Pratech\Warehouse\Model\Converter\WarehouseProductResultSerializer;
-use Pratech\Warehouse\Api\Data\CategoryListResultInterface;
 
 /**
  * Plugin for handling WarehouseProductResult in the REST API

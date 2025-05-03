@@ -15,6 +15,7 @@ namespace Pratech\Warehouse\Model;
 
 use Exception;
 use Hyuga\CacheManagement\Api\CacheServiceInterface;
+use Hyuga\CacheManagement\Model\CacheService;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
@@ -29,7 +30,6 @@ use Pratech\Warehouse\Api\WarehouseSlaRepositoryInterface;
 use Pratech\Warehouse\Logger\InventorySyncLogger;
 use Pratech\Warehouse\Model\ResourceModel\Pincode as ResourcePincode;
 use Pratech\Warehouse\Model\ResourceModel\Pincode\CollectionFactory as PincodeCollectionFactory;
-use Hyuga\CacheManagement\Model\CacheService;
 use Pratech\Warehouse\Service\DarkStoreLocatorService;
 
 class PincodeRepository implements PincodeRepositoryInterface
@@ -171,13 +171,15 @@ class PincodeRepository implements PincodeRepositoryInterface
             }
 
             $earliestAt = $this->warehouseSlaRepository->getEarliestAtByPincode($pincodeData->getPincode());
-            try {
-                $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+
+            $darkStore = $this->darkStoreLocator->findNearestDarkStore($pincode);
+
+            if (!empty($darkStore)) {
                 $store = [
                     'is_dark_store' => true,
                     'name' => $darkStore['warehouse_name']
                 ];
-            } catch (NoSuchEntityException $e) {
+            } else {
                 $store = [
                     'is_dark_store' => false
                 ];

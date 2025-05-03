@@ -1,5 +1,15 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Observer;
 
 use Exception;
@@ -10,17 +20,11 @@ use Pratech\Recurring\Model\SubscriptionFactory;
 class SalesOrderCancelAfter implements ObserverInterface
 {
     /**
-     * @var SubscriptionFactory
-     */
-    private $subscriptionFactory;
-    
-    /**
      * @param SubscriptionFactory $subscriptionFactory
      */
     public function __construct(
-        SubscriptionFactory $subscriptionFactory
+        private SubscriptionFactory $subscriptionFactory
     ) {
-        $this->subscriptionFactory = $subscriptionFactory;
     }
 
     /**

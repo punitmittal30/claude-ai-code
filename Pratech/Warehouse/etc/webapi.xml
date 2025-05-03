@@ -54,20 +54,6 @@
         </resources>
     </route>
 
-    <!-- Available filters API endpoints -->
-    <route url="/V1/warehouse/:warehouseCode/filters" method="GET">
-        <service class="Pratech\Warehouse\Api\FilterRepositoryInterface" method="getWarehouseFilters"/>
-        <resources>
-            <resource ref="Pratech_Warehouse::warehouse_manage"/>
-        </resources>
-    </route>
-    <route url="/V1/warehouse/pincode/:pincode/filters" method="GET">
-        <service class="Pratech\Warehouse\Api\FilterRepositoryInterface" method="getDarkStoreFilters"/>
-        <resources>
-            <resource ref="Pratech_Warehouse::warehouse_manage"/>
-        </resources>
-    </route>
-
     <!-- Carousel products endpoint -->
     <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/carousel" method="GET">
         <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"

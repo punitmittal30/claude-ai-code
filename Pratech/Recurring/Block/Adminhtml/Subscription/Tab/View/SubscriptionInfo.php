@@ -1,9 +1,24 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Block\Adminhtml\Subscription\Tab\View;
 
+use Magento\Backend\Block\Template\Context;
+use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
+use Magento\Catalog\Model\ProductFactory;
+use Magento\Customer\Model\CustomerFactory;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\Order\Address\Renderer;
 use Magento\Framework\Pricing\Helper\Data as FormatPrice;
 use Pratech\Recurring\Model\Config\Source\Status as SubscriptionStatus;
 
@@ -13,88 +28,28 @@ use Pratech\Recurring\Model\Config\Source\Status as SubscriptionStatus;
 class SubscriptionInfo extends \Magento\Backend\Block\Template
 {
     /**
-     * @var Magento\Sales\Model\ProductFactory
-     */
-    protected $productFactory;
-
-    /**
-     * @var SubscriptionFactory
-     */
-    protected $subscriptionFactory;
-
-    /**
-     * @var Order
-     */
-    protected $orderFactory;
-
-    /**
-     * @var \Magento\Customer\Model\CustomerFactory
-     */
-    protected $customerFactory;
-
-    /**
-     * @var \Magento\Framework\Registry
-     */
-    protected $coreRegistry;
-    /**
-     * @var UrlInterface
-     */
-    protected $urlBuilder;
-
-    /**
-     * @var FormatPrice
-     */
-    private $priceHelper;
-
-    /**
-     * @var \Magento\Sales\Model\Order\Address\Renderer
-     */
-    private $addressRenderer;
-
-    /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
+     * @param Context $context
+     * @param Registry $coreRegistry
      * @param UrlInterface $urlBuilder
-     * @param \Magento\Catalog\Model\ProductFactory $productFactory
-     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
+     * @param ProductFactory $productFactory
+     * @param CustomerFactory $customerFactory
      * @param OrderFactory $orderFactory
      * @param FormatPrice $priceHelper
-     * @param \Magento\Sales\Model\Order\Address\Renderer $addressRenderer
+     * @param Renderer $addressRenderer
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Registry $registry,
-        UrlInterface $urlBuilder,
-        \Magento\Catalog\Model\ProductFactory $productFactory,
-        \Magento\Customer\Model\CustomerFactory $customerFactory,
-        OrderFactory $orderFactory,
-        FormatPrice $priceHelper,
-        \Magento\Sales\Model\Order\Address\Renderer $addressRenderer,
+        Context $context,
+        protected Registry $coreRegistry,
+        protected UrlInterface $urlBuilder,
+        protected ProductFactory $productFactory,
+        protected CustomerFactory $customerFactory,
+        protected OrderFactory $orderFactory,
+        private FormatPrice $priceHelper,
+        private Renderer $addressRenderer,
         array $data = []
     ) {
         parent::__construct($context, $data);
-        $this->orderFactory = $orderFactory;
-        $this->productFactory = $productFactory;
-        $this->customerFactory = $customerFactory;
-        $this->coreRegistry = $registry;
-        $this->urlBuilder = $urlBuilder;
-        $this->priceHelper = $priceHelper;
-        $this->addressRenderer = $addressRenderer;
-    }
-
-    /**
-     * Get subscription started date
-     *
-     * @return string
-     */
-    public function getStartDate()
-    {
-        return $this->formatDate(
-            $this->getSubscription()->getStartDate(),
-            \IntlDateFormatter::FULL,
-            false
-        );
     }
 
     /**
@@ -169,7 +124,7 @@ class SubscriptionInfo extends \Magento\Backend\Block\Template
     /**
      * Get Product
      *
-     * @return \Magento\Catalog\Model\ProductFactory
+     * @return \Magento\Catalog\Model\Product
      */
     public function getProduct()
     {

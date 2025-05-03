@@ -24,9 +24,5 @@
         <job name="update_cod_order_status" instance="Pratech\Order\Cron\UpdateCodOrderStatus" method="execute">
             <schedule>0 * * * *</schedule>
         </job>
-        <!-- To update shipment status counters for customer. The cron will run at 2:30AM IST(selected timezone in magento). -->
-        <job name="update_shipment_status_counter" instance="Pratech\Order\Cron\UpdateShipmentStatusCounter" method="execute">
-            <schedule>30 2 * * *</schedule>
-        </job>
     </group>
 </config>

@@ -25,27 +25,21 @@ class OrderLink extends Column
     public const URL_RELATIVE_PATH = 'sales/order/view';
 
     /**
-     * @var UrlInterface
-     */
-    protected $urlBuilder;
-
-    /**
      * OrderLink constructor
      *
-     * @param UrlInterface $urlBuilder
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
+     * @param UrlInterface $urlBuilder
      * @param array $components
      * @param array $data
      */
     public function __construct(
-        UrlInterface       $urlBuilder,
-        ContextInterface   $context,
+        ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
-        array              $components = [],
-        array              $data = []
+        protected UrlInterface $urlBuilder,
+        array $components = [],
+        array $data = []
     ) {
-        $this->urlBuilder = $urlBuilder;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 

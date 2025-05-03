@@ -156,10 +156,10 @@ class Video
                         'url' => $mediaUrl . $video->getUrl(),
                         'display_timing' => $video->getDisplayTiming(),
                         'shop_now_url' => $video->getShopNowUrl(),
-                        'pages' => $video->getPage()
-                            ? explode(",", $video->getPage()) : null,
+                        'platform' => $video->getPlatform()
+                            ? explode(",", $video->getPlatform()) : null,
                         'video_for' => $video->getVideoFor()
-                            ? explode(",", $video->getVideoFor()) : null,
+                            ? explode(",", $video->getVideoFor()) : null
                     ];
                 }
                 $result[] = [

@@ -37,13 +37,13 @@ class SalesOrderSaveAfter implements ObserverInterface
     /**
      * Send Sqs Event Constructor
      *
-     * @param SqsEvent              $sqsEvent
+     * @param SqsEvent $sqsEvent
      * @param StoreManagerInterface $storeManager
-     * @param Logger                $apiLogger
-     * @param BaseHelper            $baseHelper
-     * @param UpdateCouponUsages    $updateCouponUsages
-     * @param RuleUsageCounter      $ruleUsageCounter
-     * @param CouponFactory         $couponFactory
+     * @param Logger $apiLogger
+     * @param BaseHelper $baseHelper
+     * @param UpdateCouponUsages $updateCouponUsages
+     * @param RuleUsageCounter $ruleUsageCounter
+     * @param CouponFactory $couponFactory
      */
     public function __construct(
         private SqsEvent              $sqsEvent,
@@ -99,18 +99,15 @@ class SalesOrderSaveAfter implements ObserverInterface
             } elseif ($order->getStatus() == 'pending' && $order->getState() == 'pending') {
                 $emailData = $this->getOrderDataForEmail($order, 'ORDER_PENDING');
                 $emailData['type'] = 'event';
-                $emailData['id'] = $order->getId();
                 $this->sqsEvent->sentEmailEventToSqs($emailData);
             } elseif ($order->getStatus() == 'shipped') {
                 $emailData = $this->getOrderDataForEmail($order, 'ORDER_SHIPPED');
                 $emailData['type'] = 'event';
-                $emailData['id'] = $order->getId();
                 $emailData['trackings'] = $this->getTrackingDetails($order);
                 $this->sqsEvent->sentEmailEventToSqs($emailData);
-            } elseif ($order->getStatus() == 'delivered') {
+            } elseif (strtolower($order->getStatus()) == 'delivered') {
                 $emailData = $this->getOrderDataForEmail($order, 'ORDER_DELIVERED');
                 $emailData['type'] = 'event';
-                $emailData['id'] = $order->getId();
                 $emailData['trackings'] = $this->getTrackingDetails($order);
                 $this->sqsEvent->sentEmailEventToSqs($emailData);
             }
@@ -124,8 +121,8 @@ class SalesOrderSaveAfter implements ObserverInterface
     /**
      * Get Order Data For Email Event
      *
-     * @param  Order  $order
-     * @param  string $eventName
+     * @param Order $order
+     * @param string $eventName
      * @return array
      * @throws LocalizedException
      */
@@ -135,6 +132,7 @@ class SalesOrderSaveAfter implements ObserverInterface
         return [
             'type' => 'email',
             'event_name' => $eventName,
+            'id' => $order->getId(),
             'name' => ucfirst($shippingAddress->getFirstname()) . " " . ucfirst($shippingAddress->getLastname()),
             'email' => $shippingAddress->getEmail(),
             'order_id' => $order->getIncrementId(),
@@ -151,7 +149,7 @@ class SalesOrderSaveAfter implements ObserverInterface
             'prepaid_discount' => number_format($order->getPrepaidDiscount() ? $order->getPrepaidDiscount() : 0, 2),
             'grand_total_without_prepaid' => number_format(
                 $order->getGrandTotalWithoutPrepaid()
-                ? $order->getGrandTotalWithoutPrepaid(): 0,
+                    ? $order->getGrandTotalWithoutPrepaid() : 0,
                 2
             ),
             'grand_total' => number_format($order->getGrandTotal(), 2),
@@ -160,7 +158,7 @@ class SalesOrderSaveAfter implements ObserverInterface
             'eligible_cashback' => $order->getEligibleCashback() ? $order->getEligibleCashback() : 0,
             'customerbalance' => number_format(
                 $order->getCustomerBalanceAmount() ?
-                    $order->getCustomerBalanceAmount(): 0,
+                    $order->getCustomerBalanceAmount() : 0,
                 2
             ),
             'utm' => $this->getOrderUtmParamsData($order)
@@ -170,7 +168,7 @@ class SalesOrderSaveAfter implements ObserverInterface
     /**
      * Get Shipping Address Data
      *
-     * @param  Address $shippingAddress
+     * @param Address $shippingAddress
      * @return string
      */
     private function getShippingAddressData(Address $shippingAddress): string
@@ -182,7 +180,7 @@ class SalesOrderSaveAfter implements ObserverInterface
     /**
      * Get Order Items Data
      *
-     * @param  Order $order
+     * @param Order $order
      * @return array
      * @throws NoSuchEntityException
      */
@@ -201,28 +199,44 @@ class SalesOrderSaveAfter implements ObserverInterface
                 'price' => $item->getPrice() ? number_format($item->getPrice(), 2) : 0,
                 'sku' => $item->getSku(),
                 'brand' => $product->getCustomAttribute('brand') ?
-                        $this->baseHelper->getProductAttributeLabel(
-                            'brand',
-                            $product->getCustomAttribute('brand')->getValue()
-                        ) : "",
+                    $this->baseHelper->getProductAttributeLabel(
+                        'brand',
+                        $product->getCustomAttribute('brand')->getValue()
+                    ) : "",
                 'primary_l1_category' => $product->getCustomAttribute('primary_l1_category') ?
-                        $this->baseHelper->getCategoryData(
-                            $product->getCustomAttribute('primary_l1_category')->getValue()
-                        ) : "",
+                    $this->baseHelper->getCategoryData(
+                        $product->getCustomAttribute('primary_l1_category')->getValue()
+                    ) : "",
                 'primary_l2_category' => $product->getCustomAttribute('primary_l2_category') ?
-                        $this->baseHelper->getCategoryData(
-                            $product->getCustomAttribute('primary_l2_category')->getValue()
-                        ) : "",
+                    $this->baseHelper->getCategoryData(
+                        $product->getCustomAttribute('primary_l2_category')->getValue()
+                    ) : "",
             ];
         }
         return $orderItems;
     }
 
     /**
+     * Get Order UTM Params Data
+     *
+     * @param Order $order
+     * @return array
+     */
+    private function getOrderUtmParamsData(Order $order): array
+    {
+        return [
+            'utm_source' => $order->getUtmSource() ? $order->getUtmSource() : null,
+            'utm_campaign' => $order->getUtmCampaign() ? $order->getUtmCampaign() : null,
+            'utm_medium' => $order->getUtmMedium() ? $order->getUtmMedium() : null,
+            'utm_term' => $order->getUtmTerm() ? $order->getUtmTerm() : null
+        ];
+    }
+
+    /**
      * Get Order Data For Sms Event
      *
-     * @param  Order  $order
-     * @param  string $eventName
+     * @param Order $order
+     * @param string $eventName
      * @return array
      */
     private function getOrderDataForSms(Order $order, string $eventName): array
@@ -239,42 +253,10 @@ class SalesOrderSaveAfter implements ObserverInterface
     }
 
     /**
-     * Restore Coupon Usages on order cancel or payment failed
-     *
-     * @param  Order $order
-     * @return void
-     */
-    private function restoreCouponUsages(Order $order): void
-    {
-        $cancelledOrderStatus = ['canceled', 'payment_failed'];
-        if (in_array($order->getStatus(), $cancelledOrderStatus)) {
-            $this->updateCouponUsages->execute($order, false);
-
-            if ($order->getAppliedRuleIds()) {
-                $appliedRuleIds = explode(',', $order->getAppliedRuleIds());
-                foreach (array_unique($appliedRuleIds) as $ruleId) {
-                    if (!(int)$ruleId) {
-                        continue;
-                    }
-                    $this->ruleUsageCounter->saveUsageCount(
-                        $ruleId,
-                        $this->ruleUsageCounter->getCountByRuleId($ruleId) - 1
-                    );
-                }
-            }
-            if ($code = $order->getCouponCode()) {
-                $coupon = $this->couponFactory->create()->load($code, 'code');
-                $coupon->setTimesUsed($coupon->getTimesUsed() - 1);
-                $coupon->save();
-            }
-        }
-    }
-
-    /**
      * Get Order Data For Food Darzee Email Event
      *
-     * @param  Order  $order
-     * @param  string $eventName
+     * @param Order $order
+     * @param string $eventName
      * @return array
      * @throws LocalizedException
      */
@@ -301,7 +283,7 @@ class SalesOrderSaveAfter implements ObserverInterface
     /**
      * Get Order Items Data For Food Darzee
      *
-     * @param  Order $order
+     * @param Order $order
      * @return array
      * @throws NoSuchEntityException
      */
@@ -329,32 +311,16 @@ class SalesOrderSaveAfter implements ObserverInterface
                 'sku' => $item->getSku(),
                 'brand' => $brand,
                 'primary_l1_category' => $product->getCustomAttribute('primary_l1_category') ?
-                        $this->baseHelper->getCategoryData(
-                            $product->getCustomAttribute('primary_l1_category')->getValue()
-                        ) : "",
+                    $this->baseHelper->getCategoryData(
+                        $product->getCustomAttribute('primary_l1_category')->getValue()
+                    ) : "",
                 'primary_l2_category' => $product->getCustomAttribute('primary_l2_category') ?
-                        $this->baseHelper->getCategoryData(
-                            $product->getCustomAttribute('primary_l2_category')->getValue()
-                        ) : "",
+                    $this->baseHelper->getCategoryData(
+                        $product->getCustomAttribute('primary_l2_category')->getValue()
+                    ) : "",
             ];
         }
         return $orderItems;
-    }
-
-    /**
-     * Get Order UTM Params Data
-     *
-     * @param  Order $order
-     * @return array
-     */
-    private function getOrderUtmParamsData(Order $order): array
-    {
-        return [
-            'utm_source' => $order->getUtmSource() ? $order->getUtmSource() : null,
-            'utm_campaign' => $order->getUtmCampaign() ? $order->getUtmCampaign() : null,
-            'utm_medium' => $order->getUtmMedium() ? $order->getUtmMedium() : null,
-            'utm_term' => $order->getUtmTerm() ? $order->getUtmTerm() : null
-        ];
     }
 
     /**
@@ -377,5 +343,46 @@ class SalesOrderSaveAfter implements ObserverInterface
         }
 
         return $trackingDetails;
+    }
+
+    /**
+     * Restore Coupon Usages on order cancel or payment failed
+     *
+     * @param Order $order
+     * @return void
+     */
+    private function restoreCouponUsages(Order $order): void
+    {
+        $cancelledOrderStatus = ['canceled', 'payment_failed'];
+        if (in_array($order->getStatus(), $cancelledOrderStatus)) {
+            $this->updateCouponUsages->execute($order, false);
+
+            if ($order->getAppliedRuleIds()) {
+                $appliedRuleIds = explode(',', $order->getAppliedRuleIds());
+                foreach (array_unique($appliedRuleIds) as $ruleId) {
+                    if (!(int)$ruleId) {
+                        continue;
+                    }
+                    $this->ruleUsageCounter->saveUsageCount(
+                        $ruleId,
+                        $this->ruleUsageCounter->getCountByRuleId($ruleId) - 1
+                    );
+                }
+            }
+            if ($code = $order->getCouponCode()) {
+                $couponCodes = explode(',', $code);
+                foreach ($couponCodes as $couponCode) {
+                    $couponCode = trim($couponCode);
+                    if (empty($couponCode)) {
+                        continue;
+                    }
+                    $coupon = $this->couponFactory->create()->load($couponCode, 'code');
+                    if ($coupon->getId()) {
+                        $coupon->setTimesUsed($coupon->getTimesUsed() - 1);
+                        $coupon->save();
+                    }
+                }
+            }
+        }
     }
 }

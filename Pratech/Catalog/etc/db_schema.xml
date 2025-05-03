@@ -24,4 +24,20 @@
          		<column name="category_id"/>
      	 </index>
     </table>
+    <table name="linked_configurable_product" resource="default" engine="innodb" comment="Linked Configurable Products">
+        <column name="product_id" xsi:type="int" unsigned="true" nullable="false" comment="Product ID"/>
+        <column name="linked_product_id" xsi:type="int" unsigned="true" nullable="false" comment="Linked Product ID"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="product_id"/>
+            <column name="linked_product_id"/>
+        </constraint>
+
+        <constraint xsi:type="foreign" referenceId="FK_PRODUCT_ID_CATALOG_PRODUCT_ENTITY"
+                    table="pratech_linked_configurable_product" column="product_id"
+                    referenceTable="catalog_product_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="FK_LINKED_PRODUCT_ID_CATALOG_PRODUCT_ENTITY"
+                    table="pratech_linked_configurable_product" column="linked_product_id"
+                    referenceTable="catalog_product_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
 </schema>

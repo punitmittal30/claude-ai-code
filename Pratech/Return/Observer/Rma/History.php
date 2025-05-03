@@ -286,6 +286,7 @@ class History implements ObserverInterface
             'type' => 'email',
             'event_name' => $eventName,
             'is_rvp' => true,
+            'id' => $order->getId(),
             'name' => ucfirst($shippingAddress->getFirstname()) . " " . ucfirst($shippingAddress->getLastname()),
             'email' => $shippingAddress->getEmail(),
             'order_id' => $order->getIncrementId(),

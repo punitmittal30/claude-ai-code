@@ -41,8 +41,6 @@
                 type="Pratech\Warehouse\Model\Data\WarehouseProductResult"/>
 
     <!-- Filter repository and related data interfaces -->
-    <preference for="Pratech\Warehouse\Api\FilterRepositoryInterface"
-                type="Pratech\Warehouse\Model\Repository\FilterRepository"/>
     <preference for="Pratech\Warehouse\Api\Data\FilterResultInterface"
                 type="Pratech\Warehouse\Model\Data\FilterResult"/>
     <preference for="Pratech\Warehouse\Api\Data\PriceRangeInterface"

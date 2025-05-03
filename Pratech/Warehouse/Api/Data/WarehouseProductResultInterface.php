@@ -55,10 +55,25 @@ interface WarehouseProductResultInterface
     /**
      * Set category title
      *
-     * @param string $title
+     * @param string|null $title
      * @return $this
      */
-    public function setTitle(string $title);
+    public function setTitle(?string $title);
+
+    /**
+     * Get category image icon
+     *
+     * @return string|null
+     */
+    public function getCategoryIcon(): ?string;
+
+    /**
+     * Set category image icon
+     *
+     * @param string|null $imageUrl
+     * @return $this
+     */
+    public function setCategoryIcon(?string $imageUrl);
 
     /**
      * Get items

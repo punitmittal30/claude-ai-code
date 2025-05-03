@@ -1,4 +1,15 @@
 <?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_Recurring
+ *
+ * @category  XML
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
 	<argument name="data" xsi:type="array">
 		<item name="js_config" xsi:type="array">

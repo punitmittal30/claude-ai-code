@@ -1,103 +1,82 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Helper;
 
 use Exception;
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Json\Helper\Data as JsonHelper;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Model\Order as SalesOrder;
-use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\App\Emulation;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Api\CartTotalRepositoryInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Pratech\Base\Logger\CronLogger;
+use Pratech\Order\Helper\Order as OrderHelper;
+use Pratech\Recurring\Helper\Recurring as RecurringHelper;
 use Pratech\Recurring\Model\Subscription;
+use Pratech\StoreCredit\Helper\Data as StoreCreditHelper;
 
 /**
  * Pratech Recurring Helper Order
  */
-class Order extends \Magento\Framework\App\Helper\AbstractHelper
+class Order
 {
     /**
-     * This variable is set the store scope for order
-     *
-     * @var Magento\Store\Model\App\Emulation;
-     */
-    private $emulate;
-
-    /**
-     * @var \Magento\Framework\Json\Helper\Data
-     */
-    private $jsonHelper;
-    /**
-     * @var Magento\Catalog\Model\ProductFactory
-     */
-    private $productFactory;
-    /**
-     * @var Magento\Quote\Api\CartRepositoryInterface
-     */
-    private $cartRepositoryInterface;
-    /**
-     * @var Magento\Quote\Api\CartManagementInterface
-     */
-    private $cartManagementInterface;
-    /**
-     * @var Magento\Customer\Api\CustomerRepositoryInterface
-     */
-    private $customerRepository;
-    /**
-     * @var OrderFactory
-     */
-    private $orderFactory;
-    /**
-     * @var \Pratech\Base\Logger\CronLogger;
-     */
-    protected $cronLogger;
-    /**
-     * @var \Magento\Quote\Api\CartRepositoryInterface
-     */
-    protected $quoteRepository;
-
-    /**
-     * @param \Magento\Framework\App\Helper\Context $context
      * @param Emulation $emulate
-     * @param Magento\Catalog\Model\ProductFactory $productFactory
-     * @param Magento\Quote\Api\CartRepositoryInterface $cartRepositoryInterface
-     * @param Magento\Quote\Api\CartManagementInterface $cartManagementInterface
-     * @param \Magento\Framework\Json\Helper\Data $jsonHelper
-     * @param Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
-     * @param OrderFactory $orderFactory
-     * @param \Pratech\Base\Logger\CronLogger $cronLogger
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
+     * @param ProductRepositoryInterface $productRepository
+     * @param CartRepositoryInterface $cartRepositoryInterface
+     * @param CartManagementInterface $cartManagementInterface
+     * @param CartTotalRepositoryInterface $cartTotalRepository
+     * @param JsonHelper $jsonHelper
+     * @param DateTime $date
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param ScopeConfigInterface $scopeConfig
+     * @param OrderRepositoryInterface $orderRepository
+     * @param CronLogger $cronLogger
+     * @param StoreCreditHelper $storeCreditHelper
      */
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        Emulation $emulate,
-        \Magento\Catalog\Model\ProductFactory $productFactory,
-        \Magento\Quote\Api\CartRepositoryInterface $cartRepositoryInterface,
-        \Magento\Quote\Api\CartManagementInterface $cartManagementInterface,
-        \Magento\Framework\Json\Helper\Data $jsonHelper,
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
-        OrderFactory $orderFactory,
-        \Pratech\Base\Logger\CronLogger $cronLogger,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
+        private Emulation $emulate,
+        private ProductRepositoryInterface $productRepository,
+        private CartRepositoryInterface $cartRepositoryInterface,
+        private CartManagementInterface $cartManagementInterface,
+        private CartTotalRepositoryInterface $cartTotalRepository,
+        private JsonHelper $jsonHelper,
+        private DateTime $date,
+        private CustomerRepositoryInterface $customerRepository,
+        private ScopeConfigInterface $scopeConfig,
+        private OrderRepositoryInterface $orderRepository,
+        private CronLogger $cronLogger,
+        private StoreCreditHelper $storeCreditHelper
     ) {
-        $this->emulate                  = $emulate;
-        $this->jsonHelper               = $jsonHelper;
-        $this->productFactory           = $productFactory;
-        $this->cartRepositoryInterface  = $cartRepositoryInterface;
-        $this->cartManagementInterface  = $cartManagementInterface;
-        $this->customerRepository       = $customerRepository;
-        $this->orderFactory             = $orderFactory;
-        $this->cronLogger = $cronLogger;
-        $this->quoteRepository = $quoteRepository;
-        parent::__construct($context);
     }
-    
+
     /**
-     * Get product
+     * Get Product By SKU
      *
-     * @param integer $productId
-     * @return \Magento\Catalog\Model\ProductFactory
+     * @param  string $sku
+     * @return ProductInterface
+     * @throws NoSuchEntityException
      */
-    private function getProduct($productId)
+    public function getProduct(string $sku): ProductInterface
     {
-        return $this->productFactory->create()->load($productId);
+        return $this->productRepository->get($sku);
     }
     
     /**
@@ -109,6 +88,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function createMageOrder(SalesOrder $order, Subscription $subscription)
     {
+        $result = [];
         try {
             $storeId = $order->getStoreId();
             $cartId = $this->cartManagementInterface->createEmptyCart(); //Create empty cart
@@ -117,7 +97,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
             $quote->setStoreId($storeId);
             $environment  = $this->emulate->startEnvironmentEmulation($storeId);
     
-            $customerId = $order->getCustomerId();
+            $customerId = $subscription->getCustomerId();
             
             $shippingAddress = ($order->getShippingAddress() && count($order->getShippingAddress()->getData())) ?
                                 $order->getShippingAddress() :
@@ -136,16 +116,18 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
             ];
             //add items in quote
             foreach ($order->getAllVisibleItems() as $item) {
-                $product = $this->getProduct($item->getProductId());
-                $product->setPrice($subscription->getLockedPrice());
-                $quote->addProduct($product, (int)($subscription->getProductQty()));
+                if ($item->getItemId() == $subscription->getOrderItemId()) {
+                    $product = $this->getProduct($subscription->getProductSku());
+                    $product->setPrice($subscription->getLockedPrice());
+                    $quote->addProduct($product, (int)($subscription->getProductQty()));
+                }
             }
     
             $cartData = $quote->getAllVisibleItems();
-            foreach ($cartData as $item) {
-                $item->addOption(
+            foreach ($cartData as $cartItem) {
+                $cartItem->addOption(
                     [
-                        'product_id' => $item->getProductId(),
+                        'product_id' => $cartItem->getProductId(),
                         'code' => 'custom_additional_options',
                         'value' => $this->jsonHelper->jsonEncode($additionalOptions)
                     ]
@@ -173,29 +155,102 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
             
             // Collect Totals
             $quote->collectTotals();
-            
+
             // Create Order From Quote
-            $orderId = $this->cartManagementInterface->placeOrder($quote->getId());
-            $createdOrder = $this->orderFactory->create()->load($orderId);
-            
-            $createdOrder->setEmailSent(0);
-            
-            if ($createdOrder->getEntityId()) {
-                $result =   [
-                    'error' => 0,
-                    'order_id' => $createdOrder->getRealOrderId(),
-                    'id' => $createdOrder->getId()
-                ];
-            } else {
-                $result =   [
-                    'error' => 1,
-                    'msg' => __('Error occured while creating subscription order.')
-                ];
-            }
+            $result = $this->placeCustomerOrder($quote->getId(), $paymentMethod);
             $this->emulate->stopEnvironmentEmulation($environment);
         } catch (Exception $e) {
             $this->cronLogger->error($e->getMessage() . __METHOD__);
+            $result['msg'] = $e->getMessage();
         }
         return $result;
+    }
+
+    /**
+     * Place Customer Order
+     *
+     * @param int $cartId
+     * @param string $paymentCode
+     * @return array
+     * @throws CouldNotSaveException
+     * @throws LocalizedException
+     */
+    public function placeCustomerOrder(
+        int $cartId,
+        string $paymentCode
+    ): array {
+        $eligibleCashbackAmount = 0;
+        $isCashbackEnabled = $this->scopeConfig->getValue(
+            RecurringHelper::IS_CASHBACK_ENABLED,
+            ScopeInterface::SCOPE_STORE
+        );
+        if ($isCashbackEnabled) {
+            try {
+                $totals = $this->cartTotalRepository->get($cartId);
+                $eligibleCashbackAmount = $this->storeCreditHelper->getCashbackAmount($totals);
+            } catch (Exception $exception) {
+                $this->cronLogger->error($exception->getMessage()  . __METHOD__);
+            }
+        }
+        $orderId = $this->cartManagementInterface->placeOrder($cartId);
+        $order = $this->orderRepository->get($orderId);
+        $orderTotal = $order->getGrandTotal();
+        switch ($paymentCode) {
+            case "free":
+            case "cashondelivery":
+                $isEnable = $this->scopeConfig->getValue(
+                    OrderHelper::COD_VERIFICATION_STATUS,
+                    ScopeInterface::SCOPE_STORE
+                );
+                $codThreshold = $this->scopeConfig->getValue(
+                    OrderHelper::COD_CONFIRM_THRESHOLD,
+                    ScopeInterface::SCOPE_STORE
+                );
+                if (!$isEnable || $orderTotal < $codThreshold) {
+                    $order->setStatus(SalesOrder::STATE_PROCESSING)
+                        ->setState(SalesOrder::STATE_PROCESSING);
+                    $order->addCommentToStatusHistory("System: Processing(processing)");
+                } else {
+                    $order->setStatus(OrderHelper::STATUS_PENDING)
+                        ->setState(OrderHelper::STATUS_PENDING);
+                    $order->addCommentToStatusHistory("System: Pending(pending)");
+                }
+                break;
+            case "prepaid_dpanda":
+                $order->setStatus(SalesOrder::STATE_PROCESSING)
+                    ->setState(SalesOrder::STATE_PROCESSING);
+                $order->addCommentToStatusHistory("DPanda: Processing(processing)");
+                break;
+            default:
+                $order->setStatus(SalesOrder::STATE_PAYMENT_REVIEW)
+                    ->setState(SalesOrder::STATE_PAYMENT_REVIEW);
+                $order->addCommentToStatusHistory("System: Payment Review(payment_review)");
+        }
+        $order->setEstimatedDeliveryDate($this->getClickPostEdd($order->getShippingAddress()->getPostcode()));
+        $order->setEligibleCashback($eligibleCashbackAmount);
+        $this->orderRepository->save($order);
+        if ($orderId) {
+            return [
+                'error' => 0,
+                'order_id' => $orderId,
+            ];
+        }
+        return [
+            'error' => 1,
+            'msg' => __('Error occured while creating subscription order.')
+        ];
+    }
+
+    /**
+     * Get Estimated Delivery Date
+     *
+     * @param string $postcode
+     * @return string
+     */
+    private function getClickPostEdd(string $postcode): string
+    {
+        $days = OrderHelper::MAX_DELIVERY_DATE;
+        $date = $this->date->date('Y-m-d');
+        return $this->date->date('Y-m-d', strtotime($date . " +" . $days . "days"));
     }
 }

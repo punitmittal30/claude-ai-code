@@ -1,8 +1,15 @@
 <?php
 /**
- * Copyright ©  All rights reserved.
- * See COPYING.txt for license details.
- */
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 declare(strict_types=1);
 
 namespace Pratech\Recurring\Model;
@@ -20,33 +27,6 @@ use Pratech\Recurring\Model\ResourceModel\Subscription\CollectionFactory as Subs
 
 class SubscriptionRepository implements SubscriptionRepositoryInterface
 {
-
-    /**
-     * @var ResourceSubscription
-     */
-    protected $resource;
-
-    /**
-     * @var SubscriptionInterfaceFactory
-     */
-    protected $subscriptionFactory;
-
-    /**
-     * @var Subscription
-     */
-    protected $searchResultsFactory;
-
-    /**
-     * @var CollectionProcessorInterface
-     */
-    protected $collectionProcessor;
-
-    /**
-     * @var SubscriptionCollectionFactory
-     */
-    protected $subscriptionCollectionFactory;
-
-
     /**
      * @param ResourceSubscription $resource
      * @param SubscriptionInterfaceFactory $subscriptionFactory
@@ -55,17 +35,12 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
      * @param CollectionProcessorInterface $collectionProcessor
      */
     public function __construct(
-        ResourceSubscription $resource,
-        SubscriptionInterfaceFactory $subscriptionFactory,
-        SubscriptionCollectionFactory $subscriptionCollectionFactory,
-        SubscriptionSearchResultsInterfaceFactory $searchResultsFactory,
-        CollectionProcessorInterface $collectionProcessor
+        protected ResourceSubscription $resource,
+        protected SubscriptionInterfaceFactory $subscriptionFactory,
+        protected SubscriptionCollectionFactory $subscriptionCollectionFactory,
+        protected SubscriptionSearchResultsInterfaceFactory $searchResultsFactory,
+        protected CollectionProcessorInterface $collectionProcessor
     ) {
-        $this->resource = $resource;
-        $this->subscriptionFactory = $subscriptionFactory;
-        $this->subscriptionCollectionFactory = $subscriptionCollectionFactory;
-        $this->searchResultsFactory = $searchResultsFactory;
-        $this->collectionProcessor = $collectionProcessor;
     }
 
     /**
@@ -146,4 +121,3 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
         return $this->delete($this->get($subscriptionId));
     }
 }
-

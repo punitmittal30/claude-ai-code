@@ -1,5 +1,15 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Block\Adminhtml\Subscription\Tab;
 
 use Magento\Backend\Block\Template\Context;
@@ -18,11 +28,6 @@ class Orders extends \Magento\Backend\Block\Template
     protected $_template = 'Pratech_Recurring::subscription/orders.phtml';
 
     /**
-     * @var Registry
-     */
-    protected $coreRegistry = null;
-
-    /**
      * @var bool
      */
     protected $isAjaxLoaded = true;
@@ -36,15 +41,14 @@ class Orders extends \Magento\Backend\Block\Template
      * Constructor
      *
      * @param Context $context
-     * @param Registry $registry
+     * @param Registry $coreRegistry
      * @param array $data
      */
     public function __construct(
         Context $context,
-        Registry $registry,
+        protected Registry $coreRegistry,
         array $data = []
     ) {
-        $this->coreRegistry = $registry;
         parent::__construct($context, $data);
     }
 

@@ -1,5 +1,15 @@
 <?xml version="1.0"?>
-
+<!--
+/**
+ * Pratech_Recurring
+ *
+ * @category  XML
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
 <config>
 	<group id="default">
         <job name="pratech_recurring_cron_job" instance="\Pratech\Recurring\Cron\Order" method="recurringOrder">

@@ -1,16 +1,15 @@
 <?php
 /**
- * Pratech_RedisIntegration
+ * Pratech_Catalog
  *
  * PHP version 8.x
  *
  * @category  PHP
- * @package   Pratech\RedisIntegration
+ * @package   Pratech\Catalog
  * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
- * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  **/
-
 namespace Pratech\Catalog\Observer;
 
 use Exception;
@@ -20,12 +19,14 @@ use Magento\Elasticsearch\Model\Adapter\Elasticsearch as ElasticsearchAdapter;
 use Magento\Elasticsearch\Model\Adapter\Index\IndexNameResolver;
 use Magento\Elasticsearch\Model\Config;
 use Magento\Elasticsearch\SearchAdapter\ConnectionManager;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\ScopeResolverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Indexer\SaveHandler\Batch;
 use Magento\Store\Model\StoreManagerInterface;
 use Pratech\Base\Logger\Logger;
+use Pratech\Catalog\Model\ResourceModel\LinkedProduct;
 use Pratech\SqsIntegration\Model\SqsEvent;
 
 /**
@@ -46,7 +47,7 @@ class ProductSaveAfter implements ObserverInterface
         'PRICE_PER_100_GRAM' => 'price_per_100_gram',
         'PRICE_PER_GRAM_PROTEIN' => 'price_per_gram_protein',
     ];
-    
+
     /**
      * @param Batch                  $batch
      * @param Config                 $clientConfig
@@ -58,18 +59,22 @@ class ProductSaveAfter implements ObserverInterface
      * @param StoreManagerInterface  $storeManager
      * @param Logger                 $apiLogger
      * @param SqsEvent               $sqsEvent
+     * @param RequestInterface       $request
+     * @param LinkedProduct          $linkedProductResource
      */
     public function __construct(
-        private Batch $batch,
-        private Config $clientConfig,
-        private FullAction $fullAction,
-        private IndexNameResolver $indexNameResolver,
-        private ElasticsearchAdapter $adapter,
-        private ConnectionManager $connectionManager,
+        private Batch                  $batch,
+        private Config                 $clientConfig,
+        private FullAction             $fullAction,
+        private IndexNameResolver      $indexNameResolver,
+        private ElasticsearchAdapter   $adapter,
+        private ConnectionManager      $connectionManager,
         private ScopeResolverInterface $scopeResolver,
-        private StoreManagerInterface $storeManager,
-        private Logger $apiLogger,
-        private SqsEvent $sqsEvent
+        private StoreManagerInterface  $storeManager,
+        private Logger                 $apiLogger,
+        private SqsEvent               $sqsEvent,
+        private RequestInterface       $request,
+        private LinkedProduct          $linkedProductResource,
     ) {
         $this->client = $connectionManager->getConnection()->getElasticsearchClient();
     }
@@ -81,9 +86,19 @@ class ProductSaveAfter implements ObserverInterface
     {
         /**
          * @var Product $product
-        */
+         */
         $product = $observer->getEvent()->getData('product');
         $productId = $product->getId();
+
+        $linkedJson = $this->request->getParam('linked_configurable_products');
+        if ($linkedJson && $productId) {
+            try {
+                $linkedIds = array_keys(json_decode($linkedJson, true));
+                $this->linkedProductResource->saveLinks($productId, $linkedIds);
+            } catch (Exception $e) {
+                $this->apiLogger->error('Error saving linked configurable products: ' . $e->getMessage());
+            }
+        }
         try {
             $storeId = 1;
             $this->updateIndex($this->fullAction->rebuildStoreIndex($storeId, [$productId]));
@@ -115,7 +130,7 @@ class ProductSaveAfter implements ObserverInterface
             $updateIndexDocuments = $this->getDocsArrayInUpdateIndexFormat($docs, $indexName);
             $this->client->update($updateIndexDocuments);
         }
-        
+
         $this->adapter->updateAlias($storeId, $indexerId);
     }
 

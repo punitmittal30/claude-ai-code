@@ -1,11 +1,23 @@
 <?xml version="1.0"?>
-
+<!--
+/**
+ * Pratech_Recurring
+ *
+ * @category  XML
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <recurring>
             <general_settings>
                 <enable>0</enable>
                 <enable_discount>0</enable_discount>
+                <enable_cashback>1</enable_cashback>
+                <max_total_time>365</max_total_time>
             </general_settings>
         </recurring>
     </default>

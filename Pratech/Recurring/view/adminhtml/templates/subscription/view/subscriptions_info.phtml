@@ -1,9 +1,18 @@
 <?php
+/**
+ * Pratech_Recurring
+ *
+ * @category  PHTML
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 
-    $model = $block->getSubscription();
-    $order = $block->getOrder();
-    $product  = $block->getProduct();
-    $customer = $block->getCustomer();
+$model = $block->getSubscription();
+$order = $block->getOrder();
+$product  = $block->getProduct();
+$customer = $block->getCustomer();
 ?>
 <div class="subscriptions-information">
     <table class="admin__table-secondary">
@@ -45,6 +54,12 @@
             <th><?= $escaper->escapeHtml(__('Product SKU :')) ?></th>
             <td>            
                 <?= $escaper->escapeHtml($model->getProductSku()) ?>
+            </td>
+        </tr>
+        <tr>
+            <th><?= $escaper->escapeHtml(__('Product Qty :')) ?></th>
+            <td>            
+                <?= $escaper->escapeHtml($model->getProductQty()) ?>
             </td>
         </tr>
         <tr>

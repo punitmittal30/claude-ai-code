@@ -10,7 +10,6 @@
  * @copyright 2025 Copyright (c) Pratech Brands Private Limited
  * @link      https://pratechbrands.com/
  **/
-
 namespace Pratech\Recurring\Model;
 
 use Pratech\Base\Model\Data\Response;
@@ -55,14 +54,46 @@ class SubscriptionManagement implements SubscriptionManagementInterface
     /**
      * @inheritDoc
      */
-    public function createSubscription(int $orderId, array $items): array
+    public function createSubscription(int $customerId, int $orderId, array $items): array
     {
         return $this->response->getResponse(
             200,
             'success',
             self::RECURRING_API_RESOURCE,
             [
-                'is_created' => $this->recurringHelper->createSubscription($orderId, $items)
+                'is_created' => $this->recurringHelper->createSubscription($customerId, $orderId, $items)
+            ]
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCustomerSubscriptions(int $customerId): array
+    {
+        return $this->response->getResponse(
+            200,
+            'success',
+            self::RECURRING_API_RESOURCE,
+            $this->recurringHelper->getCustomerSubscriptions($customerId)
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cancelCustomerSubscription(int $customerId, int $subscriptionId, string $reason = ''): array
+    {
+        return $this->response->getResponse(
+            200,
+            'success',
+            self::RECURRING_API_RESOURCE,
+            [
+                'is_canceled' => $this->recurringHelper->cancelCustomerSubscription(
+                    $customerId,
+                    $subscriptionId,
+                    $reason
+                )
             ]
         );
     }

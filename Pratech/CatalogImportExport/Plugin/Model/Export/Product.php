@@ -4,6 +4,7 @@ namespace Pratech\CatalogImportExport\Plugin\Model\Export;
 
 use Exception;
 use Magento\Catalog\Model\Product\LinkTypeProvider;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory;
 use Magento\Catalog\Model\ResourceModel\ProductFactory;
 use Magento\CatalogImportExport\Model\Export\Product\Type\Factory;
@@ -20,6 +21,7 @@ use Magento\ImportExport\Model\Import;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Pratech\Catalog\Model\ResourceModel\LinkedProduct as LinkedProductResource;
 use Psr\Log\LoggerInterface;
 
 class Product extends \Magento\CatalogImportExport\Model\Export\Product
@@ -54,6 +56,8 @@ class Product extends \Magento\CatalogImportExport\Model\Export\Product
      * @param LinkTypeProvider $linkTypeProvider
      * @param RowCustomizerInterface $rowCustomizer
      * @param ScopeConfigInterface $scopeConfig
+     * @param LinkedProductResource $linkedProductResource
+     * @param ProductResource $productResource
      * @param array $dateAttrCodes
      * @param ProductFilterInterface|null $filter
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -76,6 +80,8 @@ class Product extends \Magento\CatalogImportExport\Model\Export\Product
         LinkTypeProvider                                                        $linkTypeProvider,
         RowCustomizerInterface                                                  $rowCustomizer,
         private ScopeConfigInterface                                            $scopeConfig,
+        private LinkedProductResource                                           $linkedProductResource,
+        private ProductResource                                                 $productResource,
         array                                                                   $dateAttrCodes = [],
         ?ProductFilterInterface                                                 $filter = null
     ) {
@@ -120,6 +126,8 @@ class Product extends \Magento\CatalogImportExport\Model\Export\Product
             $productIds = array_keys($rawData);
             $stockItemRows = $this->prepareCatalogInventory($productIds);
 
+            $linkedSkus = $this->getLinkedProductSkus($productIds);
+
             $this->rowCustomizer->prepareData(
                 $this->_prepareEntityCollection($this->_entityCollectionFactory->create()),
                 $productIds
@@ -132,6 +140,12 @@ class Product extends \Magento\CatalogImportExport\Model\Export\Product
                     if ($storeId == Store::DEFAULT_STORE_ID && isset($stockItemRows[$productId])) {
                         // phpcs:ignore Magento2.Performance.ForeachArrayMerge
                         $dataRow = array_merge(["entity_id" => $productId], $dataRow, $stockItemRows[$productId]);
+
+                        if (isset($linkedSkus[$productId])) {
+                            $dataRow['linked_products'] = implode(',', $linkedSkus[$productId]);
+                        } else {
+                            $dataRow['linked_products'] = '';
+                        }
                     }
                     $this->updateGalleryImageData($dataRow, $rawData);
                     $this->appendMultirowData($dataRow, $multirawData);
@@ -147,6 +161,45 @@ class Product extends \Magento\CatalogImportExport\Model\Export\Product
     }
 
     /**
+     * Get Linked Product Skus
+     *
+     * @param array $productIds
+     * @return array
+     */
+    private function getLinkedProductSkus(array $productIds): array
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $linkedProductIds = [];
+        foreach ($productIds as $productId) {
+            $linkedProductIds[$productId] = $this->linkedProductResource->getLinkedProducts($productId);
+        }
+
+        $allLinkedIds = array_unique(array_merge(...array_values($linkedProductIds)));
+
+        if (empty($allLinkedIds)) {
+            return [];
+        }
+
+        $productSkuList = $this->productResource->getProductsSku($allLinkedIds);
+        $productSkuMap = array_column($productSkuList, 'sku', 'entity_id');
+
+        $linkedSkus = [];
+        foreach ($linkedProductIds as $productId => $linkedIdsArray) {
+            $skus = [];
+            foreach ($linkedIdsArray as $linkedId) {
+                if (isset($productSkuMap[$linkedId])) {
+                    $skus[] = $productSkuMap[$linkedId];
+                }
+            }
+            $linkedSkus[$productId] = $skus;
+        }
+        return $linkedSkus;
+    }
+
+    /** 
      * Set header columns
      *
      * @param array $customOptionsData
@@ -194,7 +247,8 @@ class Product extends \Magento\CatalogImportExport\Model\Export\Product
                     'crosssell_skus',
                     'crosssell_position',
                     'upsell_skus',
-                    'upsell_position'
+                    'upsell_position',
+                    'linked_products'
                 ],
                 ['additional_images', 'additional_image_labels', 'hide_from_product_page']
             );

@@ -224,7 +224,7 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="dataType" xsi:type="string">date</item>
-                    <item name="label" xsi:type="string" translate="true">Start Date</item>
+                    <item name="label" xsi:type="string" translate="true">End Date</item>
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">date</item>
                     <item name="source" xsi:type="string">video</item>

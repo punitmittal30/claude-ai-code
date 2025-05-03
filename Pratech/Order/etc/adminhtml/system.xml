@@ -55,20 +55,6 @@
                     <validate>validate-number</validate>
                 </field>
             </group>
-            <group id="shipment_status_counter" translate="label" sortOrder="50" showInDefault="1"
-                   showInWebsite="0" showInStore="0">
-                <label>Update Customer Shipment Status Counter</label>
-                <field id="status" translate="label" type="select" sortOrder="1" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
-                    <label>Status</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="mode" translate="label" type="select" sortOrder="5" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
-                    <label>Mode</label>
-                    <source_model>Pratech\Order\Model\System\Config\Source\ShipmentStatusCounter\Mode</source_model>
-                </field>
-            </group>
         </section>
         <section id="customers" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1"
                  showInStore="1">

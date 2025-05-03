@@ -25,4 +25,16 @@
             <resource ref="Pratech_Recurring::Subscription"/>
         </resources>
     </route>
+    <route url="/V1/recurring/subscription/customer/:customerId" method="GET">
+        <service class="Pratech\Recurring\Api\SubscriptionManagementInterface" method="getCustomerSubscriptions"/>
+        <resources>
+            <resource ref="Pratech_Recurring::Subscription"/>
+        </resources>
+    </route>
+    <route url="/V1/recurring/subscription/cancel" method="POST">
+        <service class="Pratech\Recurring\Api\SubscriptionManagementInterface" method="cancelCustomerSubscription"/>
+        <resources>
+            <resource ref="Pratech_Recurring::Subscription"/>
+        </resources>
+    </route>
 </routes>

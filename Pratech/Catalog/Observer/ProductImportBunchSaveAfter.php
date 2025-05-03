@@ -14,10 +14,12 @@
 namespace Pratech\Catalog\Observer;
 
 use Exception;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\CatalogImportExport\Model\Import\Product as ImportProduct;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Pratech\Base\Logger\Logger;
+use Pratech\Catalog\Model\ResourceModel\LinkedProduct as LinkedProductResource;
 use Pratech\SqsIntegration\Model\SqsEvent;
 
 /**
@@ -26,12 +28,16 @@ use Pratech\SqsIntegration\Model\SqsEvent;
 class ProductImportBunchSaveAfter implements ObserverInterface
 {
     /**
-     * @param Logger    $apiLogger
-     * @param SqsEvent  $sqsEvent
+     * @param Logger                $apiLogger
+     * @param SqsEvent              $sqsEvent
+     * @param ProductResource       $productResource
+     * @param LinkedProductResource $linkedProductResource
      */
     public function __construct(
-        private Logger $apiLogger,
-        private SqsEvent $sqsEvent
+        private Logger                $apiLogger,
+        private SqsEvent              $sqsEvent,
+        private ProductResource       $productResource,
+        private LinkedProductResource $linkedProductResource
     ) {
     }
 
@@ -47,6 +53,27 @@ class ProductImportBunchSaveAfter implements ObserverInterface
                 if (isset($product[ImportProduct::COL_SKU])) {
                     $skus[] = $product[ImportProduct::COL_SKU];
                 }
+                try {
+                    if (isset($product['linked_products'])) {
+                        $productSku = $product['sku'];
+                        $linkedSkus = explode(',', $product['linked_products']);
+
+                        $productId = $this->productResource->getIdBySku($productSku);
+
+                        $linkedProductIds = [];
+                        foreach ($linkedSkus as $sku) {
+                            $linkedId = $this->productResource->getIdBySku($sku);
+                            if ($linkedId) {
+                                $linkedProductIds[] = (int)$linkedId;
+                            }
+                        }
+                        $this->linkedProductResource->saveLinks($productId, $linkedProductIds);
+                    }
+                } catch (Exception $e) {
+                    $this->apiLogger->error($e->getMessage() . __METHOD__);
+                    continue;
+                }
+
             }
             $this->sqsEvent->sendCatalogEvent(['skus' => implode(',', $skus)], 'CATALOG_PRODUCT_UPDATED');
         } catch (Exception $exception) {

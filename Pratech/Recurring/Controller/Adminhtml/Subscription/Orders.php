@@ -1,6 +1,20 @@
 <?php
-
+/**
+ * Pratech_Recurring
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 namespace Pratech\Recurring\Controller\Adminhtml\Subscription;
+
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\Registry;
+use Magento\Framework\View\Result\LayoutFactory;
 
 class Orders extends \Magento\Backend\App\Action
 {
@@ -8,30 +22,18 @@ class Orders extends \Magento\Backend\App\Action
      * Authorization level of a basic admin session
      */
     public const ADMIN_RESOURCE = 'Pratech_Recurring::Subscription';
-    
-    /**
-     * @var \Magento\Framework\View\Result\LayoutFactory
-     * */
-    private $resultLayoutFactory;
-
-    /**
-     * @var \Magento\Framework\Registry
-     */
-    private $coreRegistry = null;
 
     /**
      *
-     * @param \Magento\Backend\App\Action\Context $context
-     * @param \Magento\Framework\Registry $coreRegistry
-     * @param \Magento\Framework\View\Result\LayoutFactory $resultLayoutFactory
+     * @param Context $context
+     * @param Registry $coreRegistry
+     * @param LayoutFactory $resultLayoutFactory
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \Magento\Framework\Registry $coreRegistry,
-        \Magento\Framework\View\Result\LayoutFactory $resultLayoutFactory
+        Context $context,
+        private Registry $coreRegistry,
+        private LayoutFactory $resultLayoutFactory
     ) {
-        $this->coreRegistry = $coreRegistry;
-        $this->resultLayoutFactory = $resultLayoutFactory;
         parent::__construct($context);
     }
     
