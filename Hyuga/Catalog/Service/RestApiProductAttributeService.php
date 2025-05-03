@@ -16,6 +16,7 @@ namespace Hyuga\Catalog\Service;
 use DateTime;
 use Exception;
 use Hyuga\CacheManagement\Api\CacheServiceInterface;
+use Hyuga\LogManagement\Logger\ProductApiLogger;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
@@ -23,13 +24,12 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Store\Model\ScopeInterface;
-use Pratech\Base\Logger\Logger;
 use Pratech\Warehouse\Service\DeliveryDateCalculator;
 
 /**
  * Centralized Product Attribute Cache Service
  */
-class ProductAttributeService
+class RestApiProductAttributeService
 {
     /**
      * Cache lifetime for rarely updated attributes (1 week)
@@ -60,26 +60,25 @@ class ProductAttributeService
     /**
      * Constructor
      *
-     * @param CacheServiceInterface $cache
+     * @param CacheServiceInterface $cacheService
      * @param ResourceConnection $resourceConnection
      * @param StockRegistryInterface $stockItemRepository
      * @param ProductRepositoryInterface $productRepository
      * @param DeliveryDateCalculator $deliveryDateCalculator
      * @param TimezoneInterface $timezone
      * @param ScopeConfigInterface $scopeConfig
-     * @param Logger $logger
+     * @param ProductApiLogger $productApiLogger
      */
     public function __construct(
-        private CacheServiceInterface      $cache,
+        private CacheServiceInterface      $cacheService,
         private ResourceConnection         $resourceConnection,
         private StockRegistryInterface     $stockItemRepository,
         private ProductRepositoryInterface $productRepository,
         private DeliveryDateCalculator     $deliveryDateCalculator,
         private TimezoneInterface          $timezone,
         private ScopeConfigInterface       $scopeConfig,
-        private Logger                     $logger
-    )
-    {
+        private ProductApiLogger           $productApiLogger
+    ) {
     }
 
     /**
@@ -109,11 +108,11 @@ class ProductAttributeService
      */
     private function getStableAttributes(int $productId): array
     {
-        $cacheKey = 'stable_attrs_' . $productId;
+        $cacheKey = 'rest_stable_attrs_' . $productId;
 
-        $cachedData = $this->cache->get($cacheKey);
+        $cachedData = $this->cacheService->get($cacheKey);
         if ($cachedData) {
-            return json_decode($cachedData, true);
+            return $cachedData;
         }
 
         $stableAttributeCodes = [
@@ -136,14 +135,15 @@ class ProductAttributeService
             $attributes['id'] = $productId;
             $attributes['sku'] = $product->getSku();
             $attributes['type'] = $product->getTypeId();
+            $attributes['slug'] = $attributes['url_key'];
         } catch (Exception $e) {
-            $this->logger->error('Error fetching product: ' . $e->getMessage());
+            $this->productApiLogger->error('Error fetching product: ' . $e->getMessage());
         }
 
-        $this->cache->save(
-            json_encode($attributes),
+        $this->cacheService->save(
             $cacheKey,
-            ['stable_attrs', 'product_' . $productId],
+            $attributes,
+            ['rest_stable_attrs', 'product_' . $productId],
             604800 // 1 week
         );
 
@@ -289,10 +289,10 @@ class ProductAttributeService
      */
     private function getAttributeMetadata(): array
     {
-        $cachedData = $this->cache->get(self::ATTRIBUTE_METADATA_CACHE_KEY);
+        $cachedData = $this->cacheService->get(self::ATTRIBUTE_METADATA_CACHE_KEY);
 
         if ($cachedData) {
-            return json_decode($cachedData, true);
+            return $cachedData;
         }
 
         // Build metadata from database
@@ -332,10 +332,10 @@ class ProductAttributeService
             'attributeInputMap' => $attributeInputMap
         ];
 
-        $this->cache->save(
-            json_encode($metadata),
+        $this->cacheService->save(
             self::ATTRIBUTE_METADATA_CACHE_KEY,
-            ['product_attribute_metadata'],
+            $metadata,
+            [self::ATTRIBUTE_METADATA_CACHE_KEY],
             self::CACHE_LIFETIME_LONG
         );
 
@@ -405,14 +405,14 @@ class ProductAttributeService
      */
     private function getDynamicAttributes(int $productId, int $pincode = null): array
     {
-        $cacheKey = 'dynamic_attrs_' . $productId;
+        $cacheKey = 'rest_dynamic_attrs_' . $productId;
         if ($pincode) {
             $cacheKey .= '_' . $pincode;
         }
 
-        $cachedData = $this->cache->get($cacheKey);
+        $cachedData = $this->cacheService->get($cacheKey);
         if ($cachedData) {
-            return json_decode($cachedData, true);
+            return $cachedData;
         }
 
         $dynamicAttributeCodes = [
@@ -438,7 +438,7 @@ class ProductAttributeService
                 $attributes['estimated_delivery_time'] = $this->deliveryDateCalculator
                     ->getEstimatedDelivery($product->getSku(), $pincode);
             } catch (Exception $e) {
-                $this->logger->error('Error getting delivery time: ' . $e->getMessage());
+                $this->productApiLogger->error('Error getting delivery time: ' . $e->getMessage());
             }
         }
 
@@ -454,11 +454,11 @@ class ProductAttributeService
             );
         }
 
-        $this->cache->save(
-            json_encode($attributes),
+        $this->cacheService->save(
             $cacheKey,
-            ['dynamic_attrs', 'product_' . $productId],
-            3600 // 1 hour
+            $attributes,
+            ['rest_dynamic_attrs', 'product_' . $productId],
+            300 // 5 min
         );
 
         return $attributes;
@@ -491,7 +491,7 @@ class ProductAttributeService
             );
             return $this->timezone->date(new DateTime($date), $locale)->format($format);
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage() . __METHOD__);
+            $this->productApiLogger->error($e->getMessage() . __METHOD__);
             return "";
         }
     }

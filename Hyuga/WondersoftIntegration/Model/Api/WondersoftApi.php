@@ -195,7 +195,7 @@ class WondersoftApi implements WondersoftApiInterface
                 "Item" => [
                     "StagingRowID" => 1,
                     "ProductCode" => $sku,
-                    "ProductName" => $name,
+                    "ProductName" => (strlen($name) <= 150) ? $name : substr($name, 0, 150),
                     "ProductFullName" => $name,
                     "Classification" => 0,
                     "EANCode" => $eanCode,

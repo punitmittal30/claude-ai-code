@@ -15,21 +15,21 @@ namespace Hyuga\CacheManagement\Model;
 
 use Exception;
 use Hyuga\CacheManagement\Api\CacheServiceInterface;
+use Hyuga\LogManagement\Logger\CachingLogger;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\SerializerInterface;
-use Psr\Log\LoggerInterface;
 
 class CacheService implements CacheServiceInterface
 {
     /**
      * @param CacheInterface $cache
      * @param SerializerInterface $serializer
-     * @param LoggerInterface $logger
+     * @param CachingLogger $cachingLogger
      */
     public function __construct(
         private CacheInterface      $cache,
         private SerializerInterface $serializer,
-        private LoggerInterface     $logger
+        private CachingLogger       $cachingLogger
     ) {
     }
 
@@ -43,7 +43,7 @@ class CacheService implements CacheServiceInterface
             try {
                 return $this->serializer->unserialize($data);
             } catch (Exception $e) {
-                $this->logger->error('Error un-serializing cached data: ' . $e->getMessage());
+                $this->cachingLogger->error('Error un-serializing cached data: ' . $e->getMessage());
                 return null;
             }
         }
@@ -66,7 +66,7 @@ class CacheService implements CacheServiceInterface
             );
             return true;
         } catch (Exception $e) {
-            $this->logger->error('Error saving data to cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error saving data to cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -78,10 +78,10 @@ class CacheService implements CacheServiceInterface
     {
         try {
             $cacheKey = $this->getPincodeCacheKey($pincode);
-            $this->logger->info("Clearing pincode serviceability cache for pincode: {$pincode}");
+            $this->cachingLogger->info("Clearing pincode serviceability cache for pincode: {$pincode}");
             return $this->remove($cacheKey);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning pincode cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning pincode cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -102,7 +102,22 @@ class CacheService implements CacheServiceInterface
         try {
             return $this->cache->remove($key);
         } catch (Exception $e) {
-            $this->logger->error('Error removing cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error removing cache: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cleanCategoriesByPincodeCache(int $pincode): bool
+    {
+        try {
+            $cacheKey = self::CACHE_KEY_CATEGORIES_BY_PINCODE . '_' . $pincode;
+            $this->cachingLogger->info("Clearing categories by pincode cache for pincode: {$pincode}");
+            return $this->remove($cacheKey);
+        } catch (Exception $e) {
+            $this->cachingLogger->error('Error cleaning categories by pincode cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -113,10 +128,10 @@ class CacheService implements CacheServiceInterface
     public function cleanAllPincodeCaches(): bool
     {
         try {
-            $this->logger->info("Clearing all pincode serviceability caches");
+            $this->cachingLogger->info("Clearing all pincode serviceability caches");
             return $this->clean([self::CACHE_TAG_PINCODE]);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning all pincode caches: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning all pincode caches: ' . $e->getMessage());
             return false;
         }
     }
@@ -129,7 +144,7 @@ class CacheService implements CacheServiceInterface
         try {
             return $this->cache->clean($tags);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -141,10 +156,10 @@ class CacheService implements CacheServiceInterface
     {
         try {
             $cacheKey = $this->getNearestDarkStoreCacheKey($pincode);
-            $this->logger->info("Clearing dark store cache for pincode: {$pincode}");
+            $this->cachingLogger->info("Clearing dark store cache for pincode: {$pincode}");
             return $this->remove($cacheKey);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning dark store cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning dark store cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -163,10 +178,10 @@ class CacheService implements CacheServiceInterface
     public function cleanAllNearestDarkStoreCaches(): bool
     {
         try {
-            $this->logger->info("Clearing all dark store caches");
+            $this->cachingLogger->info("Clearing all dark store caches");
             return $this->clean([self::CACHE_TAG_NEAREST_DARK_STORE]);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning all dark store caches: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning all dark store caches: ' . $e->getMessage());
             return false;
         }
     }
@@ -174,10 +189,10 @@ class CacheService implements CacheServiceInterface
     /**
      * @inheritDoc
      */
-    public function getWarehouseFiltersCacheKey(string $warehouseCode, array $filters): string
+    public function getWarehouseFiltersCacheKey(string $warehouseCode, string $categorySlug, array $filters): string
     {
         $filterHash = md5($this->serializer->serialize($filters));
-        return "warehouse_filters_{$warehouseCode}_{$filterHash}";
+        return "warehouse_filters_{$warehouseCode}_{$categorySlug}_{$filterHash}";
     }
 
     /**
@@ -187,10 +202,10 @@ class CacheService implements CacheServiceInterface
     {
         try {
             // Since filters have a hash in their key, we need to clean by tag
-            $this->logger->info("Clearing warehouse filters cache for warehouse: {$warehouseCode}");
+            $this->cachingLogger->info("Clearing warehouse filters cache for warehouse: {$warehouseCode}");
             return $this->clean([self::CACHE_TAG_WAREHOUSE_FILTERS]);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning warehouse filters cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning warehouse filters cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -201,10 +216,10 @@ class CacheService implements CacheServiceInterface
     public function cleanAllWarehouseFiltersCaches(): bool
     {
         try {
-            $this->logger->info("Clearing all warehouse filters caches");
+            $this->cachingLogger->info("Clearing all warehouse filters caches");
             return $this->clean([self::CACHE_TAG_WAREHOUSE_FILTERS]);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning all warehouse filters caches: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning all warehouse filters caches: ' . $e->getMessage());
             return false;
         }
     }
@@ -213,19 +228,20 @@ class CacheService implements CacheServiceInterface
      * @inheritDoc
      */
     public function getCategoryListingCacheKey(
-        int     $pincode,
+        string  $warehouseCode,
         string  $categorySlug,
         int     $pageSize = 20,
         int     $currentPage = 1,
         ?string $sortField = null,
         ?string $sortDirection = null,
-        $filters = []
-    ): string {
+                $filters = []
+    ): string
+    {
         // Create a hash of the filters to keep the cache key shorter
         $filterHash = md5($this->serializer->serialize($filters ?? []));
 
         // Build a cache key that includes pagination and sorting
-        return "category_listing_{$pincode}_{$categorySlug}_p{$pageSize}_c{$currentPage}" .
+        return "category_listing_{$warehouseCode}_{$categorySlug}_p{$pageSize}_c{$currentPage}" .
             "_s" . ($sortField ?? 'default') . "_" . ($sortDirection ?? 'ASC') .
             "_{$filterHash}";
     }
@@ -237,10 +253,10 @@ class CacheService implements CacheServiceInterface
     {
         try {
             $cacheKey = $this->getCategoryProductsCacheKey($pincode, $categorySlug);
-            $this->logger->info("Clearing category products cache for pincode: {$pincode}, category: {$categorySlug}");
+            $this->cachingLogger->info("Clearing category products cache for pincode: {$pincode}, category: {$categorySlug}");
             return $this->remove($cacheKey);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning category products cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning category products cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -259,10 +275,10 @@ class CacheService implements CacheServiceInterface
     public function cleanAllWarehouseProductsCaches(): bool
     {
         try {
-            $this->logger->info("Clearing all warehouse products caches");
+            $this->cachingLogger->info("Clearing all warehouse products caches");
             return $this->clean([self::CACHE_TAG_WAREHOUSE_PRODUCTS]);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning all warehouse products caches: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning all warehouse products caches: ' . $e->getMessage());
             return false;
         }
     }
@@ -273,10 +289,10 @@ class CacheService implements CacheServiceInterface
     public function cleanAvailableDarkStoresCache(): bool
     {
         try {
-            $this->logger->info("Clearing available dark store cache");
+            $this->cachingLogger->info("Clearing available dark store cache");
             return $this->clean([self::CACHE_KEY_AVAILABLE_DARK_STORES]);
         } catch (Exception $e) {
-            $this->logger->error('Error cleaning available dark store cache: ' . $e->getMessage());
+            $this->cachingLogger->error('Error cleaning available dark store cache: ' . $e->getMessage());
             return false;
         }
     }
@@ -295,5 +311,28 @@ class CacheService implements CacheServiceInterface
     public function getSubcategoryCacheKey(int $categoryId, string $warehouseCode): string
     {
         return self::CACHE_KEY_SUBCATEGORY_FILTERS . '_' . $categoryId . '_' . $warehouseCode;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cleanSubcategoryCacheKey(int $categoryId): bool
+    {
+        try {
+            $this->cachingLogger->info("Clearing sub category cache");
+            return $this->clean([self::CACHE_KEY_SUBCATEGORY_FILTERS]);
+        } catch (Exception $e) {
+            $this->cachingLogger->error('Error clearing sub category cache: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearProductDynamicCache(int $productId): bool
+    {
+        $cacheKey = "product_dynamic_attributes_" . $productId;
+        return $this->remove($cacheKey);
     }
 }

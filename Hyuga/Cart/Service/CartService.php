@@ -47,8 +47,7 @@ class CartService
         private StockRegistryInterface     $stockItemRepository,
         private ScopeConfigInterface       $scopeConfig,
         private ProductRepositoryInterface $productRepository
-    )
-    {
+    ) {
     }
 
     /**

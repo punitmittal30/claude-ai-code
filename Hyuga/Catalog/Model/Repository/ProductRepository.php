@@ -14,17 +14,17 @@
 namespace Hyuga\Catalog\Model\Repository;
 
 use Hyuga\Catalog\Api\ProductRepositoryInterface;
-use Hyuga\Catalog\Service\ProductAttributeService;
+use Hyuga\Catalog\Service\RestApiProductAttributeService;
 
 class ProductRepository implements ProductRepositoryInterface
 {
     /**
      * Product Helper Constructor
      *
-     * @param ProductAttributeService $productAttributeService
+     * @param RestApiProductAttributeService $productAttributeService
      */
     public function __construct(
-        private ProductAttributeService $productAttributeService
+        private RestApiProductAttributeService $productAttributeService
     ) {
     }
 

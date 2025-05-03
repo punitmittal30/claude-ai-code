@@ -31,7 +31,9 @@ interface CacheServiceInterface
     public const CACHE_LIFETIME_STATIC = 604800;
     public const CACHE_LIFETIME_5_MINUTES = 300;
     public const CACHE_LIFETIME_1_HOUR = 3600;
+    public const CACHE_LIFETIME_1_DAY = 86400;
     public const CACHE_LIFETIME_1_WEEK = 604800;
+
 
     /**
      * Get cached data
@@ -118,10 +120,11 @@ interface CacheServiceInterface
      * Get cache key for warehouse filters
      *
      * @param string $warehouseCode
+     * @param string $categorySlug
      * @param array $filters
      * @return string
      */
-    public function getWarehouseFiltersCacheKey(string $warehouseCode, array $filters): string;
+    public function getWarehouseFiltersCacheKey(string $warehouseCode, string $categorySlug, array $filters): string;
 
     /**
      * Clean warehouse filters cache
@@ -150,7 +153,7 @@ interface CacheServiceInterface
     /**
      * Get cache key for category listing with pagination parameters
      *
-     * @param int $pincode
+     * @param string $warehouseCode
      * @param string $categorySlug
      * @param int $pageSize
      * @param int $currentPage
@@ -160,13 +163,13 @@ interface CacheServiceInterface
      * @return string
      */
     public function getCategoryListingCacheKey(
-        int $pincode,
-        string $categorySlug,
-        int $pageSize = 20,
-        int $currentPage = 1,
+        string  $warehouseCode,
+        string  $categorySlug,
+        int     $pageSize = 20,
+        int     $currentPage = 1,
         ?string $sortField = null,
         ?string $sortDirection = null,
-        mixed $filters = []
+        mixed   $filters = []
     ): string;
 
     /**
@@ -201,6 +204,14 @@ interface CacheServiceInterface
     public function getCategoriesByPincodeCacheKey(int $pincode): string;
 
     /**
+     * Clean Categories By Pincode Cache.
+     *
+     * @param int $pincode
+     * @return bool
+     */
+    public function cleanCategoriesByPincodeCache(int $pincode): bool;
+
+    /**
      * Get cache key for subcategory filters
      *
      * @param int $categoryId
@@ -208,4 +219,20 @@ interface CacheServiceInterface
      * @return string
      */
     public function getSubcategoryCacheKey(int $categoryId, string $warehouseCode): string;
+
+    /**
+     * Clean Categories By Pincode Cache.
+     *
+     * @param int $categoryId
+     * @return bool
+     */
+    public function cleanSubcategoryCacheKey(int $categoryId): bool;
+
+    /**
+     * Clear dynamic product data for a specific product
+     *
+     * @param int $productId
+     * @return bool
+     */
+    public function clearProductDynamicCache(int $productId): bool;
 }

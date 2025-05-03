@@ -13,26 +13,31 @@
 
 namespace Pratech\Warehouse\Service;
 
+use DateTime;
 use Exception;
 use Hyuga\Catalog\Service\GraphQlProductAttributeService;
 use Magento\Catalog\Model\Product;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Service for formatting product data
- */
 class ProductFormatterService
 {
     /**
      * @param ResourceConnection $resource
      * @param GraphQlProductAttributeService $graphQlProductAttributeService
      * @param LoggerInterface $logger
+     * @param ScopeConfigInterface $scopeConfig
+     * @param TimezoneInterface $timezone
      */
     public function __construct(
         private ResourceConnection             $resource,
         private GraphQlProductAttributeService $graphQlProductAttributeService,
-        private LoggerInterface                $logger
+        private LoggerInterface                $logger,
+        private ScopeConfigInterface           $scopeConfig,
+        private TimezoneInterface              $timezone
     ) {
     }
 
@@ -46,8 +51,8 @@ class ProductFormatterService
     {
         $productId = (int)$product->getId();
 
-        // Load all attributes from cache
-        $allAttributes = $this->graphQlProductAttributeService->getAllAttributes($productId);
+        // Load only static attributes
+        $staticAttributes = $this->graphQlProductAttributeService->getStaticAttributes($productId);
 
         // Extract static attributes
         return [
@@ -57,27 +62,27 @@ class ProductFormatterService
             'sku' => $product->getSku(),
             'url_key' => $product->getUrlKey(),
             'image' => $this->getProductImage($product),
-            'deal_of_the_day' => $allAttributes['deal_of_the_day'] ?? false,
-            'badges' => $allAttributes['badges'] ?? '',
-            'is_hl_verified' => (int)($allAttributes['is_hl_verified'] ?? 0),
-            'is_hm_verified' => (int)($allAttributes['is_hm_verified'] ?? 0),
-            'number_of_servings' => $allAttributes['number_of_servings'] ?? '',
-            'star_ratings' => $allAttributes['rating_summary'] ?
-                number_format(($allAttributes['rating_summary'] / 20), 1)
+            'deal_of_the_day' => $staticAttributes['deal_of_the_day'] ?? false,
+            'badges' => $staticAttributes['badges'] ?? '',
+            'is_hl_verified' => (int)($staticAttributes['is_hl_verified'] ?? 0),
+            'is_hm_verified' => (int)($staticAttributes['is_hm_verified'] ?? 0),
+            'number_of_servings' => $staticAttributes['number_of_servings'] ?? '',
+            'star_ratings' => $staticAttributes['rating_summary'] ?
+                number_format(($staticAttributes['rating_summary'] / 20), 1)
                 : 0,
-            'review_count' => (int)($allAttributes['review_count'] ?? 0),
-            'price_per_count' => $allAttributes['price_per_count'] ?? '',
-            'price_per_100_ml' => $allAttributes['price_per_100_ml'] ?? '',
-            'price_per_100_gram' => $allAttributes['price_per_100_gram'] ?? '',
-            'price_per_gram_protein' => $allAttributes['price_per_gram_protein'] ?? '',
-            'color' => $allAttributes['color_text'] ?? '',
-            'dietary_preference' => $allAttributes['dietary_preference_text'] ?? '',
-            'material' => $allAttributes['material_text'] ?? '',
-            'size' => $allAttributes['size_text'] ?? '',
-            'flavour' => $allAttributes['flavour_text'] ?? '',
-            'item_weight' => $allAttributes['item_weight_text'] ?? '',
-            'pack_of' => $allAttributes['pack_of_text'] ?? '',
-            'pack_size' => $allAttributes['pack_size_text'] ?? ''
+            'review_count' => (int)($staticAttributes['review_count'] ?? 0),
+            'price_per_count' => $staticAttributes['price_per_count'] ?? '',
+            'price_per_100_ml' => $staticAttributes['price_per_100_ml'] ?? '',
+            'price_per_100_gram' => $staticAttributes['price_per_100_gram'] ?? '',
+            'price_per_gram_protein' => $staticAttributes['price_per_gram_protein'] ?? '',
+            'color' => $staticAttributes['color_text'] ?? '',
+            'dietary_preference' => $staticAttributes['dietary_preference_text'] ?? '',
+            'material' => $staticAttributes['material_text'] ?? '',
+            'size' => $staticAttributes['size_text'] ?? '',
+            'flavour' => $staticAttributes['flavour_text'] ?? '',
+            'item_weight' => $staticAttributes['item_weight_text'] ?? '',
+            'pack_of' => $staticAttributes['pack_of_text'] ?? '',
+            'pack_size' => $staticAttributes['pack_size_text'] ?? ''
         ];
     }
 
@@ -125,15 +130,19 @@ class ProductFormatterService
         // Get stock information
         $stockInfo = $this->getProductStockInfo($productId);
 
-        // Get all cached attributes
-        $allAttributes = $this->graphQlProductAttributeService->getAllAttributes($productId);
+        // Get only dynamic attributes
+        $dynamicAttributes = $this->graphQlProductAttributeService->getDynamicAttributes($productId);
 
         return [
             'price' => (float)$product->getPrice(),
             'special_price' => (float)$product->getSpecialPrice(),
             'price_range' => $this->getPriceRange($product),
-            'special_from_date_formatted' => $allAttributes['special_from_date'] ?? '',
-            'special_to_date_formatted' => $allAttributes['special_to_date'] ?? '',
+            'special_from_date_formatted' => isset($dynamicAttributes['special_from_date'])
+                ? $this->getDateTimeBasedOnTimezone($dynamicAttributes['special_from_date'])
+                : '',
+            'special_to_date_formatted' => isset($dynamicAttributes['special_to_date'])
+                ? $this->getDateTimeBasedOnTimezone($dynamicAttributes['special_to_date'])
+                : '',
             'stock_info' => [
                 'qty' => $stockInfo['qty'] ?? 0,
                 'min_sale_qty' => $stockInfo['min_sale_qty'] ?? 1,
@@ -223,5 +232,26 @@ class ProductFormatterService
                 ]
             ]
         ];
+    }
+
+    /**
+     * Get Time Based On Timezone for Email
+     *
+     * @param string $date
+     * @param string $format
+     * @return string
+     */
+    public function getDateTimeBasedOnTimezone(string $date, string $format = 'Y-m-d H:i:s'): string
+    {
+        try {
+            $locale = $this->scopeConfig->getValue(
+                'general/locale/timezone',
+                ScopeInterface::SCOPE_STORE
+            );
+            return $this->timezone->date(new DateTime($date), $locale)->format($format);
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage() . __METHOD__);
+            return "";
+        }
     }
 }

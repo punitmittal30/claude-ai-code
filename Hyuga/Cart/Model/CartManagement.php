@@ -18,20 +18,44 @@ use Hyuga\Cart\Api\CartManagementInterface;
 use Hyuga\Cart\Service\CartService;
 use Hyuga\LogManagement\Logger\CartApiLogger;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Pratech\Base\Model\Data\Response;
 
 class CartManagement implements CartManagementInterface
 {
+    /**
+     * @param CartService $cartService
+     * @param CartApiLogger $cartApiLogger
+     * @param Response $response
+     */
     public function __construct(
         private CartService   $cartService,
-        private CartApiLogger $cartApiLogger
-    )
-    {
+        private CartApiLogger $cartApiLogger,
+        private Response      $response
+    ) {
     }
 
     /**
      * @inheritDoc
      */
     public function getCartCrossSellProducts(string $type, string $cartId, int $pincode = null): array
+    {
+        return $this->response->getResponse(
+            200,
+            'success',
+            'cart',
+            $this->getCartCrossSellProductsByPincode($type, $cartId, $pincode)
+        );
+    }
+
+    /**
+     * Get cross-sell products for cart by pincode.
+     *
+     * @param string $type
+     * @param string $cartId
+     * @param int|null $pincode
+     * @return array
+     */
+    private function getCartCrossSellProductsByPincode(string $type, string $cartId, int $pincode = null): array
     {
         $crossSellProducts = [];
 
@@ -49,7 +73,8 @@ class CartManagement implements CartManagementInterface
                 return [];
             }
 
-            $maxCrossSellCount = (int)$this->cartService->getConfigValue(CartService::CROSS_SELL_MAX_NUMBER_CONFIG_PATH);
+            $maxCrossSellCount = (int)$this->cartService
+                ->getConfigValue(CartService::CROSS_SELL_MAX_NUMBER_CONFIG_PATH);
             $crossSellMode = $this->cartService->getConfigValue(CartService::CROSS_SELL_MODE_CONFIG_PATH);
 
             $cartItemProductIds = [];
@@ -65,7 +90,14 @@ class CartManagement implements CartManagementInterface
             $itemsToProcess = [];
             if ($crossSellMode === 'lastcartitem') {
                 // Get the last item based on item ID
-                $lastItem = max($cartItems, fn($a, $b) => $a->getId() <=> $b->getId());
+                $lastItemId = 0;
+                $lastItem = null;
+                foreach ($cartItems as $item) {
+                    if ($item->getId() > $lastItemId) {
+                        $lastItemId = $item->getId();
+                        $lastItem = $item;
+                    }
+                }
                 if ($lastItem) {
                     $itemsToProcess[] = $lastItem;
                 }

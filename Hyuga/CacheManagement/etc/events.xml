@@ -16,4 +16,16 @@
         <observer name="hyuga_cache_clear_pincode_on_dark_store_status_change"
                   instance="Hyuga\CacheManagement\Observer\ClearCacheOnDarkStoreStatusChange"/>
     </event>
+    <event name="catalog_category_save_after">
+        <observer name="clear_cache_on_category_save"
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnCategoryChange"/>
+    </event>
+    <event name="catalog_category_delete_after">
+        <observer name="clear_cache_on_category_delete"
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnCategoryChange"/>
+    </event>
+    <event name="catalog_category_change_products">
+        <observer name="clear_cache_on_catalog_category_products_change"
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnCategoryChange"/>
+    </event>
 </config>

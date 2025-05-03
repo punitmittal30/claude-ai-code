@@ -20,7 +20,7 @@ use Hyuga\LogManagement\Logger\CachingLogger;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
-class ClearCacheOnDarkStoreStatusChange implements ObserverInterface
+class ClearCacheOnCategoryChange implements ObserverInterface
 {
     /**
      * @param CacheServiceInterface $cacheService
@@ -43,32 +43,18 @@ class ClearCacheOnDarkStoreStatusChange implements ObserverInterface
     public function execute(Observer $observer)
     {
         try {
-            $object = $observer->getEvent()->getData();
-
+            $category = $observer->getEvent()->getData('category');
             $eventName = $observer->getEvent()->getName();
 
             switch ($eventName) {
-                case 'warehouse_entity_changed':
-                    if ($object['old_value']['is_dark_store'] != $object['new_value']['is_dark_store']) {
-                        $this->handleDarkStoreChange();
-                    }
+                case 'catalog_category_delete_after':
+                case 'catalog_category_save_after':
+                    $this->cacheService->cleanCategoriesByPincodeCache($category->getId());
+                    $this->cacheService->cleanSubcategoryCacheKey($category->getId());
                     break;
             }
         } catch (Exception $e) {
             $this->cachingLogger->error('Error clearing pincode cache in observer: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Handle Dark Store Changes.
-     *
-     * @return void
-     */
-    private function handleDarkStoreChange(): void
-    {
-        $this->cacheService->cleanAllPincodeCaches();
-        $this->cacheService->cleanAvailableDarkStoresCache();
-        $this->cacheService->cleanAllNearestDarkStoreCaches();
-        $this->nodeRedisService->cleanAllPincodeCachesAndDarkStoreSlugs();
     }
 }

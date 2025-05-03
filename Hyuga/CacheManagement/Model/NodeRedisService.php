@@ -1,4 +1,15 @@
 <?php
+/**
+ * Hyuga_CacheManagement
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Hyuga\CacheManagement
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
 
 namespace Hyuga\CacheManagement\Model;
 
@@ -35,11 +46,13 @@ class NodeRedisService implements NodeRedisServiceInterface
     {
         try {
             if ($this->redisConnection) {
-                if ($this->validateExistingKey(self::DARK_STORE_URL_LIST)) {
-                    $this->redisConnection->del($this->getKeys(self::DARK_STORE_URL_LIST));
+                if ($this->validateExistingKey(self::NODE_CACHING_LIST['dark_store_url_list'])) {
+                    $this->redisConnection->del($this->getKeys(self::NODE_CACHING_LIST['dark_store_url_list']));
                 }
-                if ($this->validateExistingKey(self::PINCODE_SERVICEABILITY . "*")) {
-                    $this->redisConnection->del($this->getKeys(self::PINCODE_SERVICEABILITY . "*"));
+                if ($this->validateExistingKey(self::NODE_CACHING_LIST['pincode_serviceability'] . "*")) {
+                    $this->redisConnection->del(
+                        $this->getKeys(self::NODE_CACHING_LIST['pincode_serviceability'] . "*")
+                    );
                 }
             }
         } catch (Exception $e) {
@@ -79,8 +92,8 @@ class NodeRedisService implements NodeRedisServiceInterface
     {
         try {
             if ($this->redisConnection) {
-                if ($this->validateExistingKey(self::CATEGORY_ID_SLUG_MAPPING)) {
-                    $this->redisConnection->del($this->getKeys(self::CATEGORY_ID_SLUG_MAPPING));
+                if ($this->validateExistingKey(self::NODE_CACHING_LIST['category_id_slug_mapping'])) {
+                    $this->redisConnection->del($this->getKeys(self::NODE_CACHING_LIST['category_id_slug_mapping']));
                 }
             }
         } catch (Exception $e) {
