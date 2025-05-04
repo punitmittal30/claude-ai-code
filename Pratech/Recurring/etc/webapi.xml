@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Recurring
+ *
+ * @category  XML
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <route url="/V1/recurring/subscription-form/order/:orderId" method="GET">
+        <service class="Pratech\Recurring\Api\SubscriptionManagementInterface" method="getSubscriptionFormData"/>
+        <resources>
+            <resource ref="Pratech_Recurring::Subscription"/>
+        </resources>
+    </route>
+    <route url="/V1/recurring/subscription/create" method="POST">
+        <service class="Pratech\Recurring\Api\SubscriptionManagementInterface" method="createSubscription"/>
+        <resources>
+            <resource ref="Pratech_Recurring::Subscription"/>
+        </resources>
+    </route>
+    <route url="/V1/recurring/subscription/customer/:customerId" method="GET">
+        <service class="Pratech\Recurring\Api\SubscriptionManagementInterface" method="getCustomerSubscriptions"/>
+        <resources>
+            <resource ref="Pratech_Recurring::Subscription"/>
+        </resources>
+    </route>
+    <route url="/V1/recurring/subscription/cancel" method="POST">
+        <service class="Pratech\Recurring\Api\SubscriptionManagementInterface" method="cancelCustomerSubscription"/>
+        <resources>
+            <resource ref="Pratech_Recurring::Subscription"/>
+        </resources>
+    </route>
+</routes>

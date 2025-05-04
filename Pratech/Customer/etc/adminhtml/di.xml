@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Customer
+ *
+ * @category  XML
+ * @package   Pratech\Customer
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magento\Customer\Block\Adminhtml\Edit\Tab\Orders"
+                type="Pratech\Customer\Block\Adminhtml\Edit\Tab\Orders"/>
+</config>

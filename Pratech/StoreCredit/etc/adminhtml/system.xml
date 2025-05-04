@@ -1,0 +1,160 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="store_credit" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1"
+                 showInStore="1">
+            <class>separator-top</class>
+            <label>Store Credit(Wallet)</label>
+            <tab>pratech</tab>
+            <resource>Pratech_StoreCredit::store_credit</resource>
+            <group id="store_credit" translate="label" type="text" sortOrder="100" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Store Credit(Wallet)</label>
+                <field id="title" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Store Credit Title</label>
+                    <comment>Set the value which needs to be shown to user in place of Store Credit. Ex: Hyugalife
+                        Wallet
+                    </comment>
+                </field>
+                <field id="conversion_rate" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Conversion Rate (Store Credit Points to Rupees)</label>
+                    <validate>validate-number</validate>
+                    <comment>Set the store credit conversion rate.</comment>
+                </field>
+                <field id="store_credit_limit" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Limit Percentage</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                    <comment>Set the maximum store credit limit for orders. Ex: 60, 70, etc.</comment>
+                </field>
+                <field id="use_store_credit_after_days" translate="label" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Credit After N Days</label>
+                    <source_model>Pratech\StoreCredit\Model\Config\Source\Days</source_model>
+                    <comment>Amount credit period after N days of order delivery.</comment>
+                </field>
+                <field id="exclude_from_utm_source" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Exclude Store Credit from these UTM Source</label>
+                    <comment>Set the UTM Source value with comma (,) seperated.</comment>
+                </field>
+                <field id="enable_refund" translate="label" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Enable Refund on Order Payment Failed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="expiry_days" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Expiry Period (Days)</label>
+                    <comment>Set default number of days until store credit expires</comment>
+                    <validate>validate-number</validate>
+                </field>
+            </group>
+            <group id="registration_store_credit" translate="label" type="text" sortOrder="200" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Customer Registration Cashback</label>
+                <field id="enabled" translate="label" type="select" sortOrder="0" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable or disable customer signup cashback functionality.</comment>
+                </field>
+                <field id="store_credit_amount" translate="label" type="text" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Store Credit Amount</label>
+                    <frontend_model>Pratech\StoreCredit\Block\Adminhtml\System\Config\Types</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="additional_info" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Additional Info</label>
+                    <comment>Use shortcode %s to display the platform against which cashback is credited.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="first_review_store_credit" translate="label" type="text" sortOrder="300" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>First Review Cashback</label>
+                <field id="enabled" translate="label" type="select" sortOrder="0" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable or disable first review cashback functionality.</comment>
+                </field>
+                <field id="store_credit_amount" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Store Credit Amount</label>
+                    <comment>Set the maximum store credit amount for first review submitted by customer. Ex: 100, 200,
+                        etc.
+                    </comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="additional_info" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Additional Info</label>
+                    <comment>Use shortcode %s to display the review id.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="cashback_against_order" translate="label" type="text" sortOrder="400" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Cashback against order</label>
+                <field id="additional_info" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Additional Info</label>
+                    <comment>use shortcode %s to display the order Id .</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+        <section id="cron_schedule" translate="label" sortOrder="10" showInDefault="1"
+                 showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Cron Schedule</label>
+            <tab>pratech</tab>
+            <resource>Pratech_StoreCredit::store_credit</resource>
+            <group id="update_store_credit" translate="label" sortOrder="50" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Store Credit Update Frequency</label>
+                <field id="status" translate="label" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="expire_store_credit" translate="label" sortOrder="50" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Expire Store Credit</label>
+                <field id="status" translate="label" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

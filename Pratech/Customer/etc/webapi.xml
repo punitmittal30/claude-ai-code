@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Customer
+ *
+ * @category  XML
+ * @package   Pratech\Customer
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <route url="/V1/customers/id/:customerId" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getCustomerById"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/id/:customerId" method="PUT">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="setCustomerById"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/id/:customerId/addresses" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getCustomerAddresses"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/id/:customerId/addresses" method="POST">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="addCustomerAddress"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/id/:customerId/addresses/update" method="POST">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="updateCustomerAddress"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/address/:addressId" method="DELETE">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="deleteAddressByAddressId"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/orders" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getCustomerOrders"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/id/:customerId/order/:orderId" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getCustomerOrderById"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/id/:customerId/store-credit" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getCustomerStoreCredit"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customers/id/:customerId/purchased-products" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getCustomerPurchasedProducts"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <!-- Get customer order history(My Order Page) -->
+    <route url="/V1/customers/order/history" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getOrderHistory"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <!-- Get customer order by order id(Order Detail Page) -->
+    <route url="/V1/customers/id/:customerId/order/:orderId/view" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="viewOrderDetails"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+    <!-- Get blocked customers list -->
+    <route url="/V1/customers/blocked/list" method="GET">
+        <service class="Pratech\Customer\Api\CustomerRepositoryInterface" method="getBlockedCustomers"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+</routes>

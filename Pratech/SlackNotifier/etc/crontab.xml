@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_SlackNotifier
+ *
+ * @category  XML
+ * @package   Pratech\SlackNotifier
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <!-- Cron to be at 05:00 PM -->
+        <job name="slack_return_report" instance="Pratech\SlackNotifier\Cron\ReturnReport" method="execute">
+             <schedule>0 17 * * *</schedule>
+        </job>
+    </group>
+</config>

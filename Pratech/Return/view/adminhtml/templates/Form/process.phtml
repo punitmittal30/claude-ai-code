@@ -1,0 +1,30 @@
+<form class="process-form" method="post" action="<?= $escaper->escapeUrl($block->getActionUrl()); ?>"
+      style="max-width: 500px; margin: 0 auto 30px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+    <?= $block->getBlockHtml('formkey'); ?>
+
+    <p style="font-weight: bold; text-align: center; color: #d9534f;">
+        <?= __('After processing this request, a return will be created on Vinculum.'); ?>
+    </p>
+
+    <div class="field" style="margin-bottom: 15px;">
+        <label for="instant_refund"
+               style="font-weight: bold; display: block; margin-bottom: 8px;">
+            <?= __('Enable Instant Refund'); ?>
+        </label>
+        <select id="instant_refund" name="instant_refund" class="admin__control-select"
+                style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
+            <?php foreach ($block->getOptionsList() as $option): ?>
+                <option value="<?= $escaper->escapeHtmlAttr($option['value']); ?>">
+                    <?= $escaper->escapeHtml($option['label']); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div class="actions" style="text-align: center;">
+        <button type="submit" class="action-primary"
+                style="padding: 10px 20px; background-color: #0070d2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+            <?= __('Process Request'); ?>
+        </button>
+    </div>
+</form>

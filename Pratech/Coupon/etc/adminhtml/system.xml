@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_Coupon
+ *
+ * @category  XML
+ * @package   Pratech\Coupon
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="coupon" translate="label" sortOrder="130"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Coupon</label>
+            <tab>pratech</tab>
+            <resource>Pratech_Coupon::coupon</resource>
+            <group id="general" translate="label" type="text" sortOrder="100"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>General Configuration</label>
+                <field id="enable" translate="label" type="select" sortOrder="1"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="coupon_exist" translate="label" type="text"
+                       sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when Coupon does not exist</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+                <field id="coupon_expired" translate="label" type="text"
+                       sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when Coupon exist but is expired</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+                <field id="coupon_customer_group" translate="label" type="text"
+                       sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when coupon is not applicable for guest customer</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+                <field id="coupon_website_id" translate="label" type="text"
+                       sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when coupon is not applicable on website</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+                <field id="coupon_usages" translate="label" type="text"
+                       sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when coupon was used more than it can be used</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+                <field id="condition_fail" translate="label" type="text"
+                       sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when Coupon exist but do not apply to the rule conditions</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+                <field id="coupon_stackable" translate="label" type="text"
+                       sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when coupon cannot be stacked with other coupons</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+                <field id="max_coupon_stackable" translate="label" type="text"
+                       sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Message when coupon reach maximum limit of stacking</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment>use shortcode %s to display the coupon code used by the customer</comment>
+                </field>
+            </group>
+            <group id="stacking" translate="label" type="text" sortOrder="110"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Coupon Stacking</label>
+                <field id="enable" translate="label" type="select" sortOrder="1"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="max_coupon" translate="label" type="text" sortOrder="2" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Maximum no of coupons</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

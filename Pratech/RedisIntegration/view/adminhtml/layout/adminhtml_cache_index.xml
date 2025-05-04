@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_RedisIntegration
+ *
+ * @category  XML
+ * @package   Pratech\RedisIntegration
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Pratech\RedisIntegration\Block\Cache\Additional" name="pratech.cache.additional"
+                   template="Pratech_RedisIntegration::system/cache/additional.phtml">
+                <arguments>
+                    <argument name="permissions" xsi:type="object">Pratech\RedisIntegration\Block\Cache\Permissions
+                    </argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

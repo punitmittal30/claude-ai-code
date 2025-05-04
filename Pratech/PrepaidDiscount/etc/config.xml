@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_PrepaidDiscount
+ *
+ * @category  XML
+ * @package   Pratech\PrepaidDiscount
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <prepaid_discount>
+            <general>
+                <ranges>
+                    <item1>
+                        <from_price>1</from_price>
+                        <to_price>500</to_price>
+                        <discount>20</discount>
+                        <discount_type>amount</discount_type>
+                    </item1>
+                    <item2>
+                        <from_price>501</from_price>
+                        <to_price>1000</to_price>
+                        <discount>30</discount>
+                        <discount_type>amount</discount_type>
+                    </item2>
+                    <item3>
+                        <from_price>1000</from_price>
+                        <to_price>10000</to_price>
+                        <discount>50</discount>
+                        <discount_type>amount</discount_type>
+                    </item3>
+                </ranges>
+            </general>
+        </prepaid_discount>
+    </default>
+</config>
