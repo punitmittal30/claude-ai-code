@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_RazorpayLogs
+ *
+ * @category  XML
+ * @package   Pratech\RazorpayLogs
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="razorpay_logs" resource="sales" engine="innodb" comment="Razorpay Logs Grid">
+        <column xsi:type="int" name="entity_id" identity="true" nullable="false" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="order_id" unsigned="false" nullable="true" identity="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="increment_id" nullable="true" length="50" comment="Order Increment ID"/>
+        <column xsi:type="varchar" name="status" nullable="true" length="32" comment="Order Status"/>
+        <column xsi:type="varchar" name="source" nullable="true" length="32" comment="Source"/>
+        <column xsi:type="varchar" name="rzp_order_id" nullable="true" length="55" comment="Razorpay Order ID"/>
+        <column xsi:type="varchar" name="rzp_payment_id" nullable="true" length="55" comment="Razorpay Payment ID"/>
+        <column xsi:type="timestamp" name="created_at" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="varchar" name="classification" nullable="true" length="32" comment="Classification"/>
+        <constraint xsi:type="primary" referenceId="RAZORPAY_LOGS_ENTITY_ID_PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+    </table>
+</schema>

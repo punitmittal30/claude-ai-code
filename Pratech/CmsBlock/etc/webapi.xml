@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CmsBlock
+ *
+ * @category  XML
+ * @package   Pratech\CmsBlock
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/cms-block/identifier/:identifier" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsBlockInterface" method="getCmsBlockByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/blogs/categories" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsPageInterface" method="getBlogCategories"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/blogs/list" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsPageInterface" method="getBlogs"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/blogs/identifier/:identifier" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsPageInterface" method="getBlogByIdentifier"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/blogs/related-articles/:identifier" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsPageInterface" method="getRelatedArticles"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/blogs/top-blogs" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsPageInterface" method="getTopBlogs"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/blogs/top-blogs/category/:categoryId" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsPageInterface" method="getTopBlogsByCategory"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+    <route url="/V1/blogs/new-blogs" method="GET">
+        <service class="Pratech\CmsBlock\Api\CmsPageInterface" method="getNewBlogs"/>
+        <resources>
+            <resource ref="Magento_Cms::block"/>
+        </resources>
+    </route>
+</routes>

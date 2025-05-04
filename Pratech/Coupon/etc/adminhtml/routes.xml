@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Coupon
+ *
+ * @category  XML
+ * @package   Pratech\Coupon
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="coupon" frontName="coupon">
+            <module name="Pratech_Coupon"/>
+        </route>
+    </router>
+</config>

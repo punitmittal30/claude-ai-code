@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Pratech_StoreCredit::store_credit" title="Store Credit(Wallet)"/>
+                        </resource>
+                    </resource>
+                </resource>
+                <resource id="Pratech_Banners::pratech" title="Pratech" sortOrder="150">
+                    <resource id="Pratech_StoreCredit::storecredit" title="Store Credit" translate="title"
+                              sortOrder="10">
+                        <resource id="Pratech_StoreCredit::pendingorder" title="Pending Order Credits" translate="title"
+                                  sortOrder="10"/>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

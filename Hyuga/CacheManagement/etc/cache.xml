@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_CacheManagement
+ *
+ * @category  XML
+ * @package   Hyuga\CacheManagement
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Cache/etc/cache.xsd">
+    <type name="hyuga_pincode" translate="label,description" instance="Hyuga\CacheManagement\Model\Cache\Type\Pincode">
+        <label>Pincode Serviceability</label>
+        <description>Pincode serviceability API responses caching</description>
+    </type>
+    <type name="hyuga_warehouse_products" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\Products">
+        <label>Warehouse Products</label>
+        <description>Warehouse product listings and data caching</description>
+    </type>
+    <type name="hyuga_warehouse_filters" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\Filters">
+        <label>Warehouse Filters</label>
+        <description>Product filter data in warehouses caching</description>
+    </type>
+    <type name="hyuga_nearest_dark_store" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\NearestDarkStore">
+        <label>Nearest Dark Store</label>
+        <description>Nearest dark store information caching</description>
+    </type>
+    <type name="hyuga_available_dark_store" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\AvailableDarkStore">
+        <label>Available Dark Store</label>
+        <description>Available dark store information caching</description>
+    </type>
+    <type name="hyuga_category_id_slug_mapping" translate="label,description"
+          instance="Hyuga\CacheManagement\Model\Cache\Type\CategoryIdSlugMapping">
+        <label>Available Dark Store</label>
+        <description>Category ID Slug Mapping caching</description>
+    </type>
+</config>

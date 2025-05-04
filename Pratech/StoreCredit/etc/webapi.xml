@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/store-credit/transaction/:customerId" method="GET">
+        <service class="Pratech\StoreCredit\Api\StoreCreditInterface" method="getStoreCreditTransaction"/>
+        <resources>
+            <resource ref="Pratech_StoreCredit::store_credit"/>
+        </resources>
+    </route>
+</routes>

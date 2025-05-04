@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_SqsIntegration
+ *
+ * @category  XML
+ * @package   Pratech\SqsIntegration
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <sqs>
+            <communication>
+                <email>1</email>
+                <sms>1</sms>
+                <refund>1</refund>
+                <catalog>1</catalog>
+            </communication>
+        </sqs>
+    </default>
+</config>

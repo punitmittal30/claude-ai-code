@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Banners
+ *
+ * @category  XML
+ * @package   Pratech\Banners
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<logging xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Logging:etc/logging.xsd">
+    <groups>
+        <group name="banner_management">
+            <label translate="true">Banner Management</label>
+            <expected_models>
+                <expected_model class="Pratech\Banners\Model\Banner" />
+            </expected_models>
+            <events>
+                <event controller_action="custom_banner_edit" action_alias="view" />
+                <event controller_action="custom_banner_save" action_alias="save">
+                    <skip_on_back>
+                        <controller_action name="custom_banner_edit" />
+                    </skip_on_back>
+                </event>
+                <event controller_action="custom_banner_delete"
+                       action_alias="delete" />
+                <event controller_action="custom_banner__massDelete"
+                       action_alias="massDelete" />
+            </events>
+        </group>
+        <group name="slider_management">
+            <label translate="true">Slider Management</label>
+            <expected_models>
+                <expected_model class="Pratech\Banners\Model\Slider" />
+            </expected_models>
+            <events>
+                <event controller_action="custom_slider_edit" action_alias="view" />
+                <event controller_action="custom_slider_save" action_alias="save">
+                    <skip_on_back>
+                        <controller_action name="custom_slider_edit" />
+                    </skip_on_back>
+                </event>
+                <event controller_action="custom_slider_delete"
+                       action_alias="delete" />
+                <event controller_action="custom_slider__massDelete"
+                       action_alias="massDelete" />
+            </events>
+        </group>
+    </groups>
+</logging>

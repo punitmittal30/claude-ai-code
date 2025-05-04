@@ -1,0 +1,220 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Return
+ *
+ * @category  XML
+ * @package   Pratech\Return
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="sales_order_return_reason" resource="default" engine="innodb"
+           comment="Sales Order Return Reasons Table">
+        <column xsi:type="int" name="reason_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Reason Id"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" default="" comment="Title"/>
+        <column xsi:type="smallint" name="status" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Status"/>
+        <column xsi:type="smallint" name="position" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Position"/>
+        <column xsi:type="boolean" name="is_deleted" nullable="false" comment="Is_deleted"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="reason_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order_return_reject_reason" resource="default" engine="innodb"
+           comment="Sales Order Return Reject Reasons Table">
+        <column xsi:type="int" name="reason_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Reason Id"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" default="" comment="Title"/>
+        <column xsi:type="smallint" name="status" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Status"/>
+        <column xsi:type="smallint" name="position" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Position"/>
+        <column xsi:type="boolean" name="is_deleted" nullable="false" comment="Is_deleted"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="reason_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order_return_status" resource="default" engine="innodb" comment="Order Return Status Table">
+        <column xsi:type="int" name="status_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Status_id"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" default="" comment="Title"/>
+        <column xsi:type="boolean" name="is_enabled" nullable="false" default="true" comment="Is_enabled"/>
+        <column xsi:type="boolean" name="is_initial" nullable="false" comment="Is_initial"/>
+        <column xsi:type="smallint" name="state" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="State"/>
+        <column xsi:type="smallint" name="grid" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Grid"/>
+        <column xsi:type="int" name="priority" padding="11" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Priority"/>
+        <column xsi:type="boolean" name="is_deleted" nullable="false" comment="Is_deleted"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="status_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order_return_request" resource="default" engine="innodb"
+           comment="Sales Order Return Request Table">
+        <column xsi:type="int" name="request_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Request_id"/>
+        <column xsi:type="int" name="order_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Order_id"/>
+        <column xsi:type="int" name="shipment_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Shipment_id"/>
+        <column xsi:type="varchar" name="vin_return_number" length="255" comment="Vinculum Return Number"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created_at"/>
+        <column xsi:type="timestamp" name="modified_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Modified_at"/>
+        <column xsi:type="int" name="status" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Status"/>
+        <column xsi:type="int" name="refund_status" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Refund Status"/>
+        <column xsi:type="smallint" name="is_processed" padding="5" nullable="false" default="0"
+                comment="Is Processed"/>
+        <column xsi:type="smallint" name="instant_refund" padding="5" nullable="false" comment="Instant Refund"/>
+        <column xsi:type="smallint" name="reject_reason_id" padding="6" unsigned="false" nullable="false"
+                identity="false" default="0" comment="Reject Reason Id"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Customer_id"/>
+        <column xsi:type="text" name="customer_name" nullable="false" comment="Customer_name"/>
+        <column xsi:type="int" name="manager_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Manager_id"/>
+        <column xsi:type="decimal" name="refunded_amount" scale="4" precision="12" default="0.0000" unsigned="false"
+                nullable="false" comment="Refunded Amount"/>
+        <column xsi:type="decimal" name="refunded_store_credit" scale="4" precision="12" default="0.0000"
+                unsigned="false" nullable="false" comment="Refunded Store Credit"/>
+        <column xsi:type="text" name="comment" nullable="true" comment="comment"/>
+        <column xsi:type="text" name="note" nullable="true" comment="Note"/>
+        <index referenceId="SALES_ORDER_RETURN_REQUEST_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="request_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order_return_request_item" resource="default" engine="innodb"
+           comment="Sales Order Return Request Items Table">
+        <column xsi:type="int" name="request_item_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Request_item_id"/>
+        <column xsi:type="int" name="request_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Request_id"/>
+        <column xsi:type="int" name="order_item_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Order_item_id"/>
+        <column xsi:type="decimal" name="qty" scale="4" precision="12" unsigned="false" nullable="true" default="0"
+                comment="Qty"/>
+        <column xsi:type="decimal" name="request_qty" scale="4" precision="12" unsigned="false" nullable="true"
+                default="0" comment="Request_qty"/>
+        <column xsi:type="int" name="reason_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Reason_id"/>
+        <column xsi:type="text" name="images" nullable="true" comment="Images"/>
+        <column xsi:type="smallint" name="item_status" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Item_status"/>
+        <column xsi:type="decimal" name="refunded_amount" scale="4" precision="12" default="0.0000" unsigned="false"
+                nullable="false" comment="Refunded Amount"/>
+        <column xsi:type="text" name="comment" nullable="true" comment="comment"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="request_item_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ORDER_RETURN_REQUEST_ITEM_REQUEST_ID_ORDER_RETURN_REQUEST_REQUEST_ID"
+                    table="sales_order_return_request_item" column="request_id"
+                    referenceTable="sales_order_return_request" referenceColumn="request_id"
+                    onDelete="CASCADE"
+        />
+    </table>
+    <table name="sales_order_return_tracking" resource="default" engine="innodb"
+           comment="Sales Order Return Tracking Number Table">
+        <column xsi:type="int" name="tracking_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Tracking_id"/>
+        <column xsi:type="int" name="request_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Request_id"/>
+        <column xsi:type="varchar" name="tracking_code" nullable="false" length="255" comment="Tracking_code"/>
+        <column xsi:type="varchar" name="tracking_number" nullable="false" length="255" comment="Tracking_number"/>
+        <column xsi:type="boolean" name="is_customer" nullable="false" default="true" comment="Is_customer"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="tracking_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order_return_history" resource="default" engine="innodb" comment="Order Return History Table">
+        <column xsi:type="int" name="event_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Event_id"/>
+        <column xsi:type="int" name="request_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Request_id"/>
+        <column xsi:type="int" name="request_status_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Request_status_id"/>
+        <column xsi:type="timestamp" name="event_date" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Event_date"/>
+        <column xsi:type="smallint" name="event_type" padding="6" unsigned="false" nullable="false" identity="false"
+                default="0" comment="Event_type"/>
+        <column xsi:type="text" name="event_data" nullable="false" comment="Event_data"/>
+        <column xsi:type="smallint" name="event_initiator" padding="5" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Event_initiator"/>
+        <column xsi:type="varchar" name="event_initiator_name" nullable="false" length="255" default=""
+                comment="Event_initiator_name"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="event_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order_return_track_updates" resource="default" engine="innodb"
+           comment="Sales Order Return Track Updates">
+        <column xsi:type="int" name="entity_id" nullable="false" unsigned="true" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="parent_id" nullable="true" unsigned="true" comment="Parent ID"/>
+        <column xsi:type="int" name="status_id" nullable="true" unsigned="true" comment="Status ID"/>
+        <column xsi:type="varchar" name="track_number" nullable="true" length="100" comment="Track Number"/>
+        <column xsi:type="varchar" name="location" nullable="true" length="255" comment="Location"/>
+        <column xsi:type="timestamp" name="created_at" default="CURRENT_TIMESTAMP" comment="Create Date"/>
+        <column xsi:type="text" name="remark" nullable="true" comment="Remark"/>
+        <constraint xsi:type="foreign"
+                    referenceId="SALES_RETURN_TRACK_UPDATES_PARENT_ID_SALES_ORDER_RETURN_REQUEST_REQUEST_ID"
+                    table="sales_return_track_updates" column="parent_id" referenceTable="sales_order_return_request"
+                    referenceColumn="request_id" onDelete="CASCADE"/>
+        <index referenceId="SALES_RETURN_TRACK_UPDATES_PARENT_ID" indexType="btree">
+            <column name="parent_id"/>
+        </index>
+        <index referenceId="SALES_RETURN_TRACK_UPDATES_TRACK_NUMBER" indexType="btree">
+            <column name="track_number"/>
+        </index>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="SHIPMENT_TRACK_UPDATES_STATUS_ID_SHIPMENT_STATUS_STATUS_ID"
+                    table="sales_return_track_updates" column="status_id"
+                    referenceTable="sales_shipment_status" referenceColumn="status_id"/>
+    </table>
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Order">
+        <column xsi:type="varchar" name="return_requests" nullable="true" length="50" comment="Return Requests"/>
+    </table>
+    <table name="sales_order_item" resource="sales" engine="innodb" comment="Sales Order Item">
+        <column xsi:type="int" name="qty_returned" unsigned="true" nullable="true" padding="10" comment="Qty Returned"/>
+    </table>
+    <table name="sales_order_return_payment_details" resource="default" engine="innodb"
+           comment="Sales Order Return Payment Details Table">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Entity Id"/>
+        <column xsi:type="int" name="request_id" padding="10" unsigned="true" nullable="false" identity="false"
+                comment="Request_id"/>
+        <column xsi:type="varchar" name="payment_type" length="20" comment="Payment Type"/>
+        <column xsi:type="varchar" name="upi_id" length="255" comment="Upi Id"/>
+        <column xsi:type="varchar" name="account_number" length="255" comment="Account Number"/>
+        <column xsi:type="varchar" name="ifsc_code" length="20" comment="Ifsc Code"/>
+        <column xsi:type="varchar" name="account_holder_name" length="255" comment="Account Holder Name"/>
+        <column xsi:type="timestamp" name="created_at" default="CURRENT_TIMESTAMP" comment="Create Date"/>
+        <index referenceId="SALES_RETURN_PAYMENT_DETAILS_REQUEST_ID" indexType="btree">
+            <column name="request_id"/>
+        </index>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ORDER_RETURN_PAYMENT_DETAILS_REQUEST_ID_ORDER_RETURN_REQUEST_REQUEST_ID"
+                    table="sales_order_return_request_item" column="request_id"
+                    referenceTable="sales_order_return_request" referenceColumn="request_id"
+                    onDelete="CASCADE"
+        />
+    </table>
+</schema>

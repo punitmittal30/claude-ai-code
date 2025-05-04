@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Search
+ *
+ * @category  XML
+ * @package   Pratech\Search
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="search" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1"
+                 showInStore="1">
+            <class>separator-top</class>
+            <label>Search</label>
+            <tab>pratech</tab>
+            <resource>Pratech_Search::search_config</resource>
+            <group id="search" translate="label" type="text" sortOrder="10" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Search Configuration</label>
+                <field id="top_terms" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Top Search Terms</label>
+                    <comment>Enter search terms with comma(,) separated</comment>
+                </field>
+            </group>
+            <group id="sort_by_bestseller" translate="label" type="text" sortOrder="20" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Sort By Bestseller</label>
+                <field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label"
+                       type="select">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="bestseller_days" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="20"
+                       translate="label" type="text">
+                    <label>No of days to be considered</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

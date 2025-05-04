@@ -1,0 +1,58 @@
+<!-- ko if: $data.addAllowed || $data.trackingNumbers().length -->
+<div class="return-tracking-information">
+    <h2 class="return-title" data-bind="i18n: 'Tracking Information'"></h2>
+    <!-- ko if: $data.trackingNumbers().length -->
+        <div class="table-wrapper return-items-table">
+            <table class="data table table-returns-items return-table">
+                <caption class="table-caption" data-bind="i18n: 'Tracking Information'"></caption>
+                <thead class="return-thead">
+                <tr>
+                    <th scope="col" class="col return-col carrier" >
+                        <div class="return-th" data-bind="i18n: 'Carrier'"></div>
+                    </th>
+                    <th scope="col" class="col return-col id">
+                        <div class="return-th" data-bind="i18n: 'Tracking Number'"></div>
+                    </th>
+                    <th scope="col" class="col return-col remove">
+                        <div class="return-th" data-bind="i18n: 'Action'"></div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="return-tbody">
+                <!-- ko foreach: $data.trackingNumbers() -->
+                    <tr class="return-row">
+                        <td class="col return-col" data-bind="text: $parent.indexedCarriers[$data.code]"></td>
+                        <td class="col id return-col" data-bind="text: $data.number"></td>
+                        <td class="col remove return-col">
+                            <!-- ko if: $data.customer || $parent.isAdmin -->
+                            <a href="#" data-bind="click: $parent.removeTracking.bind($parent, $data.id)">Remove</a>
+                            <!-- /ko -->
+                        </td>
+
+                    </tr>
+                <!-- /ko -->
+                </tbody>
+            </table>
+        </div>
+    <!-- /ko -->
+
+    <!-- ko if: $data.addAllowed -->
+    <div class="return-tracking-add">
+        <div class="return-select-container">
+            <p class="return-label" data-bind="i18n: 'Carrier'"></p>
+            <select class="admin__control-select" data-bind="value: carrier">
+                <option data-bind="text: 'Please Select'" value=""></option>
+                <!-- ko foreach: $data.carriers -->
+                    <option data-bind="text: $data.label, value: $data.code"></option>
+                <!-- /ko -->
+            </select>
+        </div>
+        <div class="return-input">
+            <p class="return-label" data-bind="i18n: 'Tracking Number'"></p>
+            <input class="return-text" type="text" data-bind="value: value">
+        </div>
+        <button class="btn amreturn-btn" data-bind="i18n: 'Add', click: addTracking"></button>
+    </div>
+    <!-- /ko -->
+</div>
+<!-- /ko -->

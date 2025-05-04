@@ -1,0 +1,22 @@
+<!-- ko foreach: $data.items() -->
+<tr data-js="return-row" data-bind="attr: {class: $data.splited ? 'return-row -no-border' : 'return-row'}">
+    <td class="return-cell -product">
+        <!--ko template: $parent.getProductTemplate()--><!-- /ko -->
+    </td>
+    <!-- ko if: $parents[1].is_createForm -->
+    <!--ko template: $parent.getStateTemplate()--><!-- /ko -->
+    <!-- /ko -->
+
+    <!-- ko ifnot: $parents[1].is_createForm -->
+    <!--ko template: $parent.getEditStateTemplate()--><!-- /ko -->
+    <!-- /ko -->
+
+    <!-- ko if: $parents[1].is_createForm -->
+    <!--ko template: $parent.getCreateFieldsTemplate()--><!-- /ko -->
+    <!-- /ko -->
+
+    <!-- ko ifnot: $parents[1].is_createForm -->
+    <!--ko template: $parent.getViewFieldsTemplate()--><!-- /ko -->
+    <!-- /ko -->
+</tr>
+<!-- /ko -->

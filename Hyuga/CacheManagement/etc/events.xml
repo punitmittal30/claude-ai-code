@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_CacheManagement
+ *
+ * @category  XML
+ * @package   Hyuga\CacheManagement
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="warehouse_entity_changed">
+        <observer name="hyuga_cache_clear_pincode_on_dark_store_status_change"
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnDarkStoreStatusChange"/>
+    </event>
+    <event name="catalog_category_save_after">
+        <observer name="clear_cache_on_category_save"
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnCategoryChange"/>
+    </event>
+    <event name="catalog_category_delete_after">
+        <observer name="clear_cache_on_category_delete"
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnCategoryChange"/>
+    </event>
+    <event name="catalog_category_change_products">
+        <observer name="clear_cache_on_catalog_category_products_change"
+                  instance="Hyuga\CacheManagement\Observer\ClearCacheOnCategoryChange"/>
+    </event>
+</config>

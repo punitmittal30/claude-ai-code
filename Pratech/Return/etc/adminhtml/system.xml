@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Return
+ *
+ * @category  XML
+ * @package   Pratech\Return
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="return" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1"
+                 showInStore="1">
+            <class>separator-top</class>
+            <label>Order Return</label>
+            <tab>pratech</tab>
+            <resource>Pratech_Return::config</resource>
+            <group id="return" translate="label" type="text" sortOrder="500" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Order Return Configuration</label>
+                <field id="host" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Host</label>
+                </field>
+                <field id="owner" translate="label" type="obscure" sortOrder="5" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Owner</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="key" translate="label" type="obscure" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="kapture_url" translate="label" type="text" sortOrder="1" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Kapture URL</label>
+                </field>
+                <field id="kapture_key" translate="label" type="obscure" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Kapture Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="return_period_days" translate="label" type="text" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Return Period (Days)</label>
+                    <comment>Set the number of days after order delivery to allow returns.</comment>
+                </field>
+            </group>
+        </section>
+        <section id="cron_schedule" translate="label" sortOrder="10" showInDefault="1"
+                 showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Cron Schedule</label>
+            <tab>pratech</tab>
+            <resource>Pratech_Catalog::product</resource>
+            <group id="update_return_track_number" translate="label" sortOrder="30" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Update Return Track Number</label>
+                <field id="status" translate="label" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="update_instant_refund_flag" translate="label" sortOrder="30" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Update Instant Refund for Returns</label>
+                <field id="status" translate="label" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="day_threshold" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Days Threshold for Instant Refund</label>
+                    <comment>Number of days after which instant refund is disabled</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
