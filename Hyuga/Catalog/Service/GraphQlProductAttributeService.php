@@ -463,7 +463,11 @@ class GraphQlProductAttributeService
                 'price',
                 'special_price',
                 'special_from_date',
-                'special_to_date'
+                'special_to_date',
+                'total_number_of_count',
+                'total_volume_in_ml',
+                'number_of_serving_for_price_per_serving',
+                'protein_per_serving'
             ];
 
             // Get price and special price data
