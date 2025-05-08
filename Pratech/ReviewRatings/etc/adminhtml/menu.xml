@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_ReviewRatings
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\ReviewRatings
+ * @author    Himmat Singh <himmat.singh@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Pratech_ReviewRatings::reviews" title="Review" module="Pratech_ReviewRatings"
+             resource="Pratech_ReviewRatings::reviews" parent="Pratech_Banners::pratech"
+             sortOrder="150" translate="true"/>
+        <add id="Pratech_ReviewRatings::reviews_import" title="Import Reviews" module="Pratech_ReviewRatings"
+             resource="Pratech_ReviewRatings::reviews_import" parent="Pratech_ReviewRatings::reviews"
+             action="review/review/index" sortOrder="10" translate="true"/>
+        <add id="Pratech_ReviewRatings::keywords" title="Keywords" module="Pratech_ReviewRatings"
+             resource="Pratech_ReviewRatings::keywords" parent="Pratech_ReviewRatings::reviews"
+             action="review/keywords/index" sortOrder="50" translate="true"/>
+          <add id="Pratech_ReviewRatings::review_media" title="Review Media" translate="title"
+               module="Pratech_ReviewRatings" parent="Magento_Backend::marketing_user_content" sortOrder="50"
+               action="review/media/index" resource="Pratech_ReviewRatings::review_media"/>
+    </menu>
+</config>

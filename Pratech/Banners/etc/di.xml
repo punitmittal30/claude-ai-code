@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Banners
+ *
+ * @category  XML
+ * @package   Pratech\Banners
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="CustomSliderGridDataProvider"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">
+                Pratech\Banners\Model\ResourceModel\Slider\Collection
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="custom_slider_listing_data_source" xsi:type="string">
+                    Pratech\Banners\Model\Resource\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Pratech\Banners\Model\Resource\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">pratech_slider</argument>
+            <argument name="resourceModel" xsi:type="string">
+                Pratech\Banners\Model\ResourceModel\Slider
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="CustomBannerGridDataProvider"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">
+                Pratech\Banners\Model\ResourceModel\Banner\Collection
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="custom_banner_listing_data_source" xsi:type="string">
+                    Pratech\Banners\Model\Resource\Banner\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Pratech\Banners\Model\Resource\Banner\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">pratech_banner</argument>
+            <argument name="resourceModel" xsi:type="string">
+                Pratech\Banners\Model\ResourceModel\Banner
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Pratech\Banners\ReferenceImageUpload"
+                 type="Pratech\Banners\Model\ImageUploader">
+        <arguments>
+            <argument name="baseTmpPath" xsi:type="string">banner/tmp/feature</argument>
+            <argument name="basePath" xsi:type="string">banner/feature</argument>
+            <argument name="allowedExtensions" xsi:type="array">
+                <item name="jpg" xsi:type="string">jpg</item>
+                <item name="jpeg" xsi:type="string">jpeg</item>
+                <item name="gif" xsi:type="string">gif</item>
+                <item name="png" xsi:type="string">png</item>
+                <item name="webp" xsi:type="string">webp</item>
+            </argument>
+            <argument name="allowedMimeTypes" xsi:type="array">
+                <item name="jpg" xsi:type="string">image/jpg</item>
+                <item name="jpeg" xsi:type="string">image/jpeg</item>
+                <item name="gif" xsi:type="string">image/gif</item>
+                <item name="png" xsi:type="string">image/png</item>
+                <item name="webp" xsi:type="string">image/webp</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Pratech\Banners\Controller\Adminhtml\Banner\Upload">
+        <arguments>
+            <argument name="imageUploader" xsi:type="object">
+                Pratech\Banners\ReferenceImageUpload
+            </argument>
+        </arguments>
+    </type>
+
+    <preference for="Pratech\Banners\Api\Data\SliderItemInterface" type="Pratech\Banners\Model\Data\SliderItem"/>
+    <preference for="Pratech\Banners\Api\Data\BannerPlatformItemInterface" type="Pratech\Banners\Model\Data\BannerPlatformItem"/>
+    <preference for="Pratech\Banners\Api\Data\BannerItemInterface" type="Pratech\Banners\Model\Data\BannerItem"/>
+    <preference for="Pratech\Banners\Api\BannerRepositoryInterface" type="Pratech\Banners\Model\BannerRepository"/>
+    <preference for="Pratech\Banners\Api\Data\BannerResponseInterface" type="Pratech\Banners\Model\Data\BannerResponse"/>
+</config>

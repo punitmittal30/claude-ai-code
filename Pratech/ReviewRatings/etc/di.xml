@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_ReviewRatings
+ *
+ * @category  XML
+ * @package   Pratech\ReviewRatings
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!--Review API preference-->
+    <preference for="Pratech\ReviewRatings\Api\ReviewInterface" type="Pratech\ReviewRatings\Model\ReviewManagement"/>
+    <preference for="Pratech\ReviewRatings\Api\Data\RatingInterface" type="Pratech\ReviewRatings\Model\RatingData"/>
+    <preference for="Magento\Review\Block\Adminhtml\Edit\Form"
+                type="Pratech\ReviewRatings\Plugin\Block\Adminhtml\Edit\Form"/>
+    <preference for="Magento\Review\Block\Adminhtml\Add\Form"
+                type="Pratech\ReviewRatings\Plugin\Block\Adminhtml\Add\Form"/>
+    <preference for="Magento\Review\Model\ResourceModel\Review" type="Pratech\ReviewRatings\Plugin\Model\ResourceModel\Review" />
+    <preference for="Magento\Review\Model\ResourceModel\Review\Collection"
+                type="Pratech\ReviewRatings\Plugin\Model\ResourceModel\Review\Collection" />
+    <preference for="Magento\Review\Model\ResourceModel\Review\Product\Collection"
+                type="Pratech\ReviewRatings\Plugin\Model\ResourceModel\Review\Product\Collection" />
+    <preference for="Magento\Review\Block\Adminhtml\Grid"
+                type="Pratech\ReviewRatings\Plugin\Block\Adminhtml\Grid"/>
+    <!--Review API preference End-->
+
+    <preference for="Pratech\ReviewRatings\Api\KeywordsRepositoryInterface" type="Pratech\ReviewRatings\Model\KeywordsRepository"/>
+	<preference for="Pratech\ReviewRatings\Api\Data\KeywordsInterface" type="Pratech\ReviewRatings\Model\Keywords"/>
+	<preference for="Pratech\ReviewRatings\Api\Data\KeywordsSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+	<virtualType name="Pratech\ReviewRatings\Model\ResourceModel\Keywords\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">pratech_reviewratings_keywords</argument>
+			<argument name="resourceModel" xsi:type="string">Pratech\ReviewRatings\Model\ResourceModel\Keywords\Collection</argument>
+		</arguments>
+	</virtualType>
+    <virtualType name="Pratech\ReviewRatings\Model\ResourceModel\Media\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">pratech_reviewratings_media</argument>
+			<argument name="resourceModel" xsi:type="string">Pratech\ReviewRatings\Model\ResourceModel\Media</argument>
+		</arguments>
+	</virtualType>
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="pratech_reviewratings_keywords_listing_data_source" xsi:type="string">Pratech\ReviewRatings\Model\ResourceModel\Keywords\Grid\Collection</item>
+                <item name="pratech_reviewratings_all_media_listing_data_source" xsi:type="string">Pratech\ReviewRatings\Model\ResourceModel\Media\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+
+    <preference for="Pratech\ReviewRatings\Api\MediaRepositoryInterface" type="Pratech\ReviewRatings\Model\MediaRepository"/>
+	<preference for="Pratech\ReviewRatings\Api\Data\MediaInterface" type="Pratech\ReviewRatings\Model\Media"/>
+	<preference for="Pratech\ReviewRatings\Api\Data\MediaSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+    <preference for="Pratech\ReviewRatings\Api\Data\MediaDataInterface" type="Pratech\ReviewRatings\Model\MediaData"/>
+
+    <type name="Pratech\ReviewRatings\Ui\Component\MassAction\MediaStatus\Options">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="urlPath" xsi:type="string">review/media/masschangestatus</item>
+                <item name="paramName" xsi:type="string">status</item>
+                <item name="confirm" xsi:type="array">
+                    <item name="title" xsi:type="string" translatable="true">Change Status</item>
+                    <item name="message" xsi:type="string" translatable="true">Are you sure to change?</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>

@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <!-- Existing routes -->
+    <route url="/V1/warehouse" method="POST">
+        <service class="Pratech\Warehouse\Api\WarehouseRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+    <route url="/V1/warehouse/:warehouseId" method="GET">
+        <service class="Pratech\Warehouse\Api\WarehouseRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+    <route url="/V1/system/configuration" method="GET">
+        <service class="Pratech\Warehouse\Api\SystemConfigInterface" method="getSystemConfig"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+    <route url="/V1/warehouse/delivery-estimate/:sku/:pincode" method="GET">
+        <service class="Pratech\Warehouse\Api\DeliveryEstimateRepositoryInterface" method="getEstimate"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+    <route url="/V1/warehouse/serviceability/:pincode" method="GET">
+        <service class="Pratech\Warehouse\Api\PincodeRepositoryInterface" method="getPincodeServiceability"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+    <route url="/V1/warehouse/inventory" method="POST">
+        <service class="Pratech\Warehouse\Api\WarehouseInventoryRepositoryInterface" method="updateInventory"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::inventory_manage"/>
+        </resources>
+        <data>
+            <parameter name="payload" force="false"/>
+        </data>
+    </route>
+    <route url="/V1/warehouse/inventory/update" method="POST">
+        <service class="Pratech\Warehouse\Api\WarehouseInventoryRepositoryInterface" method="updateWarehouseInventory"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::inventory_manage"/>
+        </resources>
+    </route>
+    <route url="/V1/warehouse/dark-stores" method="GET">
+        <service class="Pratech\Warehouse\Api\WarehouseRepositoryInterface" method="getDarkStores"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+
+    <!-- Carousel products endpoint -->
+    <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/carousel" method="GET">
+        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
+                 method="getCarouselProductsByPincode"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+
+    <!-- Listing products endpoint -->
+    <route url="/V1/warehouse/pincode/:pincode/category/:categorySlug/listing" method="POST">
+        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
+                 method="getListingProductsByPincode"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+
+    <!-- Store specific categories endpoint -->
+    <route url="/V1/warehouse/pincode/:pincode/categories" method="GET">
+        <service class="Pratech\Warehouse\Api\WarehouseProductRepositoryInterface"
+                 method="getCategoriesByPincode"/>
+        <resources>
+            <resource ref="Pratech_Warehouse::warehouse_manage"/>
+        </resources>
+    </route>
+</routes>

@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_ReviewRatings
+ *
+ * @category  XML
+ * @package   Pratech\ReviewRatings
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+	<update handle="pratech_reviewratings_keywords_edit"/>
+</page>

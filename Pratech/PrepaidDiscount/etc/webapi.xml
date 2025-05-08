@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_PrepaidDiscount
+ *
+ * @category  XML
+ * @package   Pratech\PrepaidDiscount
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/carts/info/prepaid-discount" method="GET">
+        <service class="Pratech\PrepaidDiscount\Api\SystemConfigInterface" method="getPrepaidDiscountInfo"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+</routes>

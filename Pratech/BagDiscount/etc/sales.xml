@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_BagDiscount
+ *
+ * @category  XML
+ * @package   Pratech\BagDiscount
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/sales.xsd">
+    <section name="quote">
+        <group name="totals">
+            <item name="bag_discount" instance="Pratech\BagDiscount\Model\Total\BagDiscount"
+                  sort_order="100"/>
+            <item name="mrp_total" instance="Pratech\BagDiscount\Model\Total\MRPTotal"
+                  sort_order="50"/>
+            <item name="update_total_segment_labels" instance="Pratech\BagDiscount\Model\Total\UpdateTotalSegmentLabels"
+                  sort_order="1000"/>
+        </group>
+    </section>
+    <section name="order_invoice">
+        <group name="totals">
+            <item name="bag_discount" instance="Pratech\BagDiscount\Model\Invoice\Total\BagDiscount"
+                  sort_order="160"/>
+            <item name="mrp_total" instance="Pratech\BagDiscount\Model\Invoice\Total\BagDiscount"
+                  sort_order="50"/>
+        </group>
+    </section>
+    <section name="order_creditmemo">
+        <group name="totals">
+            <item name="bag_discount"
+                  instance="Pratech\BagDiscount\Model\CreditMemo\Total\BagDiscount" sort_order="160"/>
+            <item name="mrp_total"
+                  instance="Pratech\BagDiscount\Model\CreditMemo\Total\BagDiscount" sort_order="50"/>
+        </group>
+    </section>
+</config>

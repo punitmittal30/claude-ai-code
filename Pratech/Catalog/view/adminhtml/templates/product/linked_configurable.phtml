@@ -1,0 +1,21 @@
+<?php
+$blockGrid = $block->getBlockGrid();
+$gridJsObjectName = $blockGrid->getJsObjectName();
+?>
+<?= $block->getGridHtml() ?>
+<input type="hidden"
+       name="linked_configurable_products"
+       id="linked_configurable_products"
+       data-form-part="product_form"
+       value=""/>
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "Pratech_Catalog/js/assign-linked-products": {
+                "selectedProducts": <?= /* @noEscape */ $block->getProductsJson() ?>,
+                "gridJsObjectName": <?= /* @noEscape */ '"' . $gridJsObjectName . '"' ?: '{}' ?>
+            }
+        }
+    }
+</script>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], "require('mage/apply/main').apply();", false) ?>

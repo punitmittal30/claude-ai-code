@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Quiz
+ *
+ * @category  XML
+ * @package   Pratech\Quiz
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="quiz" resource="default" engine="innodb" comment="Quiz Table">
+        <column name="quiz_id" xsi:type="int" nullable="false" identity="true" unsigned="true" comment="Quiz ID"/>
+        <column name="title" xsi:type="varchar" nullable="false" length="255" comment="Quiz Title"/>
+        <column name="description" xsi:type="text" nullable="true" comment="Quiz Description"/>
+        <column name="status" xsi:type="smallint" nullable="false" default="1" comment="Is Quiz Active"/>
+        <column name="passing_mark" xsi:type="int" nullable="false" comment="Passing Mark"/>
+        <column name="allow_retry" xsi:type="boolean" nullable="false" default="1" comment="Allow Retry (0=No, 1=Yes)"/>
+        <column name="reward_type" xsi:type="varchar" nullable="false" length="50"
+                comment="Reward Type (Coupon/HCash)"/>
+        <column name="quiz_type" xsi:type="varchar" nullable="false" length="50" comment="Quiz Type (Popup/Game)"/>
+        <column name="reward_value" xsi:type="varchar" nullable="true" length="255" comment="Reward Value"/>
+        <column name="reward_description" xsi:type="text" nullable="true" comment="Reward Description"/>
+        <column name="quiz_for" xsi:type="varchar" nullable="false" length="50" default="both"
+                comment="Quiz For (customer/guest/both)"/>
+        <column name="terms_conditions" xsi:type="text" nullable="true" comment="Quiz Terms AND Conditions"/>
+        <column name="created_at" xsi:type="timestamp" default="CURRENT_TIMESTAMP" comment="Creation Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="quiz_id"/>
+        </constraint>
+    </table>
+
+    <table name="quiz_question" resource="default" engine="innodb" comment="Quiz Question Table">
+        <column name="question_id" xsi:type="int" nullable="false" identity="true" unsigned="true"
+                comment="Question ID"/>
+        <column name="quiz_id" xsi:type="int" nullable="false" unsigned="true" comment="Quiz ID"/>
+        <column name="question_text" xsi:type="text" nullable="false" comment="Question Text"/>
+        <column name="question_type" xsi:type="varchar" nullable="false" length="50"
+                comment="Question Type (MCQ/Image)"/>
+        <column name="image_path" xsi:type="varchar" nullable="true" length="255" comment="Image Path (Optional)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="question_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="QUIZ_QUIZ_ID_QUIZ_QUESTION_QUIZ_ID" table="quiz_question"
+                    column="quiz_id"
+                    referenceTable="quiz" referenceColumn="quiz_id" onDelete="CASCADE"/>
+    </table>
+
+    <table name="quiz_answer" resource="default" engine="innodb" comment="Quiz Answer Table">
+        <column name="answer_id" xsi:type="int" nullable="false" identity="true" unsigned="true" comment="Answer ID"/>
+        <column name="question_id" xsi:type="int" nullable="false" unsigned="true" comment="Question ID"/>
+        <column name="title" xsi:type="text" nullable="false" comment="Answer Title"/>
+        <column name="description" xsi:type="text" nullable="true" comment="Answer Description"/>
+        <column name="sort_order" xsi:type="smallint" unsigned="true" nullable="false" padding="5"
+                comment="Sort Order"/>
+        <column name="is_correct" xsi:type="boolean" nullable="false" default="0"
+                comment="Is Correct Answer (0=No, 1=Yes)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="answer_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="QUIZ_QUESTION_ID_QUIZ_ANSWER_ID" table="quiz_answer"
+                    column="question_id"
+                    referenceTable="quiz_question" referenceColumn="question_id" onDelete="CASCADE"/>
+    </table>
+
+    <table name="quiz_user_attempt" resource="default" engine="innodb" comment="Quiz User Attempt Table">
+        <column name="attempt_id" xsi:type="int" nullable="false" identity="true" unsigned="true" comment="Attempt ID"/>
+        <column name="quiz_id" xsi:type="int" nullable="false" unsigned="true" comment="Quiz ID"/>
+        <column name="user_id" xsi:type="int" nullable="false" unsigned="true" comment="User ID"/>
+        <column name="score" xsi:type="int" nullable="false" comment="User Score"/>
+        <column name="status" xsi:type="varchar" nullable="false" length="50" comment="Status (Pass/Fail)"/>
+        <column name="reward" xsi:type="varchar" nullable="true" length="255"
+                comment="Reward Details (e.g., Coupon Code)"/>
+        <column name="attempted_at" xsi:type="timestamp" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Attempted At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="attempt_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="QUIZ_USER_ATTEMPT_QUIZ_ID_QUIZ_QUIZ_ID"
+                    table="quiz_user_attempt" column="quiz_id" referenceTable="quiz"
+                    referenceColumn="quiz_id" onDelete="CASCADE"/>
+    </table>
+</schema>

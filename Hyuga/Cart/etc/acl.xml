@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Hyuga_Cart
+ *
+ * @category  XML
+ * @package   Hyuga\Cart
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Hyuga_Cart::cart" title="Hyuga Cart" translate="true" sortOrder="210"/>
+            </resource>
+        </resources>
+    </acl>
+</config>
