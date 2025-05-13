@@ -1,0 +1,39 @@
+/**
+ * Pratech_Recurring
+ *
+ * @category  CSS
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwarr@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
+.wk_label{
+    font-size: 1.7rem;  
+    font-weight: 600;
+}
+.wk_table{
+    margin-top: 25px;
+}
+.wk_span{
+    border:1px solid gainsboro
+}
+.display-none{
+    display: none;
+}
+.manage-subscription{
+    cursor: pointer;
+}
+.wk-subscription{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.date-range{
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+.payment-information{
+    margin-top:60px;
+}

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Pratech_Order
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Order
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
+ -->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="sales_order_shipment_columns">
+        <column name="rating">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Rating</label>
+            </settings>
+        </column>
+        <column name="review">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Review</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="keywords">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Review Keywords</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="refunded_amount">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Refunded Amount</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="shipment_status" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <options class="Pratech\Order\Ui\Component\Listing\Column\ShipmentStatus"/>
+                <dataType>select</dataType>
+                <label translate="true">Shipment Status</label>
+            </settings>
+        </column>
+    </columns>
+</listing>

@@ -1,0 +1,116 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_ReviewRatings
+ *
+ * @category  XML
+ * @package   Pratech\ReviewRatings
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+	<argument name="data" xsi:type="array">
+		<item name="js_config" xsi:type="array">
+			<item name="provider" xsi:type="string">pratech_reviewratings_all_media_listing.pratech_reviewratings_all_media_listing_data_source</item>
+		</item>
+	</argument>
+	<settings>
+		<spinner>pratech_reviewratings_all_media_columns</spinner>
+		<deps>
+			<dep>pratech_reviewratings_all_media_listing.pratech_reviewratings_all_media_listing_data_source</dep>
+		</deps>
+	</settings>
+	<dataSource name="pratech_reviewratings_all_media_listing_data_source" component="Magento_Ui/js/grid/provider">
+		<settings>
+			<storageConfig>
+				<param name="indexField" xsi:type="string">media_id</param>
+			</storageConfig>
+			<updateUrl path="mui/index/render"/>
+		</settings>
+        <aclResource>Pratech_ReviewRatings::review_media</aclResource>
+		<dataProvider name="pratech_reviewratings_all_media_listing_data_source" class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+			<settings>
+				<requestFieldName>id</requestFieldName>
+				<primaryFieldName>media_id</primaryFieldName>
+			</settings>
+		</dataProvider>
+	</dataSource>
+	<listingToolbar name="listing_top">
+		<settings>
+			<sticky>true</sticky>
+		</settings>
+		<bookmark name="bookmarks"/>
+		<columnsControls name="columns_controls"/>
+		<filters name="listing_filters"/>
+		<paging name="listing_paging"/>
+		<massaction name="listing_massaction">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="component" xsi:type="string">Magento_Ui/js/grid/tree-massactions</item>
+					<item name="indexField" xsi:type="string">media_id</item>
+				</item>
+			</argument>
+			<action name="change_status">
+				<settings>
+					<type>change_status</type>
+					<label translate="true">Change Status</label>
+					<actions class="Pratech\ReviewRatings\Ui\Component\MassAction\MediaStatus\Options"/>
+				</settings>
+			</action>
+		</massaction>
+	</listingToolbar>
+	<columns name="pratech_reviewratings_all_media_columns">
+		<selectionsColumn name="ids">
+			<settings>
+				<indexField>media_id</indexField>
+			</settings>
+		</selectionsColumn>
+		<column name="media_id">
+			<settings>
+				<filter>text</filter>
+				<sorting>asc</sorting>
+				<label translate="true">ID</label>
+			</settings>
+		</column>
+		<column name="review_id" class="Pratech\ReviewRatings\Ui\Component\Listing\Column\ReviewLink">
+			<settings>
+				<filter>text</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+				<label translate="true">Review ID</label>
+			</settings>
+		</column>
+        <column name="status">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Pratech\ReviewRatings\Model\Config\Source\MediaStatus</item>
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/select</item>
+                </item>
+            </argument>
+			<settings>
+                <filter>select</filter>
+                <dataType>select</dataType>
+				<label translate="true">Status</label>
+			</settings>
+		</column>
+		<column name="type">
+			<settings>
+				<filter>text</filter>
+				<label translate="true">Media Type</label>
+			</settings>
+		</column>
+        <column name="url" class="Pratech\ReviewRatings\Ui\Component\Listing\Column\ReviewMedia">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/thumbnail</item>
+                    <item name="sortable" xsi:type="boolean">false</item>
+                    <item name="altField" xsi:type="string">name</item>
+                    <item name="has_preview" xsi:type="string">1</item>
+                    <item name="label" xsi:type="string" translate="true">Media</item>
+                    <item name="sortOrder" xsi:type="number">20</item>
+                </item>
+            </argument>
+        </column>
+	</columns>
+</listing>

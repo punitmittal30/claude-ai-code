@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Order
+ *
+ * @category  XML
+ * @package   Pratech\Order
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Order">
+        <column xsi:type="smallint" name="is_confirmed" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Is Order Confirmed"/>
+        <column xsi:type="varchar" name="rzp_order_id" nullable="true" length="55" comment="Razorpay Order ID"/>
+        <column xsi:type="varchar" name="rzp_payment_id" nullable="true" length="55" comment="Razorpay Payment ID"/>
+        <column xsi:type="varchar" name="estimated_delivery_date" nullable="true" length="55"
+                comment="Estimated Delivery Date"/>
+        <column xsi:type="varchar" name="ip_address" nullable="true" length="50" comment="IP Address"/>
+        <column xsi:type="smallint" name="platform" nullable="true" comment="Platform"/>
+        <column xsi:type="varchar" name="utm_id" nullable="true" length="200" comment="UTM ID"/>
+        <column xsi:type="varchar" name="utm_source" nullable="true" length="200" comment="UTM Source"/>
+        <column xsi:type="varchar" name="utm_campaign" nullable="true" length="255" comment="UTM Campaign"/>
+        <column xsi:type="varchar" name="utm_medium" nullable="true" length="255" comment="UTM Medium"/>
+        <column xsi:type="varchar" name="utm_term" nullable="true" length="255" comment="UTM Term"/>
+        <column xsi:type="varchar" name="utm_content" nullable="true" length="200" comment="UTM Content"/>
+        <column xsi:type="varchar" name="tracker_cookie" nullable="true" length="100" comment="Tracker Cookie"/>
+        <column xsi:type="timestamp" name="utm_timestamp" nullable="true" comment="UTM Timestamp"/>
+    </table>
+    <table name="sales_order_grid" resource="sales" engine="innodb" comment="Sales Order Grid">
+        <column xsi:type="smallint" name="is_confirmed" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Is Order Confirmed"/>
+        <column xsi:type="varchar" name="rzp_order_id" nullable="true" length="55" comment="Razorpay Order ID"/>
+        <column xsi:type="varchar" name="rzp_payment_id" nullable="true" length="55" comment="Razorpay Payment ID"/>
+        <column xsi:type="varchar" name="estimated_delivery_date" nullable="true" length="55"
+                comment="Estimated Delivery Date"/>
+        <column xsi:type="varchar" name="ip_address" nullable="true" length="50" comment="IP Address"/>
+        <column xsi:type="smallint" name="platform" nullable="true" comment="Platform"/>
+        <column xsi:type="varchar" name="utm_id" nullable="true" length="200" comment="UTM ID"/>
+        <column xsi:type="varchar" name="utm_source" nullable="true" length="200" comment="UTM Source"/>
+        <column xsi:type="varchar" name="utm_campaign" nullable="true" length="255" comment="UTM Campaign"/>
+        <column xsi:type="varchar" name="utm_medium" nullable="true" length="255" comment="UTM Medium"/>
+        <column xsi:type="varchar" name="utm_term" nullable="true" length="255" comment="UTM Term"/>
+        <column xsi:type="varchar" name="utm_content" nullable="true" length="200" comment="UTM Content"/>
+        <column xsi:type="varchar" name="tracker_cookie" nullable="true" length="100" comment="Tracker Cookie"/>
+        <column xsi:type="timestamp" name="utm_timestamp" nullable="true" comment="UTM Timestamp"/>
+    </table>
+    <table name="sales_shipment_comment" resource="sales" engine="innodb" comment="Sales Flat Shipment Comment">
+        <column xsi:type="varchar" name="status" nullable="true" length="32" comment="Status"/>
+    </table>
+    <table name="sales_shipment" resource="sales" engine="innodb" comment="Sales Flat Shipment">
+        <column name="is_rated" xsi:type="boolean" nullable="true" comment="Is rated by customer?"/>
+        <column xsi:type="int" name="rating" unsigned="true" nullable="true" identity="false"
+                comment="Rating by Customer"/>
+        <column xsi:type="varchar" name="review" nullable="true" length="255" comment="Shipment Review"/>
+        <column xsi:type="varchar" name="keywords" nullable="true" length="255" comment="Review Keywords"/>
+        <column xsi:type="decimal" name="refunded_amount" scale="4" precision="20" unsigned="false" nullable="true"
+                comment="Refunded Amount"/>
+    </table>
+    <table name="sales_shipment_grid" resource="sales" engine="innodb" comment="Sales Flat Shipment Grid">
+        <column xsi:type="int" name="rating" unsigned="true" nullable="true" identity="false"
+                comment="Rating by Customer"/>
+        <column xsi:type="varchar" name="review" nullable="true" length="255" comment="Shipment Review"/>
+        <column xsi:type="varchar" name="keywords" nullable="true" length="255" comment="Review Keywords"/>
+        <column xsi:type="decimal" name="refunded_amount" scale="4" precision="20" unsigned="false" nullable="true"
+                comment="Refunded Amount"/>
+    </table>
+    <table name="sales_shipment_status" resource="default" engine="innodb" comment="Sales Shipment Status">
+        <column xsi:type="int" name="status_id" nullable="false" unsigned="true" identity="true" comment="Status Id"/>
+        <column xsi:type="int" name="clickpost_status_code" nullable="true" unsigned="true" comment="Clickpost Status Code"/>
+        <column xsi:type="varchar" name="clickpost_status" nullable="true" length="50" comment="Clickpost Status"/>
+        <column xsi:type="varchar" name="status_code" nullable="true" length="50" comment="Status Code"/>
+        <column xsi:type="varchar" name="status" nullable="true" length="50" comment="Status"/>
+        <column xsi:type="varchar" name="description" nullable="true" length="255" comment="Description"/>
+        <column xsi:type="varchar" name="journey" nullable="true" length="50" comment="Journey(Forward, Reverse, Both)"/>
+        <column xsi:type="text" name="comments" nullable="true" comment="Comments"/>
+        <index referenceId="SALES_SHIPMENT_STATUS_STATUS_CODE" indexType="btree">
+            <column name="status_code"/>
+        </index>
+        <index referenceId="SALES_SHIPMENT_STATUS_CLICKPOST_STATUS_CODE" indexType="btree">
+            <column name="clickpost_status_code"/>
+        </index>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="status_id"/>
+        </constraint>
+    </table>
+    <table name="sales_shipment_track_updates" resource="default" engine="innodb" comment="Sales Shipment Track Updates">
+        <column xsi:type="int" name="entity_id" nullable="false" unsigned="true" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="parent_id" nullable="true" unsigned="true" comment="Parent ID"/>
+        <column xsi:type="int" name="status_id" nullable="true" unsigned="true" comment="Status ID"/>
+        <column xsi:type="varchar" name="track_number" nullable="true" length="100" comment="Track Number"/>
+        <column xsi:type="varchar" name="location" nullable="true" length="255" comment="Location"/>
+        <column xsi:type="timestamp" name="created_at" default="CURRENT_TIMESTAMP" comment="Create Date"/>
+        <column xsi:type="text" name="remark" nullable="true" comment="Remark"/>
+        <constraint xsi:type="foreign" referenceId="SALES_SHIPMENT_TRACK_UPDATES_PARENT_ID_SALES_SHIPMENT_ENTITY_ID"
+                    table="sales_shipment_track_updates" column="parent_id" referenceTable="sales_shipment"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="SALES_SHIPMENT_TRACK_UPDATES_PARENT_ID" indexType="btree">
+            <column name="parent_id"/>
+        </index>
+        <index referenceId="SALES_SHIPMENT_TRACK_UPDATES_TRACK_NUMBER" indexType="btree">
+            <column name="track_number"/>
+        </index>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="SHIPMENT_TRACK_UPDATES_STATUS_ID_SHIPMENT_STATUS_STATUS_ID" table="sales_shipment_track_updates" column="status_id"
+            referenceTable="sales_shipment_status" referenceColumn="status_id"/>
+    </table>
+</schema>

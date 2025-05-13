@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_WondersoftIntegration
+ *
+ * @category  XML
+ * @package   Hyuga\WondersoftIntegration
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Hyuga\WondersoftIntegration\Api\WondersoftApiInterface"
+                type="Hyuga\WondersoftIntegration\Model\Api\WondersoftApi"/>
+
+    <!-- Define Logger for Custom Caching -->
+    <type name="Hyuga\WondersoftIntegration\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Hyuga\WondersoftIntegration\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">wondersoft</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Hyuga\WondersoftIntegration\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

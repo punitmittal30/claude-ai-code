@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Order
+ *
+ * @category  XML
+ * @package   Pratech\Order
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_shipment_save_after">
+        <observer name="change_order_status_to_shipped"
+                  instance="Pratech\Order\Observer\ChangeShipmentStatus"/>
+    </event>
+    <event name="sales_order_invoice_save_after">
+        <observer name="change_order_status_to_delivered"
+                  instance="Pratech\Order\Observer\ChangeInvoiceStatus"/>
+    </event>
+</config>

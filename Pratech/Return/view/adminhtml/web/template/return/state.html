@@ -1,0 +1,31 @@
+<!-- ko if: $data.is_returnable -->
+<td class="return-cell return-reason-control">
+    <select class="admin__control-select return-select"
+            data-bind="options: $parents[1].reasons,
+                optionsText: function (item) {
+                    return item.label;
+                },
+                optionsValue: function (item) {
+                    return item.value;
+                },
+                value: $data.reason_id,
+                attr: {disabled: $data.is_expired ? 'disabled' : false}">
+    </select>
+</td>
+<!-- /ko -->
+
+<!-- ko ifnot: $data.is_returnable -->
+<td colspan="4" class="return-cell return-reason-control">
+    <p class="return-expired">
+        <!-- ko if: $data.no_returnable_reason == 3 -->
+            <span data-bind="text: 'This product wasn\'t shipped.'"></span>
+        <!-- /ko -->
+        <!-- ko if: $data.no_returnable_reason != 3 -->
+            <span data-bind="text: 'This product is already returned. Existing Return(s):'"></span>
+            <!-- ko foreach: $data.previous_requests -->
+            <a data-bind="attr: {href: $data.url}, text: $data.label" target="_blank"></a>
+            <!-- /ko -->
+        <!-- /ko -->
+    </p>
+</td>
+<!-- /ko -->

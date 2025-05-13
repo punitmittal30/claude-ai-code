@@ -1,0 +1,14 @@
+# Copyright © Magento, Inc. All rights reserved.
+# See COPYING.txt for license details.
+
+interface ProductInterface {
+    estimated_delivery_time(
+    pincode: String! @doc(description: "Customer pincode for delivery estimation")
+    ): EstimatedDeliveryTime @doc(description: "Estimated delivery time information") @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\EstimatedDeliveryTime")
+}
+
+type EstimatedDeliveryTime @doc(description: "Represents estimated delivery time") {
+    warehouse_code: String @doc(description: "Warehouse code.")
+    delivery_time: Int @doc(description: "Delivery time taken for the product.")
+    quantity: Int @doc(description: "The quantity of the product.")
+}

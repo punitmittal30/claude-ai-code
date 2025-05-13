@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CustomDeliveryCharges
+ *
+ * @category  XML
+ * @package   Pratech\CustomDeliveryCharges
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="quote" resource="checkout" engine="innodb" comment="Quote">
+        <column xsi:type="decimal" name="delivery_charges" scale="2" precision="20" unsigned="false" nullable="true"
+                default="0" comment="Delivery Charges"/>
+        <column xsi:type="decimal" name="base_delivery_charges" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Base Delivery Charges"/>
+    </table>
+    <table name="quote_address" resource="checkout" engine="innodb" comment="Quote Address">
+        <column xsi:type="decimal" name="delivery_charges" scale="2" precision="20" unsigned="false" nullable="true"
+                default="0" comment="Delivery Charges"/>
+        <column xsi:type="decimal" name="base_delivery_charges" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Base Delivery Charges"/>
+    </table>
+    <table name="sales_order" resource="checkout" engine="innodb" comment="Sales Order">
+        <column xsi:type="decimal" name="delivery_charges" scale="2" precision="20" unsigned="false" nullable="true"
+                default="0" comment="Delivery Charges"/>
+        <column xsi:type="decimal" name="base_delivery_charges" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Base Delivery Charges"/>
+        <column xsi:type="decimal" name="delivery_charges_refunded" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Delivery Charges Refunded"/>
+    </table>
+    <table name="sales_invoice" resource="checkout" engine="innodb" comment="Sales Invoice">
+        <column xsi:type="decimal" name="delivery_charges" scale="2" precision="20" unsigned="false" nullable="true"
+                default="0" comment="Delivery Charges"/>
+        <column xsi:type="decimal" name="base_delivery_charges" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Base Delivery Charges"/>
+        <column xsi:type="decimal" name="delivery_charges_refunded" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Delivery Charges Refunded"/>
+    </table>
+    <table name="sales_creditmemo" resource="checkout" engine="innodb" comment="Sales Credit Memo">
+        <column xsi:type="decimal" name="delivery_charges" scale="2" precision="20" unsigned="false" nullable="true"
+                default="0" comment="Delivery Charges"/>
+        <column xsi:type="decimal" name="base_delivery_charges" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Base Delivery Charges"/>
+        <column xsi:type="decimal" name="delivery_charges_refunded" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Delivery Charges Refunded"/>
+    </table>
+    <table name="sales_order_grid" resource="checkout" engine="innodb" comment="Sales Order Grid">
+        <column xsi:type="decimal" name="delivery_charges" scale="2" precision="20" unsigned="false" nullable="true"
+                default="0" comment="Delivery Charges"/>
+        <column xsi:type="decimal" name="base_delivery_charges" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Base Delivery Charges"/>
+        <column xsi:type="decimal" name="delivery_charges_refunded" scale="2" precision="20" unsigned="false"
+                nullable="true" default="0" comment="Delivery Charges Refunded"/>
+    </table>
+</schema>

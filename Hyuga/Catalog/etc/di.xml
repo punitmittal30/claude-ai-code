@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_Catalog
+ *
+ * @category  XML
+ * @package   Hyuga\Catalog
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magento\ReviewGraphQl\Model\Resolver\Product\ReviewCount"
+                type="Hyuga\Catalog\Model\Resolver\ReviewCount"/>
+    <!--    <preference for="Magento\ConfigurableProductGraphQl\Model\Resolver\ConfigurableVariant"-->
+    <!--                type="Hyuga\Catalog\Model\Resolver\ConfigurableVariant"/>-->
+    <preference for="Hyuga\Catalog\Api\CategoryRepositoryInterface"
+                type="Hyuga\Catalog\Model\Repository\CategoryRepository"/>
+    <preference for="Hyuga\Catalog\Api\ProductRepositoryInterface"
+                type="Hyuga\Catalog\Model\Repository\ProductRepository"/>
+    <preference for="Hyuga\Catalog\Api\StockManagementInterface"
+                type="Hyuga\Catalog\Model\StockManagement"/>
+</config>

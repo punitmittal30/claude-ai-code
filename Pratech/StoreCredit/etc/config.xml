@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <store_credit>
+            <store_credit>
+                <title>Hyugalife Wallet</title>
+                <conversion_rate>1</conversion_rate>
+                <store_credit_limit>70</store_credit_limit>
+                <use_store_credit_after_days>14</use_store_credit_after_days>
+                <enable_refund>1</enable_refund>
+                <default_toggle_behaviour>0</default_toggle_behaviour>
+            </store_credit>
+            <registration_store_credit>
+                <enabled>1</enabled>
+                <additional_info>Sign Up Bonus %s</additional_info>
+            </registration_store_credit>
+            <first_review_store_credit>
+                <enabled>1</enabled>
+                <store_credit_amount>200</store_credit_amount>
+                <additional_info>Cashback credited against first review %s</additional_info>
+            </first_review_store_credit>
+            <cashback_against_order>
+                <additional_info>Order Id : #%s</additional_info>
+            </cashback_against_order>
+        </store_credit>
+        <cron_schedule>
+            <update_store_credit>
+                <status>1</status>
+            </update_store_credit>
+        </cron_schedule>
+    </default>
+</config>

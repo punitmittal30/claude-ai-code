@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Order
+ *
+ * @category  XML
+ * @package   Pratech\Order
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Pratech_Order::shipment_track_updates" title="Shipment Track Updates" module="Pratech_Order"
+             resource="Pratech_Order::shipment_track_updates" parent="Magento_Sales::sales_operation"
+             action="sales/shipment_trackUpdates/index" sortOrder="100" translate="true"/>
+        <add id="Pratech_Order::shipment_statuses" title="Shipment Status" translate="title" module="Pratech_Order" sortOrder="40" parent="Magento_Backend::stores_settings" action="sales/shipment_status" resource="Magento_Sales::shipment_statuses"/>
+    </menu>
+</config>
