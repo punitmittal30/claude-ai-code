@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_VideoContent
+ *
+ * @category  XML
+ * @package   Pratech\VideoContent
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Pratech_VideoContent::videos" title="Video Management" module="Pratech_VideoContent"
+             resource="Pratech_VideoContent::videos" parent="Pratech_Banners::pratech"
+             sortOrder="200" translate="true"/>
+        <add id="Pratech_VideoContent::manage_videos" title="Manage Videos" module="Pratech_VideoContent"
+             resource="Pratech_VideoContent::manage_videos" parent="Pratech_VideoContent::videos"
+             action="videos/videos/index" sortOrder="10" translate="true"/>
+    </menu>
+</config>

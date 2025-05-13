@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Catalog
+ *
+ * @category  XML
+ * @package   Pratech\Catalog
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <cron_schedule>
+            <item_stock_status>
+                <status>1</status>
+            </item_stock_status>
+            <magento_cache_flush>
+                <status>1</status>
+            </magento_cache_flush>
+            <update_oos_for_search>
+                <status>1</status>
+            </update_oos_for_search>
+        </cron_schedule>
+        <product>
+            <general>
+                <no_of_products_in_carousel>10</no_of_products_in_carousel>
+            </general>
+            <attribute_suffix>
+                <price_per_gram_protein>/g of Protein</price_per_gram_protein>
+                <price_per_100_gram>/100g</price_per_100_gram>
+                <price_per_count>/count</price_per_count>
+                <price_per_100_ml>/100 ml</price_per_100_ml>
+            </attribute_suffix>
+        </product>
+    </default>
+</config>

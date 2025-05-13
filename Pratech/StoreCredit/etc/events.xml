@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_shipment_save_after">
+        <observer name="credit_points_order_shipment"
+                  instance="Pratech\StoreCredit\Observer\SalesShipmentSaveAfter"/>
+    </event>
+    <event name="customer_register_success">
+        <observer name="pratech_storeCredit_customer_register"
+                  instance="Pratech\StoreCredit\Observer\CustomerRegistration"/>
+    </event>
+    <event name="review_save_after">
+        <observer name="pratech_storeCredit_review_submit_observer"
+                  instance="Pratech\StoreCredit\Observer\ReviewSubmitObserver"/>
+    </event>
+</config>

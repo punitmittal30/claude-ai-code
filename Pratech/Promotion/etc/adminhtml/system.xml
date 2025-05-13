@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Promotion
+ *
+ * @category  XML
+ * @package   Pratech\Promotion
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="campaign" translate="label" type="text" sortOrder="400" showInDefault="1">
+            <class>separator-top</class>
+            <label>Campaign</label>
+            <tab>pratech</tab>
+            <resource>Pratech_Promotion::manage</resource>
+            <group id="auto_generated_codes" translate="label" showInDefault="1" sortOrder="10">
+                <label>Auto Generated Specific Coupon Codes</label>
+                <field id="length" translate="label comment" type="text" sortOrder="10" showInDefault="1"
+                       canRestore="1">
+                    <label>Code Length</label>
+                    <comment>Excluding prefix, suffix and separators.</comment>
+                    <frontend_class>validate-digits</frontend_class>
+                </field>
+                <field id="format" translate="label" type="select" sortOrder="20" showInDefault="1" canRestore="1">
+                    <label>Code Format</label>
+                    <source_model>Pratech\Promotion\Model\System\Config\Source\Code\Format</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

@@ -1,0 +1,35 @@
+<?php
+/**
+ * Pratech_Search
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\Search
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
+
+namespace Pratech\Search\Model\ResourceModel\SearchTerms;
+
+use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
+
+class Collection extends AbstractCollection
+{
+    /**
+     * @var string
+     */
+    protected $_idFieldName = 'entity_id';
+
+    /**
+     * Constructor to map model and resource model.
+     */
+    protected function _construct()
+    {
+        $this->_init(
+            \Pratech\Search\Model\SearchTerms::class,
+            \Pratech\Search\Model\ResourceModel\SearchTerms::class
+        );
+    }
+}

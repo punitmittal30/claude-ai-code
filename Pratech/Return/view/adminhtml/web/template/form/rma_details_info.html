@@ -1,0 +1,120 @@
+<div class="return-fieldset-wrapper"
+     css="$data.additionalClasses"
+     attr="'data-index': index"
+     data-role="content"
+     data-bind="visible: $data.visible === undefined ? true: $data.visible">
+    <div class="return-fieldset-wrapper-title">
+        <strong class="return-strong" css="'_loading': loading,
+                      '_error': error">
+            <span translate="label"/>
+            <span class="admin__page-nav-item-messages" if="collapsible">
+                <span class="admin__page-nav-item-message _changed">
+                    <span class="admin__page-nav-item-message-icon"></span>
+                    <span class="admin__page-nav-item-message-tooltip"
+                          data-bind="i18n: 'Changes have been made to this section that have not been saved.'">
+                    </span>
+                </span>
+                <span class="admin__page-nav-item-message _error">
+                    <span class="admin__page-nav-item-message-icon"></span>
+                    <span class="admin__page-nav-item-message-tooltip"
+                          data-bind="i18n: 'This tab contains invalid data. Please resolve this before saving.'">
+                    </span>
+                </span>
+                <span class="admin__page-nav-item-message-loader">
+                    <span class="spinner">
+                       <span repeat="8"/>
+                    </span>
+               </span>
+            </span>
+        </strong>
+    </div>
+    <div class="return-details-container">
+        <div class="return-details-block">
+            <div class="return-type _return-strong" data-bind="i18n: 'Order:'"></div>
+            <div class="return-details">
+                <a href="#" data-bind="text: $data.order.increment_id, attr: {href: $data.order.link}" target="_blank"></a>
+                <span data-bind="text:'(' + $data.order.status + ')'"></span>
+                <p class="_return-nomargin return-date" data-bind="text: $data.order.created"></p>
+            </div>
+        </div>
+        <!-- ko if: $data.shipment -->
+        <div class="return-details-block">
+            <div class="return-type _return-strong" data-bind="i18n: 'Shipment:'"></div>
+            <div class="return-details">
+                <a href="#" data-bind="text: $data.shipment.increment_id, attr: {href: $data.shipment.link}" target="_blank"></a>
+                <p class="_return-nomargin return-date" data-bind="text: $data.shipment.created"></p>
+            </div>
+        </div>
+        <!-- /ko -->
+        <div class="return-details-block">
+            <div class="return-type _return-strong" data-bind="i18n: 'Instant Refund:'"></div>
+            <div class="return-details">
+                <p class="_return-nomargin instant_refund_value"
+                    data-bind="text: instant_refund == 1 ? 'Enabled' : 'Disabled',
+                      style: { color: instant_refund == 1 ? 'green' : 'red',
+                      textTransform: 'uppercase', fontWeight: 'bold', padding: '5px'}">
+            </div>
+        </div>
+        <div class="return-details-block">
+            <div class="return-type _return-strong" data-bind="i18n: 'Refund Amount:'"></div>
+            <div class="return-details">
+                <p class="_return-nomargin refunded_amount"
+                    data-bind="text: '₹' + refunded_amount,
+                      style: {fontWeight: 'bold', padding: '5px'}">
+            </div>
+        </div>
+        <div class="return-details-block">
+            <div class="return-type _return-strong" data-bind="i18n: 'Refund HCash:'"></div>
+            <div class="return-details">
+                <p class="_return-nomargin refunded_store_credit"
+                    data-bind="text: '₹' + refunded_store_credit,
+                      style: {fontWeight: 'bold', padding: '5px'}">
+            </div>
+        </div>
+    </div>
+
+    <div class="return-details-container-right">
+        <div class="return-admin__fieldset-wrapper-content return-details-block-right">
+            <field
+                    class="return-admin__fieldset return-select-container"
+                    each="data: elems, as: 'element'" render=""/>
+        </div>
+
+        <!-- ko if: $data.payment_details && $data.payment_details.payment_type -->
+        <div class="return-details-block-right return-payment-details">
+            <div class="return-payment-title" data-bind="i18n: 'Payment Details'"></div>
+            <!-- ko if: $data.payment_details.payment_type === 'upi' -->
+            <p class="return-payment-text">
+                <span class="return-payment-label" data-bind="i18n: 'Payment Type:'"></span> UPI
+            </p>
+            <p class="return-payment-text">
+                <span class="return-payment-label" data-bind="i18n: 'UPI ID:'"></span> <span data-bind="text: $data.payment_details.upi_id"></span>
+            </p>
+            <!-- /ko -->
+
+            <!-- ko if: $data.payment_details.payment_type === 'bank_transfer' -->
+            <p class="return-payment-text">
+                <span class="return-payment-label" data-bind="i18n: 'Payment Type:'"></span> Bank Transfer
+            </p>
+            <p class="return-payment-text">
+                <span class="return-payment-label" data-bind="i18n: 'Account Number:'"></span> <span data-bind="text: $data.payment_details.account_number"></span>
+            </p>
+            <p class="return-payment-text">
+                <span class="return-payment-label" data-bind="i18n: 'IFSC Code:'"></span> <span data-bind="text: $data.payment_details.ifsc_code"></span>
+            </p>
+            <p class="return-payment-text">
+                <span class="return-payment-label" data-bind="i18n: 'Account Holder:'"></span> <span data-bind="text: $data.payment_details.account_holder_name"></span>
+            </p>
+            <!-- /ko -->
+        </div>
+        <!-- /ko -->
+         <!-- ko if: $data.comment -->
+        <div class="return-details-block-right">
+            <div class="return-type _return-strong" data-bind="i18n: 'Comment:'"></div>
+            <div class="return-details">
+                <p class="_return-nomargin return-date" data-bind="text: $data.comment"></p>
+            </div>
+        </div>
+        <!-- /ko -->
+    </div>
+</div>

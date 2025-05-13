@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Order
+ *
+ * @category  XML
+ * @package   Pratech\Order
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Pratech\Order\Api\OrderRepositoryInterface"
+                type="Pratech\Order\Model\OrderRepository"/>
+    <preference for="Pratech\Order\Api\ShipmentRepositoryInterface"
+                type="Pratech\Order\Model\ShipmentRepository"/>
+    <preference for="Pratech\Order\Api\Data\ConfirmOrderRequestItemInterface"
+                type="Pratech\Order\Model\Data\ConfirmOrderRequestItem"/>
+    <preference for="Magento\CatalogInventory\Model\StockStateProvider"
+                type="Pratech\Order\Plugin\Model\StockStateProvider"/>
+    <preference for="Pratech\Order\Api\Data\CampaignInterface"
+                type="Pratech\Order\Model\Data\Campaign"/>
+    <preference for="Pratech\Order\Api\Data\ProductReviewInterface"
+                type="Pratech\Order\Model\Data\ProductReview"/>
+    <preference for="Magento\Sales\Model\Service\OrderService"
+                type="Pratech\Order\Model\Service\OrderService"/>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="ip_address" xsi:type="string">sales_order.ip_address</item>
+                <item name="platform" xsi:type="string">sales_order.platform</item>
+                <item name="utm_id" xsi:type="string">sales_order.utm_id</item>
+                <item name="utm_source" xsi:type="string">sales_order.utm_source</item>
+                <item name="utm_campaign" xsi:type="string">sales_order.utm_campaign</item>
+                <item name="utm_medium" xsi:type="string">sales_order.utm_medium</item>
+                <item name="utm_term" xsi:type="string">sales_order.utm_term</item>
+                <item name="utm_content" xsi:type="string">sales_order.utm_content</item>
+                <item name="tracker_cookie" xsi:type="string">sales_order.tracker_cookie</item>
+                <item name="utm_timestamp" xsi:type="string">sales_order.utm_timestamp</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentGridAggregator" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="rating" xsi:type="string">sales_shipment.rating</item>
+                <item name="shipment_status" xsi:type="string">sales_shipment.shipment_status</item>
+                <item name="review" xsi:type="string">sales_shipment.review</item>
+                <item name="keywords" xsi:type="string">sales_shipment.keywords</item>
+                <item name="refunded_amount" xsi:type="string">sales_shipment.refunded_amount</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentStatusGridDataProvider"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">
+                Pratech\Order\Model\ResourceModel\ShipmentStatus\Collection
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="shipment_status_listing_data_source" xsi:type="string">
+                    Pratech\Order\Model\Resource\ShipmentStatus\Grid\Collection
+                </item>
+                <item name="sales_shipment_track_updates_listing_data_source" xsi:type="string">
+                    Pratech\Order\Model\ResourceModel\ShipmentTrackUpdates\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Pratech\Order\Model\Resource\ShipmentStatus\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">sales_shipment_status</argument>
+            <argument name="resourceModel" xsi:type="string">
+                Pratech\Order\Model\ResourceModel\ShipmentStatus
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Pratech\Order\Model\ResourceModel\ShipmentTrackUpdates\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">sales_shipment_track_updates</argument>
+			<argument name="resourceModel" xsi:type="string">
+                Pratech\Order\Model\ResourceModel\ShipmentTrackUpdates
+            </argument>
+		</arguments>
+	</virtualType>
+</config>

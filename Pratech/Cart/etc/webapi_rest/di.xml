@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Cart
+ *
+ * @category  XML
+ * @package   Pratech\Cart
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Quote\Model\QuoteRepository">
+        <plugin name="accessControl" disabled="true"/>
+    </type>
+</config>

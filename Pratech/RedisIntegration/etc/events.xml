@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_RedisIntegration
+ *
+ * @category  XML
+ * @package   Pratech\RedisIntegration
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- Products Cache Clear Events -->
+    <event name="catalog_product_save_after">
+        <observer name="product_save_after"
+                  instance="Pratech\RedisIntegration\Observer\ProductCache"/>
+    </event>
+    <event name="mirasvit_bulk_product_operation_after">
+        <observer name="mirasvit_bulk_product_operation"
+                  instance="Pratech\RedisIntegration\Observer\MirasvitBulkProductOperation"/>
+    </event>
+    <event name="cataloginventory_stock_item_save_after">
+        <observer name="stock_item_save_after_event" instance="Pratech\RedisIntegration\Observer\StockItemSaveAfter" />
+    </event>
+
+    <!-- Category Cache Clear Events -->
+    <event name="catalog_category_save_after">
+        <observer name="update_redis_cache"
+                  instance="Pratech\RedisIntegration\Observer\CategoryMappingCache"/>
+    </event>
+    <event name="catalog_category_change_products">
+        <observer name="catalog_category_products_change"
+                  instance="Pratech\RedisIntegration\Observer\CategoryCache"/>
+    </event>
+    <event name="catalog_category_move_after">
+        <observer name="catalog_category_position_change"
+                  instance="Pratech\RedisIntegration\Observer\CategoryPositionCache"/>
+    </event>
+
+    <!-- CMS Blocks Cache Clear Events -->
+    <event name="cms_block_save_after">
+        <observer name="cms_block_save_after"
+                  instance="Pratech\RedisIntegration\Observer\CmsBlockCache"/>
+    </event>
+
+    <!-- Blogs Cache Clear Events -->
+    <event name="cms_page_save_after">
+        <observer name="cms_page_save_after"
+                  instance="Pratech\RedisIntegration\Observer\CmsPageCache"/>
+    </event>
+
+    <event name="cms_page_delete_after">
+        <observer name="cms_page_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\CmsPageCache"/>
+    </event>
+
+    <event name="author_controller_save_after">
+        <observer name="author_save_after"
+                  instance="Pratech\RedisIntegration\Observer\BlogsCache"/>
+    </event>
+    <event name="author_controller_delete_after">
+        <observer name="author_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\BlogsCache"/>
+    </event>
+
+    <event name="blog_category_save_after">
+        <observer name="category_save_after"
+                  instance="Pratech\RedisIntegration\Observer\BlogsCache"/>
+    </event>
+    <event name="blog_category_delete_after">
+        <observer name="category_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\BlogsCache"/>
+    </event>
+
+    <event name="blog_tag_save_after">
+        <observer name="tag_save_after"
+                  instance="Pratech\RedisIntegration\Observer\BlogTagsCache"/>
+    </event>
+    <event name="blog_tag_delete_after">
+        <observer name="tag_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\BlogTagsCache"/>
+    </event>
+
+    <!-- Reviews Cache Clear Events -->
+    <event name="review_save_after">
+        <observer name="reviews_save_after"
+                  instance="Pratech\RedisIntegration\Observer\ReviewsCache"/>
+    </event>
+    <event name="review_delete_after">
+        <observer name="review_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\ReviewsCache"/>
+    </event>
+
+    <!-- Banner Cache Clear Events -->
+    <event name="banner_controller_save_after">
+        <observer name="banner_save_after"
+                  instance="Pratech\RedisIntegration\Observer\BannersCache"/>
+    </event>
+    <event name="banner_controller_delete_after">
+        <observer name="banner_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\BannersCache"/>
+    </event>
+    <event name="slider_controller_save_after">
+        <observer name="slider_save_after"
+                  instance="Pratech\RedisIntegration\Observer\BannersCache"/>
+    </event>
+    <event name="slider_controller_delete_after">
+        <observer name="slider_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\BannersCache"/>
+    </event>
+
+    <!-- Search Term Clear Events -->
+    <event name="search_term_controller_save_after">
+        <observer name="search_term_save_after"
+                  instance="Pratech\RedisIntegration\Observer\SearchTermsCache"/>
+    </event>
+    <event name="search_term_controller_delete_after">
+        <observer name="search_term_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\SearchTermsCache"/>
+    </event>
+    <event name="search_term_controller_bulk_delete_after">
+        <observer name="search_term_bulk_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\BulkSearchTermsCache"/>
+    </event>
+
+    <!-- Products Offer Cache Clear Events -->
+    <event name="salesrule_rule_save_after">
+        <observer name="salesrule_rule_save_after"
+                  instance="Pratech\RedisIntegration\Observer\ProductsOfferCache"/>
+    </event>
+
+    <!-- Products Offer Cache Clear Events -->
+    <event name="admin_system_config_changed_section_blogs">
+        <observer name="blogs_setting_change"
+                  instance="Pratech\RedisIntegration\Observer\TopBlogsCache"/>
+    </event>
+
+    <!-- Products Offer Cache Clear Events -->
+    <event name="admin_system_config_changed_section_product">
+        <observer name="product_setting_change"
+                  instance="Pratech\RedisIntegration\Observer\ProductCarouselCache"/>
+    </event>
+
+    <!-- Filters Position Cache Clear Events -->
+    <event name="filters_position_controller_save_after">
+        <observer name="filters_position_save_after"
+                  instance="Pratech\RedisIntegration\Observer\FiltersPositionCache"/>
+    </event>
+    <event name="filters_position_controller_delete_after">
+        <observer name="filters_position_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\FiltersPositionCache"/>
+    </event>
+    <event name="filters_position_controller_bulk_delete_after">
+        <observer name="search_term_bulk_delete_after"
+                  instance="Pratech\RedisIntegration\Observer\BulkFiltersPositionCache"/>
+    </event>
+
+    <event name="controller_action_postdispatch_search_index_reindex">
+        <observer name="mirasvit_reindex_controller_action" instance="Pratech\RedisIntegration\Observer\MirasvitReindexAfter" />
+    </event>
+
+    <!-- Customer Purchased Products Cache Clear Events -->
+    <event name="sales_order_save_after">
+        <observer name="sales_order_save_after_event" instance="Pratech\RedisIntegration\Observer\SalesOrderSaveAfter"/>
+    </event>
+
+    <!-- Customer Store Credit Cache Clear Events -->
+    <event name="adminhtml_customer_save_after">
+        <observer name="adminhtml_customer_save_after_event" instance="Pratech\RedisIntegration\Observer\CustomerSaveAfter"/>
+    </event>
+
+    <!-- Prepaid Discount Cache Clear Events -->
+    <event name="admin_system_config_changed_section_prepaid_discount">
+        <observer name="prepaid_discount_change" instance="Pratech\RedisIntegration\Observer\CategoryInfoCache"/>
+    </event>
+
+    <!-- Delivery Settings Cache Clear Events -->
+    <event name="admin_system_config_changed_section_delivery">
+        <observer name="delivery_settings_change" instance="Pratech\RedisIntegration\Observer\CategoryInfoCache"/>
+    </event>
+
+    <!-- Payment Settings Cache Clear Events -->
+    <event name="admin_system_config_changed_section_payment">
+        <observer name="delivery_settings_change" instance="Pratech\RedisIntegration\Observer\CategoryInfoCache"/>
+    </event>
+
+    <!-- Store Credit Settings Cache Clear Events -->
+    <event name="admin_system_config_changed_section_store_credit">
+        <observer name="store_credit_settings_change" instance="Pratech\RedisIntegration\Observer\CategoryInfoCache"/>
+    </event>
+
+     <!-- Return Reason Cache Clear Events -->
+    <event name="return_reason_saved">
+        <observer name="return_reason_saved_after" instance="Pratech\RedisIntegration\Observer\ReturnReasonCache"/>
+    </event>
+</config>

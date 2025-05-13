@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CustomDeliveryCharges
+ *
+ * @category  XML
+ * @package   Pratech\CustomDeliveryCharges
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Checkout\Model\ShippingInformationManagement">
+        <plugin name="save_delivery_charges_in_quote"
+                type="Pratech\CustomDeliveryCharges\Plugin\Checkout\Model\ShippingInformationManagement" sortOrder="1"/>
+    </type>
+    <!--Sync the sales_order table and sales_order_grid-->
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="delivery_charges" xsi:type="string">sales_order.delivery_charges</item>
+                <item name="base_delivery_charges" xsi:type="string">sales_order.base_delivery_charges</item>
+                <item name="delivery_charges_refunded" xsi:type="string">sales_order.delivery_charges_refunded</item>
+                <item name="is_confirmed" xsi:type="string">sales_order.is_confirmed</item>
+                <item name="rzp_order_id" xsi:type="string">sales_order.rzp_order_id</item>
+                <item name="rzp_payment_id" xsi:type="string">sales_order.rzp_payment_id</item>
+                <item name="estimated_delivery_date" xsi:type="string">sales_order.estimated_delivery_date</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="add_delivery_charges_in_response"
+                type="Pratech\CustomDeliveryCharges\Plugin\Model\Order\AddDeliveryChargesToResponse" />
+    </type>
+</config>

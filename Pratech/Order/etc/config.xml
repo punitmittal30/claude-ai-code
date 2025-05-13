@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Order
+ *
+ * @category  XML
+ * @package   Pratech\Order
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <cron_schedule>
+            <payment_review_order_status>
+                <status>1</status>
+            </payment_review_order_status>
+            <packed_order_status>
+                <status>1</status>
+                <start_time_after_processing>5</start_time_after_processing> 
+                <end_time_after_processing>12</end_time_after_processing>
+            </packed_order_status>
+        </cron_schedule>
+        <customers>
+            <orders>
+                <cancellation_time>5</cancellation_time>
+                <tracking_host_url>https://hyugalife.clickpost.ai/</tracking_host_url>
+            </orders>
+             <cod_verification>
+                <status>1</status>
+                <cod_confirm_threshold>3000</cod_confirm_threshold>
+            </cod_verification>
+        </customers>
+    </default>
+</config>

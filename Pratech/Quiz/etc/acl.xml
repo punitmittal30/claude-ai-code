@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Quiz
+ *
+ * @category  XML
+ * @package   Pratech\Quiz
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Config/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Pratech_Quiz::growth" title="Growth" sortOrder="10">
+                    <resource id="Pratech_Quiz::quiz" title="Manage Quizzes" sortOrder="10"/>
+                    <resource id="Pratech_Quiz::manage_quiz" title="Manage Quiz" sortOrder="15"/>
+                    <resource id="Pratech_Quiz::quiz_question" title="Manage Questions" sortOrder="20"/>
+                    <resource id="Pratech_Quiz::quiz_user_attempt" title="Quiz User Attempts" sortOrder="25"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

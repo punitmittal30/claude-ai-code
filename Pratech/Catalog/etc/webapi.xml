@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Catalog
+ *
+ * @category  XML
+ * @package   Pratech\Catalog
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <route url="/V1/catalog/products" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getProducts"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/slug/:slug/up-sell" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getUpSellProductsBySlug"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/slug/:slug/cross-sell" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getCrossSellProductsBySlug"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/slug/:slug/related" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getRelatedProductsBySlug"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/id/:productId/up-sell" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getUpSellProductsById"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/id/:productId/cross-sell" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getCrossSellProductsById"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/id/:productId/related" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getRelatedProductsById"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/search" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="quickSearch"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/attributesMapping" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getAttributesMapping"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/slug/:categorySlug/tree" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getCategoryTree"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/id/:categoryId/products" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getProductsByCategoryId"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/slug/:slug/products" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getProductsByCategorySlug"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/bubbles" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getCategoryBubbles"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/slug/:categorySlug/info" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getCategoryInfo"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/id/:categoryId/sub-categories" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getSubCategoriesById"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/slug/:categorySlug/shop-by-category" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getShopByCategoryForPLP"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/slug/:categorySlug/top-brand-deals" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getTopBrandDealsForPLP"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/search/categories/:searchTerm" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="searchCategories"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/list" method="GET">
+        <service class="Pratech\Catalog\Api\CategoryRepositoryInterface" method="getCategoriesList"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <!-- Catalog APIs for Analytics Start -->
+    <route url="/V1/analytics/catalog/products/slug/:slug" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getProductBySlugForAnalytics"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/analytics/catalog/products/id/:productId" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getProductByIdForAnalytics"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/analytics/catalog/products/sku/:sku" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getProductBySkuForAnalytics"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <!-- Catalog APIs for Analytics End -->
+    <route url="/V1/catalog/products/customerWidgets/customerId/:customerId/:productCount" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getCustomerWidgets"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+
+    <route url="/V1/catalog/products/id/:productId" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getProductById"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/slug/:slug" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getProductBySlug"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/slug/:slug/offers" method="GET">
+        <service class="Pratech\Catalog\Api\ProductRepositoryInterface" method="getProductOffersBySlug"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+</routes>

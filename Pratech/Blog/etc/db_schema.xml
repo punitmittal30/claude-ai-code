@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_Blog
+ *
+ * @category  XML
+ * @package   Pratech\Blog
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+	<table name="pratech_blog_category" resource="default" engine="innodb" comment="pratech_blog_category Table">
+		<column xsi:type="int" name="category_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
+		<constraint xsi:type="primary" referenceId="PRIMARY">
+			<column name="category_id"/>
+		</constraint>
+		<column name="name" nullable="false" xsi:type="varchar" comment="Name" length="255"/>
+		<column name="url_key" nullable="false" xsi:type="varchar" comment="Url Key" length="255"/>
+		<column name="title" nullable="true" xsi:type="varchar" comment="Title" length="255"/>
+		<column name="description" nullable="true" xsi:type="text" comment="Description"/>
+		<column name="status" nullable="true" xsi:type="smallint" comment="Status" identity="false" unsigned="true"/>
+		<column name="sort_order" nullable="true" xsi:type="int" comment="Sort Order" identity="false" unsigned="true"/>
+		<column name="meta_title" nullable="true" xsi:type="varchar" comment="Meta Title" length="255"/>
+		<column name="meta_tags" nullable="true" xsi:type="varchar" comment="Meta Tags" length="255"/>
+		<column name="meta_description" nullable="true" xsi:type="text" comment="Meta Description"/>
+		<column name="thumbnail_image" nullable="true" xsi:type="varchar" comment="Thumbnail Image" length="255"/>
+		<column name="thumbnail_image_mobile" nullable="true" xsi:type="varchar" comment="Thumbnail Mobile Image" length="255"/>
+		<column name="thumbnail_image_app" nullable="true" xsi:type="varchar" comment="Thumbnail App Image" length="255"/>
+		<column name="banner_image" nullable="true" xsi:type="varchar" comment="Banner Image" length="255"/>
+		<column name="banner_image_mobile" nullable="true" xsi:type="varchar" comment="Banner Mobile Image" length="255"/>
+		<column name="banner_image_app" nullable="true" xsi:type="varchar" comment="Banner App Image" length="255"/>
+		<column name="created_at" nullable="true" xsi:type="timestamp" comment="Creation time" default="CURRENT_TIMESTAMP"/>
+	</table>
+	<table name="pratech_blog_tag" resource="default" engine="innodb" comment="pratech_blog_tag Table">
+		<column xsi:type="int" name="tag_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
+		<constraint xsi:type="primary" referenceId="PRIMARY">
+			<column name="tag_id"/>
+		</constraint>
+		<column xsi:type="varchar" name="name" length="255" comment="Name"/>
+		<column xsi:type="varchar" name="url_key" length="255" comment="Url Key"/>
+		<column xsi:type="varchar" name="meta_title" nullable="true" length="255" comment="Meta Title"/>
+		<column xsi:type="varchar" name="meta_tags" nullable="true" length="255" comment="Meta Tags"/>
+		<column name="meta_description" nullable="true" xsi:type="text" comment="Meta Description"/>
+	</table>
+	<table name="pratech_blog_comment" resource="default" engine="innodb" comment="pratech_blog_comment Table">
+		<column xsi:type="int" name="comment_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
+		<constraint xsi:type="primary" referenceId="PRIMARY">
+			<column name="comment_id"/>
+		</constraint>
+		<column xsi:type="varchar" name="name" length="255" comment="Name"/>
+		<column xsi:type="varchar" name="email" nullable="true" length="255" comment="E-mail"/>
+		<column xsi:type="varchar" name="title" length="255" comment="Title"/>
+		<column name="summary" nullable="true" xsi:type="text" comment="Summary"/>
+		<column name="status" nullable="true" xsi:type="smallint" comment="Status" identity="false"/>
+		<column name="blog_id" nullable="true" xsi:type="int" comment="Blog Id" identity="false"/>
+		<column name="created_at" nullable="false" xsi:type="timestamp" comment="Creation time" default="CURRENT_TIMESTAMP"/>
+	</table>
+	<table name="cms_page" resource="default" engine="innodb" comment="CMS Page Table">
+		<column xsi:type="text" name="category" comment="CMS Category"/>
+		<column xsi:type="text" name="tag" comment="Tag"/>
+    </table>
+</schema>
