@@ -44,10 +44,10 @@ class ProductRepository implements ProductRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getProductBySlug(string $productSlug, int $pincode = null, string $section = ''): array
+    public function getProductBySlug(string $productSlug, int $pincode = null): array
     {
         $productId = $this->getProductIdByUrl($productSlug);
-        return $this->productAttributeService->getAttributes($productId, $pincode, $section);
+        return $this->productAttributeService->getAttributes($productId, $pincode, 'pdp');
     }
 
     /**

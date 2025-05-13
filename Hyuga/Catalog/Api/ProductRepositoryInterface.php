@@ -33,9 +33,8 @@ interface ProductRepositoryInterface
      *
      * @param string $productSlug
      * @param int|null $pincode
-     * @param string $section
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getProductBySlug(string $productSlug, int $pincode = null, string $section = ''): array;
+    public function getProductBySlug(string $productSlug, int $pincode = null): array;
 }

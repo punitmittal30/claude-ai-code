@@ -24,7 +24,7 @@
             <resource ref="Magento_Catalog::products"/>
         </resources>
     </route>
-    <route url="/V1/catalog/products/slug/:slug" method="GET">
+    <route url="/V1/catalog/products-new/slug/:slug" method="GET">
         <service class="Hyuga\Catalog\Api\ProductRepositoryInterface" method="getProductBySlug"/>
         <resources>
             <resource ref="Magento_Catalog::products"/>
