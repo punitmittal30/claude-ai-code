@@ -1,4 +1,0 @@
-warehouse_id,warehouse_code,name,warehouse_url,pincode,address,is_active,is_dark_store
-,WH001,"Main Warehouse","https://example.com/wh001",560067,"123 Main St, Bangalore, Karnataka",1,0
-,WH002,"Secondary Warehouse","https://example.com/wh002",110045,"456 North Road, New Delhi, Delhi",1,0
-,WH003,"Dark Store Bangalore","https://example.com/wh003",560001,"789 Market Lane, Bangalore, Karnataka",1,1
