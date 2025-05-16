@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Return
+ *
+ * @category  XML
+ * @package   Pratech\Return
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="return_request_canceled">
+        <observer name="return_canceled_history" instance="Pratech\Return\Observer\Rma\History"/>
+    </event>
+    <!-- <event name="amasty_rma_status_changed">
+        <observer name="amrma_status_changed" instance="Pratech\Return\Observer\Rma\StatusChanged" />
+    </event> -->
+    <event name="return_request_created">
+        <observer name="return_request_created_event" instance="Pratech\Return\Observer\Rma\History"/>
+    </event>
+
+    <event name="return_request_created_by_manager">
+        <observer name="return_request_created_event" instance="Pratech\Return\Observer\Rma\History"/>
+    </event>
+    <event name="return_status_auto_changed">
+        <observer name="return_status_automatically_changed_history" instance="Pratech\Return\Observer\Rma\History"/>
+    </event>
+    <event name="return_request_saved">
+        <observer name="manager_rma_saved_history" instance="Pratech\Return\Observer\Rma\History"/>
+    </event>
+    <event name="return_request_status_changed">
+        <observer name="system_return_status_changed_history" instance="Pratech\Return\Observer\Rma\History"/>
+    </event>
+    <event name="return_request_refund_status_changed">
+        <observer name="system_return_status_changed_history" instance="Pratech\Return\Observer\Rma\History"/>
+    </event>
+</config>

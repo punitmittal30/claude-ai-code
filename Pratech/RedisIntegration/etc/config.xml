@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_RedisIntegration
+ *
+ * @category  XML
+ * @package   Pratech\RedisIntegration
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <redis>
+            <credentials>
+                <host>tcp://127.0.0.1:6379</host>
+            </credentials>
+        </redis>
+    </default>
+</config>

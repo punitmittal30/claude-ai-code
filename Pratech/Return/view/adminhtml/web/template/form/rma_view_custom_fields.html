@@ -1,0 +1,5 @@
+<div class="return-custom-fields" data-bind="visible: $data.visible === undefined ? true: $data.visible, css: $data.additionalClasses, attr: {'data-index': index}">
+    <!-- ko foreach: $data.custom_fields -->
+        <div class="return-field"><strong data-bind="text: $data.label + ':'"></strong> <span data-bind="text: $data.value"></span></div>
+    <!-- /ko -->
+</div>

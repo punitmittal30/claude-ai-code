@@ -1,0 +1,209 @@
+<?xml version="1.0"?>
+<!-- /**
+ * Pratech_ProteinCalculator
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\ProteinCalculator
+ * @author    Himmat Singh <himmat.singh@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/ -->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+		<item name="js_config" xsi:type="array">
+			<item name="provider" xsi:type="string">calculator_diet_form.calculator_diet_form_data_source</item>
+		</item>
+		<item name="label" xsi:type="string" translate="true">General Information</item>
+		<item name="template" xsi:type="string">templates/form/collapsible</item>
+	</argument>
+	<settings>
+		<buttons>
+			<button name="back" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\BackButton"/>
+			<button name="delete" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\DeleteButton"/>
+			<button name="save" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\SaveButton"/>
+			<button name="save_and_continue" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\SaveAndContinueButton"/>
+		</buttons>
+		<namespace>calculator_diet_form</namespace>
+		<dataScope>data</dataScope>
+		<deps>
+			<dep>calculator_diet_form.calculator_diet_form_data_source</dep>
+		</deps>
+	</settings>
+    <dataSource name="calculator_diet_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="Pratech\ProteinCalculator\Model\Diet\DataProvider" name="calculator_diet_form_data_source">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <fieldset name="general">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">General</item>
+            </item>
+        </argument>
+        <field name="diet_type" formElement="select">
+            <argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="source" xsi:type="string">diet</item>
+				</item>
+			</argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Diet Type</label>
+                <dataScope>diet_type</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+             <formElements>
+                <select>
+                    <settings>
+                        <options>
+                            <option name="1" xsi:type="array">
+                                <item name="value" xsi:type="string">veg</item>
+                                <item name="label" xsi:type="string">Vegetarian</item>
+                            </option>
+                            <option name="2" xsi:type="array">
+                                <item name="value" xsi:type="string">egg</item>
+                                <item name="label" xsi:type="string">Eggeteria</item>
+                            </option>
+                            <option name="3" xsi:type="array">
+                                <item name="value" xsi:type="string">vegan</item>
+                                <item name="label" xsi:type="string">Vegan</item>
+                            </option>
+                            <option name="4" xsi:type="array">
+                                <item name="value" xsi:type="string">meat</item>
+                                <item name="label" xsi:type="string">Meat</item>
+                            </option>
+                        </options>
+                        <caption translate="true">-- Please Select --</caption>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <dynamicRows name="diet">
+            <settings>
+                <addButtonLabel translate="true">Add Diet</addButtonLabel>
+                <label>Diet Item</label>
+                <additionalClasses>
+                    <class name="admin__field">true</class>
+                </additionalClasses>
+                <componentType>dynamicRows</componentType>
+            </settings>
+            <container name="record" component="Magento_Ui/js/dynamic-rows/record">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="isTemplate" xsi:type="boolean">true</item>
+                        <item name="is_collection" xsi:type="boolean">true</item>
+                    </item>
+                </argument>
+                <actionDelete template="Magento_Backend/dynamic-rows/cells/action-delete" sortOrder="10">
+                    <settings>
+                        <componentType>actionDelete</componentType>
+                        <dataType>text</dataType>
+                        <label>Actions</label>
+                        <additionalClasses>
+                            <class name="data-grid-actions-cell">true</class>
+                        </additionalClasses>
+                    </settings>
+                </actionDelete>
+                <field name="diet_item" formElement="input">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="fit" xsi:type="boolean">true</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <validation>
+                            <rule name="required-entry" xsi:type="boolean">true</rule>
+                        </validation>
+                        <dataType>text</dataType>
+                        <label>Diet Item</label>
+                    </settings>
+                </field>
+                <field name="quantity" formElement="input">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="fit" xsi:type="boolean">true</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <validation>
+                            <rule name="required-entry" xsi:type="boolean">true</rule>
+                        </validation>
+                        <dataType>text</dataType>
+                        <label>Quantity (g/100g) </label>
+                    </settings>
+                </field>
+            </container>
+        </dynamicRows>
+        <field name="budget" formElement="select">
+            <argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="source" xsi:type="string">diet</item>
+				</item>
+			</argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Budget</label>
+                <dataScope>budget</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+             <formElements>
+                <select>
+                    <settings>
+                        <options>
+                            <option name="1" xsi:type="array">
+                                <item name="value" xsi:type="string">low</item>
+                                <item name="label" xsi:type="string">Low</item>
+                            </option>
+                            <option name="2" xsi:type="array">
+                                <item name="value" xsi:type="string">medium</item>
+                                <item name="label" xsi:type="string">Medium</item>
+                            </option>
+                            <option name="3" xsi:type="array">
+                                <item name="value" xsi:type="string">high</item>
+                                <item name="label" xsi:type="string">High</item>
+                            </option>
+                        </options>
+                        <caption translate="true">-- Please Select --</caption>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+    
+    <fieldset name="assign_product_grid">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Products Fieldset</item>
+                <item name="collapsible" xsi:type="boolean">true</item>
+                <item name="sortOrder" xsi:type="number">30</item>
+            </item>
+        </argument>
+        <container name="assign_products_container" >
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="sortOrder" xsi:type="number">170</item>
+                </item>
+            </argument>
+            <htmlContent name="html_content">
+                <argument name="block" xsi:type="object">Pratech\ProteinCalculator\Block\Adminhtml\AssignProducts</argument>
+            </htmlContent>
+        </container>
+    </fieldset>
+</form>

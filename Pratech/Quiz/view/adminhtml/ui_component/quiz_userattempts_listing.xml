@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Pratech_Quiz
+ *
+ * @category  XML
+ * @package   Pratech\Quiz
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">quiz_userattempts_listing.quiz_userattempts_listing_data_source</item>
+            <item name="deps" xsi:type="string">quiz_userattempts_listing.quiz_userattempts_listing_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">quiz_columns</item>
+    </argument>
+    <dataSource name="quiz_userattempts_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">QuizUserAttemptsGridDataProvider</argument>
+            <argument name="name" xsi:type="string">quiz_userattempts_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">entity_id</argument>
+            <argument name="requestFieldName" xsi:type="string">question_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                </item>
+            </argument>
+        </argument>
+        <settings>
+            <storageConfig>
+                <param name="cacheRequests" xsi:type="boolean">false</param>
+            </storageConfig>
+        </settings>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <exportButton name="export_button"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+        <massaction name="listing_massaction">
+            <action name="delete">
+                <settings>
+                    <confirm>
+                        <message translate="true">Are you sure you want to delete selected items?</message>
+                        <title translate="true">Delete items</title>
+                    </confirm>
+                    <url path="quiz/quiz/massDelete"/>
+                    <type>delete</type>
+                    <label translate="true">Delete</label>
+                </settings>
+            </action>
+        </massaction>
+    </listingToolbar>
+    <columns name="quiz_columns">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="childDefaults" xsi:type="array">
+                    <item name="fieldAction" xsi:type="array">
+                        <item name="provider" xsi:type="string">
+                            quiz_userattempts_listing.quiz_userattempts_listing.quiz_columns
+                        </item>
+                        <item name="target" xsi:type="string">applyAction</item>
+                        <item name="params" xsi:type="array">
+                            <item name="0" xsi:type="string">view</item>
+                            <item name="1" xsi:type="string">${ $.data.rowIndex }</item>
+                        </item>
+                    </item>
+                </item>
+            </item>
+        </argument>
+        <selectionsColumn name="ids">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">quiz_id</item>
+                </item>
+            </argument>
+        </selectionsColumn>
+        <column name="quiz_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Quiz Id</item>
+                    <item name="sortOrder" xsi:type="number">20</item>
+                </item>
+            </argument>
+        </column>
+        <column name="user_id" class="Pratech\StoreCredit\Ui\Component\Listing\Column\CustomerLink">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+                    <item name="label" xsi:type="string" translate="true">User Id</item>
+                    <item name="sortOrder" xsi:type="number">25</item>
+                </item>
+            </argument>
+        </column>
+        <column name="score">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Score</item>
+                    <item name="sortOrder" xsi:type="number">30</item>
+                </item>
+            </argument>
+        </column>
+        <column name="status">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Status</item>
+                    <item name="dataType" xsi:type="string">select</item>
+                    <item name="sortOrder" xsi:type="number">40</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/select</item>
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+                </item>
+                <item name="options" xsi:type="object">Pratech\Quiz\Model\Config\Source\Status</item>
+            </argument>
+        </column>
+        <column name="reward">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Reward</item>
+                    <item name="sortOrder" xsi:type="number">50</item>
+                </item>
+            </argument>
+        </column>
+        <column name="attempted_at" class="Magento\Ui\Component\Listing\Columns\Date">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/date</item>
+                    <item name="dataType" xsi:type="string">date</item>
+                    <item name="label" xsi:type="string" translate="true">Attempted At</item>
+                    <item name="sortOrder" xsi:type="number">120</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
+</listing>

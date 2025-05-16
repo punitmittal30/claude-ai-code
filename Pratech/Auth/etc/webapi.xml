@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Auth
+ *
+ * @category  XML
+ * @package   Pratech\Auth
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <route url="/V1/auth/register" method="POST">
+        <service class="Pratech\Auth\Api\AuthenticationManagementInterface" method="register"/>
+        <resources>
+            <resource ref="Magento_Customer::customer"/>
+        </resources>
+    </route>
+
+</routes>
