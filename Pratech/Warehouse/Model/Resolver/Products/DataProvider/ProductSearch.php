@@ -2,6 +2,7 @@
 
 namespace Pratech\Warehouse\Model\Resolver\Products\DataProvider;
 
+use Exception;
 use Magento\Catalog\Api\Data\ProductSearchResultsInterfaceFactory;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
@@ -72,6 +73,18 @@ class ProductSearch extends OriginalProductSearch
      */
     private $inventoryLocatorService;
 
+    /**
+     * @param CollectionFactory $collectionFactory
+     * @param ProductSearchResultsInterfaceFactory $searchResultsFactory
+     * @param CollectionProcessorInterface $collectionPreProcessor
+     * @param CollectionPostProcessorInterface $collectionPostProcessor
+     * @param SearchResultApplierFactory $searchResultsApplierFactory
+     * @param ProductCollectionSearchCriteriaBuilder $searchCriteriaBuilder
+     * @param Visibility $catalogProductVisibility
+     * @param ResourceConnection $resource
+     * @param LoggerInterface $logger
+     * @param InventoryLocatorService $inventoryLocatorService
+     */
     public function __construct(
         CollectionFactory                      $collectionFactory,
         ProductSearchResultsInterfaceFactory   $searchResultsFactory,
@@ -150,55 +163,6 @@ class ProductSearch extends OriginalProductSearch
     }
 
     /**
-     * Add inventory data to products using batch processing
-     *
-     * @param Collection $collection
-     * @param int $pincode
-     * @return void
-     */
-    private function addInventoryDataToProducts(Collection $collection, int $pincode): void
-    {
-        try {
-            $items = $collection->getItems();
-
-            if (empty($items)) {
-                return;
-            }
-
-            // Extract SKUs from all products
-            $skus = [];
-            foreach ($items as $product) {
-                $skus[] = $product->getSku();
-            }
-
-            // Get inventory data for all SKUs in a single operation
-            $startTime = microtime(true);
-            $inventoryData = $this->inventoryLocatorService->getBatchInventoryQtyByPincode($skus, $pincode);
-            $endTime = microtime(true);
-
-            // Update each product with its inventory data
-            foreach ($items as $product) {
-                $sku = $product->getSku();
-                $qty = $inventoryData[$sku] ?? 0;
-
-                $product->setData('inventory_qty', $qty);
-                $product->setData('inventory_is_in_stock', $qty > 0 ? 1 : 0);
-            }
-
-            $this->logger->debug('BATCH_INVENTORY_ADDED', [
-                'pincode' => $pincode,
-                'product_count' => count($items),
-                'time_taken' => round($endTime - $startTime, 4) . ' seconds'
-            ]);
-        } catch (\Exception $e) {
-            $this->logger->error('Error adding inventory data: ' . $e->getMessage(), [
-                'pincode' => $pincode,
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
-    }
-
-    /**
      * Create searchResultApplier
      *
      * @param SearchResultInterface $searchResult
@@ -242,5 +206,54 @@ class ProductSearch extends OriginalProductSearch
         }
 
         return $ordersArray;
+    }
+
+    /**
+     * Add inventory data to products using batch processing
+     *
+     * @param Collection $collection
+     * @param int $pincode
+     * @return void
+     */
+    private function addInventoryDataToProducts(Collection $collection, int $pincode): void
+    {
+        try {
+            $items = $collection->getItems();
+
+            if (empty($items)) {
+                return;
+            }
+
+            // Extract SKUs from all products
+            $skus = [];
+            foreach ($items as $product) {
+                $skus[] = $product->getSku();
+            }
+
+            // Get inventory data for all SKUs in a single operation
+            $startTime = microtime(true);
+            $inventoryData = $this->inventoryLocatorService->getBatchInventoryQtyByPincode($skus, $pincode);
+            $endTime = microtime(true);
+
+            // Update each product with its inventory data
+            foreach ($items as $product) {
+                $sku = $product->getSku();
+                $qty = $inventoryData[$sku] ?? 0;
+
+                $product->setData('inventory_qty', $qty);
+                $product->setData('inventory_is_in_stock', $qty > 0 ? 1 : 0);
+            }
+
+            $this->logger->debug('BATCH_INVENTORY_ADDED', [
+                'pincode' => $pincode,
+                'product_count' => count($items),
+                'time_taken' => round($endTime - $startTime, 4) . ' seconds'
+            ]);
+        } catch (Exception $e) {
+            $this->logger->error('Error adding inventory data: ' . $e->getMessage(), [
+                'pincode' => $pincode,
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
 }

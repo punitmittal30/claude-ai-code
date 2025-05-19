@@ -253,7 +253,10 @@ class ProductFormatterService
             // Calculate price_per_100_ml
             $totalVolumeInMl = $this->getNumericValue($dynamicAttributes, 'total_volume_in_ml');
             if ($totalVolumeInMl > 0) {
-                $result['price_per_100_ml'] = $this->formatPrice('price_per_100_ml', ($finalPrice / $totalVolumeInMl) * 100);
+                $result['price_per_100_ml'] = $this->formatPrice(
+                    'price_per_100_ml',
+                    ($finalPrice / $totalVolumeInMl) * 100
+                );
             }
 
             // Calculate price_per_100_gram and price_per_gram_protein

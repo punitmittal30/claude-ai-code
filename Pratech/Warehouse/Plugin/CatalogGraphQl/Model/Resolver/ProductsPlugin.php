@@ -22,7 +22,7 @@ class ProductsPlugin
     public function beforeResolve(
         ProductsResolver $subject,
         Field $field,
-                         $context,
+        $context,
         ResolveInfo $info,
         array $value = null,
         array $args = null

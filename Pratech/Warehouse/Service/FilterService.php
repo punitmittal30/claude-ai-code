@@ -99,7 +99,8 @@ class FilterService
                     $optionTable = $connection->getTableName('eav_attribute_option');
 
                     // Special handling for boolean attributes (is_hm_verified, is_hl_verified)
-                    if ($attribute->getFrontendInput() === 'boolean' || in_array($attributeCode, ['is_hm_verified', 'is_hl_verified'])) {
+                    if ($attribute->getFrontendInput() === 'boolean'
+                        || in_array($attributeCode, ['is_hm_verified', 'is_hl_verified'])) {
                         $select = $connection->select()
                             ->from(
                                 ['attr' => $attributeTable],
