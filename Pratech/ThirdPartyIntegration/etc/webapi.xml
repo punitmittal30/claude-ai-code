@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_ThirdPartyIntegration
+ *
+ * @category  XML
+ * @package   Pratech\ThirdPartyIntegration
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <!-- Create Guest Empty Cart -->
+    <route url="/V1/carts/guest/create-cart/:platform" method="POST">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="createEmptyCart"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::dpanda"/>
+        </resources>
+    </route>
+
+    <!-- Add Item To Guest Cart -->
+    <route url="/V1/carts/guest/:cartId/add-items/:platform" method="POST">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="addItemToGuestCart"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::dpanda"/>
+        </resources>
+    </route>
+
+    <!-- Managing shipping guest information -->
+    <route url="/V1/carts/guest/:cartId/add-shipping-information/:platform" method="POST">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="saveAddressInformation"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::dpanda"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/products/get-by-id/:productId/:platform" method="GET">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="getProductById"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::dpanda"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/get-by-id/:categoryId/products/:platform" method="GET">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="getProductsByCategoryId"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::dpanda"/>
+        </resources>
+    </route>
+
+    <route url="/V1/order/external-create/:cartId/:platform" method="POST">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="placeExternalOrder"/>
+        <resources>
+            <resource ref="Magento_Sales::create"/>
+        </resources>
+    </route>
+
+    <route url="/V1/order/id/:id/detail/:platform" method="GET">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="getOrderDetails"/>
+        <resources>
+            <resource ref="Magento_Sales::actions_view"/>
+        </resources>
+    </route>
+
+    <route url="/V1/order/id/:id/cancel/:platform" method="POST">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="cancelOrder"/>
+        <resources>
+            <resource ref="Magento_Sales::cancel"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/brand/images" method="GET">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="getBrandImages"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/inventory/sku/:sku/:platform" method="GET">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalOrderInterface" method="getInventoryBySku"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::dpanda"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customer/email/:email" method="GET">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalCustomerInterface" method="getCustomerByEmail"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::kapture"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customer/mobile/:mobile_number" method="GET">
+        <service class="Pratech\ThirdPartyIntegration\Api\ExternalCustomerInterface"
+                 method="getCustomerByMobileNumber"/>
+        <resources>
+            <resource ref="Pratech_ThirdPartyIntegration::kapture"/>
+        </resources>
+    </route>
+
+</routes>

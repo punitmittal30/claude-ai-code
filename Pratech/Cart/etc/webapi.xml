@@ -1,0 +1,281 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Cart
+ *
+ * @category  XML
+ * @package   Pratech\Cart
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <!-- ************************************ Guest Cart Starts ************************************ -->
+
+    <!-- Create Guest Empty Cart -->
+    <route url="/V1/carts/guest/create" method="POST">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="createEmptyCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Reset Guest Cart -->
+    <route url="/V1/carts/guest/reset/:cartId" method="POST">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="resetGuestCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Get Guest Cart Details -->
+    <route url="/V1/carts/guest/:cartId" method="GET">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="getGuestCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Add Item To Guest Cart -->
+    <route url="/V1/carts/guest/:cartId/items" method="POST">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="addItemToGuestCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Add Multiple Items To Guest Cart -->
+    <route url="/V1/carts/guest/:cartId/multiple-items" method="POST">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="addMultipleItemToGuestCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Update Item Qty In Guest Cart -->
+
+    <route url="/V1/carts/guest/:cartId/items/:itemId" method="PUT">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="updateItemInGuestCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Delete Item From Guest Cart -->
+
+    <route url="/V1/carts/guest/:cartId/items/:itemId" method="DELETE">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="deleteItemFromGuestCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Get Guest Cart Totals -->
+    <route url="/V1/carts/guest/:cartId/totals" method="GET">
+        <service class="Pratech\Cart\Api\GuestCartInterface" method="getGuestCartTotals"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Get Coupon Applied for Guest -->
+    <route url="/V1/carts/guest/:cartId/coupon" method="GET">
+        <service class="Pratech\Cart\Api\GuestCouponManagementInterface" method="getGuestCoupon"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Apply Coupon To Guest Cart -->
+    <route url="/V1/carts/guest/:cartId/coupon/:couponCode" method="PUT">
+        <service class="Pratech\Cart\Api\GuestCouponManagementInterface" method="setGuestCoupon"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Remove Coupon From Guest Cart -->
+    <route url="/V1/carts/guest/:cartId/coupon" method="DELETE">
+        <service class="Pratech\Cart\Api\GuestCouponManagementInterface" method="removeGuestCoupon"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- OLD: Coupon Listing For Guest Cart -->
+    <route url="/V1/carts/guest/coupon-listing/:platform" method="GET">
+        <service class="Pratech\Cart\Api\GuestCouponManagementInterface" method="getGuestCouponListing"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Managing shipping guest information -->
+    <route url="/V1/carts/guest/:cartId/shipping-information" method="POST">
+        <service class="Pratech\Cart\Api\GuestAddressManagementInterface" method="saveAddressInformation"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Managing payment information for guest  -->
+    <route url="/V1/carts/guest/:cartId/payment-information" method="POST">
+        <service class="Pratech\Cart\Api\GuestPaymentManagementInterface" method="savePaymentInformation"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- ************************************ Guest Cart Ends ************************************ -->
+
+    <!-- ************************************ Customer Cart Starts ************************************ -->
+
+    <!-- Create Customer Empty Cart -->
+    <route url="/V1/carts/customer/:customerId/create" method="POST">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="createCustomerEmptyCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Reset Customer Cart -->
+    <route url="/V1/carts/customer/reset/:cartId" method="POST">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="resetCustomerCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Get Customer Cart Details -->
+    <route url="/V1/carts/customer/:customerId" method="GET">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="getCustomerCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Add Item To Customer Cart -->
+    <route url="/V1/carts/customer/:cartId/items" method="POST">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="addItemToCustomerCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Add Multiple Items To Customer Cart -->
+    <route url="/V1/carts/customer/:cartId/multiple-items" method="POST">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="addMultipleItemToCustomerCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Update Item Qty In Customer Cart -->
+    <route url="/V1/carts/customer/:cartId/items/:itemId" method="PUT">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="updateItemInCustomerCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Delete Item From Customer Cart -->
+    <route url="/V1/carts/customer/:cartId/items/:itemId" method="DELETE">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="deleteItemFromCustomerCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Get Customer Cart Totals -->
+    <route url="/V1/carts/customer/:cartId/totals" method="GET">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="getCustomerCartTotals"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Customer Cart Merge -->
+    <route url="/V1/carts/customer/:customerId/merge/:cartId" method="POST">
+        <service class="Pratech\Cart\Api\CustomerCartInterface" method="mergeCart"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Get Applied Coupon for Customer Cart -->
+    <route url="/V1/carts/customer/:cartId/coupon" method="GET">
+        <service class="Pratech\Cart\Api\CouponManagementInterface" method="getCustomerCoupon"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Apply Coupon To Customer Cart -->
+    <route url="/V1/carts/customer/:cartId/coupon/:couponCode" method="PUT">
+        <service class="Pratech\Cart\Api\CouponManagementInterface" method="setCustomerCoupon"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Remove Coupon From Customer Cart -->
+    <route url="/V1/carts/customer/:cartId/coupon" method="DELETE">
+        <service class="Pratech\Cart\Api\CouponManagementInterface" method="removeCustomerCoupon"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- OLD: Coupon Listing For Customer Cart -->
+    <route url="/V1/carts/customer/coupon-listing/:platform" method="GET">
+        <service class="Pratech\Cart\Api\CouponManagementInterface" method="getCustomerCouponListing"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Apply Store Credit For Customer -->
+    <route url="/V1/carts/store-credit/:cartId/apply" method="POST">
+        <service class="Pratech\Cart\Api\StoreCreditInterface" method="apply"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Remove Store Credit For Customer -->
+    <route url="/V1/carts/store-credit/:cartId/remove" method="POST">
+        <service class="Pratech\Cart\Api\StoreCreditInterface" method="remove"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Managing shipping customer information -->
+    <route url="/V1/carts/customer/:cartId/shipping-information" method="POST">
+        <service class="Pratech\Cart\Api\CustomerAddressManagementInterface" method="saveAddressInformation"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- Managing payment information for guest  -->
+    <route url="/V1/carts/customer/:cartId/payment-information" method="POST">
+        <service class="Pratech\Cart\Api\CustomerPaymentManagementInterface" method="savePaymentInformation"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+
+    <!-- ************************************ Customer Cart ************************************ -->
+
+    <!-- OLD: Hero Coupon Listing -->
+    <route url="/V1/carts/hero-coupon/list/:platform" method="GET">
+        <service class="Pratech\Cart\Api\CouponManagementInterface" method="getHeroCoupons"/>
+        <resources>
+            <resource ref="Magento_Cart::manage"/>
+        </resources>
+    </route>
+</routes>

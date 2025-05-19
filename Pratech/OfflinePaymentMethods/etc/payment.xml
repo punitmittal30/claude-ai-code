@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_OfflinePaymentMethods
+ *
+ * @category  XML
+ * @package   Pratech\OfflinePaymentMethods
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<payment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Payment:etc/payment.xsd">
+    <groups>
+        <group id="offline">
+            <label>Offline Payment Methods</label>
+        </group>
+    </groups>
+    <methods>
+        <method name="upi">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="netbanking">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="card">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="wallet">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="online_payment_app">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="prepaid_dpanda">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="bnpl">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="snapmint">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+    </methods>
+</payment>

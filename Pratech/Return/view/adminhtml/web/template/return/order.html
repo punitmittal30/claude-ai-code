@@ -1,0 +1,29 @@
+<div class="return-fieldset-wrapper"
+     css="$data.additionalClasses"
+     attr="'data-index': index"
+     data-bind="visible: $data.visible === undefined ? true: $data.visible">
+    <div class="return-fieldset-title return-title">
+        <strong class="return-strong">
+            <span translate="label"/>
+        </strong>
+    </div>
+
+    <table class="return-return-table">
+        <col width="350">
+        <!-- ko ifnot: $parent.is_createForm -->
+        <col width="300">
+        <!-- /ko -->
+        <thead>
+            <tr>
+                <!-- ko foreach: $data.header -->
+                <th data-bind="text: $data" class="return-head"></th>
+                <!-- /ko -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- ko foreach: $data.elems() -->
+                <!--ko template: getTemplate()--><!-- /ko -->
+            <!-- /ko -->
+        </tbody>
+    </table>
+</div>

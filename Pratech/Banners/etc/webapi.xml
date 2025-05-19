@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/content/banners/:categoryId/:type" method="GET">
+        <service class="Pratech\Banners\Api\BannerRepositoryInterface" method="getBannersByCategoryId"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/content/banners/:slug/:type" method="GET">
+        <service class="Pratech\Banners\Api\BannerRepositoryInterface" method="getBannersByCategorySlug"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Backward Compatibility - Need to remove in next sprint -->
+    <route url="/V1/catalog/categories/id/:categoryId/banners" method="GET">
+        <service class="Pratech\Banners\Api\BannerRepositoryInterface" method="getBannersByCategoryId"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/catalog/categories/slug/:slug/banners" method="GET">
+        <service class="Pratech\Banners\Api\BannerRepositoryInterface" method="getBannersByCategorySlug"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>

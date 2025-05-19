@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Pratech\StoreCredit\Api\StoreCreditInterface" type="Pratech\StoreCredit\Model\StoreCredit"/>
+    <preference for="Magento\CustomerBalance\Model\Total\Quote\Customerbalance"
+                type="Pratech\StoreCredit\Plugin\Model\Total\Quote\Customerbalance"/>
+    <type name="Magento\Quote\Api\CartTotalRepositoryInterface">
+        <plugin name="Pratech_StoreCredit::cashback_amount"
+                type="Pratech\StoreCredit\Plugin\Cart\CartTotalRepository" sortOrder="1000"/>
+    </type>
+
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="pratech_storecredit_pendingorder_listing_data_source" xsi:type="string">Pratech\StoreCredit\Model\ResourceModel\CreditPoints\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+	<type name="Pratech\StoreCredit\Model\ResourceModel\CreditPoints\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">pratech_storecredit</argument>
+            <argument name="eventPrefix" xsi:type="string">pratech_storecredit</argument>
+            <argument name="eventObject"  xsi:type="string">pratech_storecredit</argument>
+            <argument name="resourceModel" xsi:type="string">Pratech\StoreCredit\Model\ResourceModel\CreditPoints</argument>
+        </arguments>
+    </type>
+</config>

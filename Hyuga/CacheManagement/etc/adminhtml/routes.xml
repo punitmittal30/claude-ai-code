@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyuga_CacheManagement
+ *
+ * @category  XML
+ * @package   Hyuga\CacheManagement
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="hyuga_cachemanagement" frontName="hyuga_cachemanagement">
+            <module name="Hyuga_CacheManagement" before="Magento_Backend"/>
+        </route>
+    </router>
+</config>

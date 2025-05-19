@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_StoreCredit
+ *
+ * @category  XML
+ * @package   Pratech\StoreCredit
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="salesrule" resource="default" engine="innodb" comment="Salesrule">
+        <column xsi:type="text" name="storecredit_apply" nullable="true" comment="Store Credit Apply"/>
+        <column xsi:type="int" name="store_credit_point" unsigned="true"
+                padding="10" identity="false" comment="Store Credit Point"/>
+    </table>
+    <table name="pratech_storecredit" resource="default" engine="innodb" comment="Pratech Store Credit">
+        <column xsi:type="int" name="storecredit_id" identity="true" nullable="false" unsigned="true"
+                comment="Store Credit ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" padding="10" comment="Customer Id"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" padding="10" comment="Order Id"/>
+        <column xsi:type="int" name="shipment_id" unsigned="true" nullable="false" padding="10" comment="Shipment Id"/>
+        <column xsi:type="decimal" name="credit_points" scale="4" precision="12" default="0.0000" unsigned="false"
+                nullable="false" comment="Credit Points"/>
+        <column xsi:type="smallint" name="can_credit" padding="6" unsigned="false" nullable="false" identity="false"
+                default="1" comment="Can Credit"/>
+        <column xsi:type="int" name="credited_status" padding="5" nullable="false" default="0"
+                comment="Credited Status(approved for all = 1 , Pending For Review = 2)"/>
+        <column xsi:type="timestamp" name="created_at" default="CURRENT_TIMESTAMP" comment="Create Date"/>
+        <column xsi:type="varchar" name="additional_info" length="255" comment="Additional Info"/>
+        <constraint xsi:type="primary" referenceId="PRATECH_STORECREDIT_ID_PRIMARY">
+            <column name="storecredit_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Order">
+        <column xsi:type="int" name="eligible_cashback" unsigned="true" nullable="true" identity="false"
+                comment="Eligible cashback for an order"/>
+    </table>
+</schema>

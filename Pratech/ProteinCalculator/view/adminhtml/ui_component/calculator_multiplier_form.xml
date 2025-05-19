@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<!-- /**
+ * Pratech_ProteinCalculator
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\ProteinCalculator
+ * @author    Himmat Singh <himmat.singh@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/ -->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+		<item name="js_config" xsi:type="array">
+			<item name="provider" xsi:type="string">calculator_multiplier_form.calculator_multiplier_form_data_source</item>
+		</item>
+		<item name="label" xsi:type="string" translate="true">General Information</item>
+		<item name="template" xsi:type="string">templates/form/collapsible</item>
+	</argument>
+	<settings>
+		<buttons>
+			<button name="back" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\BackButton"/>
+			<button name="delete" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\DeleteButton"/>
+			<button name="save" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\SaveButton"/>
+			<button name="save_and_continue" class="Pratech\ProteinCalculator\Block\Adminhtml\CalculatorButton\Edit\SaveAndContinueButton"/>
+		</buttons>
+		<namespace>calculator_multiplier_form</namespace>
+		<dataScope>data</dataScope>
+		<deps>
+			<dep>calculator_multiplier_form.calculator_multiplier_form_data_source</dep>
+		</deps>
+	</settings>
+    <dataSource name="calculator_multiplier_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="Pratech\ProteinCalculator\Model\Multipliers\DataProvider" name="calculator_multiplier_form_data_source">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <fieldset name="general">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">General</item>
+            </item>
+        </argument>
+        <field name="gender" formElement="select">
+            <argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="source" xsi:type="string">Multipliers</item>
+				</item>
+			</argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Gender</label>
+                <dataScope>gender</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+             <formElements>
+                <select>
+                    <settings>
+                        <options>
+                            <option name="1" xsi:type="array">
+                                <item name="value" xsi:type="string">male</item>
+                                <item name="label" xsi:type="string">Male</item>
+                            </option>
+                            <option name="2" xsi:type="array">
+                                <item name="value" xsi:type="string">female</item>
+                                <item name="label" xsi:type="string">Female</item>
+                            </option>
+                            <option name="3" xsi:type="array">
+                                <item name="value" xsi:type="string">pregnant</item>
+                                <item name="label" xsi:type="string">Pregnant</item>
+                            </option>
+                            <option name="4" xsi:type="array">
+                                <item name="value" xsi:type="string">other</item>
+                                <item name="label" xsi:type="string">Other</item>
+                            </option>
+                        </options>
+                        <caption translate="true">-- Please Select --</caption>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="body_type" formElement="select">
+            <argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="source" xsi:type="string">Multipliers</item>
+				</item>
+			</argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Body Type</label>
+                <dataScope>body_type</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+             <formElements>
+                <select>
+                    <settings>
+                        <options>
+                            <option name="1" xsi:type="array">
+                                <item name="value" xsi:type="string">skinny</item>
+                                <item name="label" xsi:type="string">Skinny</item>
+                            </option>
+                            <option name="2" xsi:type="array">
+                                <item name="value" xsi:type="string">skinnyfat</item>
+                                <item name="label" xsi:type="string">Skinny Fat</item>
+                            </option>
+                            <option name="3" xsi:type="array">
+                                <item name="value" xsi:type="string">athletic</item>
+                                <item name="label" xsi:type="string">Athletic</item>
+                            </option>
+                            <option name="4" xsi:type="array">
+                                <item name="value" xsi:type="string">ripped</item>
+                                <item name="label" xsi:type="string">Ripped</item>
+                            </option>
+                            <option name="5" xsi:type="array">
+                                <item name="value" xsi:type="string">overweight</item>
+                                <item name="label" xsi:type="string">OverWeight</item>
+                            </option>
+                        </options>
+                        <caption translate="true">-- Please Select --</caption>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="goal" formElement="select">
+            <argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="source" xsi:type="string">Multipliers</item>
+				</item>
+			</argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Goal</label>
+                <dataScope>goal</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+             <formElements>
+                <select>
+                    <settings>
+                        <options>
+                            <option name="1" xsi:type="array">
+                                <item name="value" xsi:type="string">fatloss</item>
+                                <item name="label" xsi:type="string">Fat Loss</item>
+                            </option>
+                            <option name="2" xsi:type="array">
+                                <item name="value" xsi:type="string">maintain</item>
+                                <item name="label" xsi:type="string">Maintain</item>
+                            </option>
+                            <option name="3" xsi:type="array">
+                                <item name="value" xsi:type="string">gainmuscles</item>
+                                <item name="label" xsi:type="string">Gain Muscles</item>
+                            </option>
+                        </options>
+                        <caption translate="true">-- Please Select --</caption>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="multiplier" formElement="input" sortOrder="60">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="source" xsi:type="string">Multipliers</item>
+				</item>
+			</argument>
+			<settings>
+				<dataType>text</dataType>
+				<label translate="true">Multiplier</label>
+				<dataScope>multiplier</dataScope>
+				<validation>
+					<rule name="required-entry" xsi:type="boolean">false</rule>
+				</validation>
+			</settings>
+		</field>
+    </fieldset>
+</form>

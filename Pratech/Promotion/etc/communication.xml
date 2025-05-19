@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="campaign.codegenerator" request="Pratech\Promotion\Api\Data\PromoCodeGenerationSpecInterface">
+        <handler name="promocodegeneratorProcessor" type="Pratech\Promotion\Model\PromoCode\Consumer" method="process"/>
+    </topic>
+</config>

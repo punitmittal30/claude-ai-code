@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Promotion
+ *
+ * @category  XML
+ * @package   Pratech\Promotion
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="pratech_promotion_campaign" resource="default" engine="innodb" comment="Pratech Promotion Campaign">
+        <column xsi:type="int" name="campaign_id" identity="true" nullable="false" unsigned="true"
+                comment="Campaign ID"/>
+        <column xsi:type="varchar" name="name" nullable="true" length="255" comment="Promotion Name"/>
+        <column xsi:type="int" name="status" unsigned="true" nullable="false" padding="10" comment="Status"/>
+        <column xsi:type="varchar" name="type" nullable="true" length="255" comment="Promotion Type"/>
+        <column xsi:type="int" name="amount" unsigned="true" nullable="false" padding="10" comment="Promotion Amount"/>
+        <constraint xsi:type="primary" referenceId="PRATECH_PROMOTION_CAMPAIGN_CAMPAIGN_ID_PRIMARY">
+            <column name="campaign_id"/>
+        </constraint>
+    </table>
+    <table name="pratech_promotion_code" resource="default" engine="innodb" comment="Pratech Promotion Code">
+        <column xsi:type="int" name="code_id" identity="true" nullable="false" unsigned="true"
+                comment="Promo Code ID"/>
+        <column xsi:type="int" name="campaign_id" unsigned="true" nullable="false" identity="false"
+                comment="Promotion Campaign ID"/>
+        <column xsi:type="varchar" name="promo_code" nullable="true" length="255" comment="Promo Code"/>
+        <column xsi:type="int" name="times_used" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Times Used"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="true"
+                comment="Creation Date"/>
+        <constraint xsi:type="primary" referenceId="PRATECH_PROMOTION_CODE_CODE_ID_PRIMARY">
+            <column name="code_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="PRATECH_PROMOTION_CODE_CODE_ID_PRATECH_PROMOTION_CAMPAIGN_CAMPAIGN_ID"
+                    table="pratech_promotion_code"
+                    column="campaign_id"
+                    referenceTable="pratech_promotion_campaign"
+                    referenceColumn="campaign_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="PRATECH_PROMOTION_CODE_PROMO_CODE">
+            <column name="promo_code"/>
+        </constraint>
+        <index referenceId="PRATECH_PROMOTION_CODE_CAMPAIGN_ID" indexType="btree">
+            <column name="campaign_id"/>
+        </index>
+    </table>
+    <table name="pratech_promotion_code_usage" resource="default" engine="innodb"
+           comment="Pratech Promotion Code Usage">
+        <column xsi:type="int" name="code_id" identity="false" nullable="false" unsigned="true"
+                comment="Promo Code ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" identity="false"
+                comment="Customer ID"/>
+        <column xsi:type="int" name="times_used" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Times Used"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="code_id"/>
+            <column name="customer_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="PRATECH_PROMOTION_CODE_USAGE_CODE_ID_PRATECH_PROMOTION_CODE_CODE_ID"
+                    table="pratech_promotion_code_usage" column="code_id" referenceTable="pratech_promotion_code"
+                    referenceColumn="code_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="PRATECH_PROMOTION_CODE_USAGE_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="pratech_promotion_code_usage" column="customer_id" referenceTable="customer_entity"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="PRATECH_PROMOTION_CODE_USAGE_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+    </table>
+</schema>

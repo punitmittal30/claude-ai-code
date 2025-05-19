@@ -1,0 +1,14 @@
+<?php
+
+use Magento\Framework\App\ObjectManager;
+
+$objectManager = ObjectManager::getInstance();
+$urlInterface = $objectManager->get('\Magento\Backend\Model\UrlInterface');
+
+$attrValueControllerUrl = $urlInterface->getUrl('pratech_filter/quickfilters/attributevalue');
+
+// Set controller URL in window object
+?>
+<script type="text/javascript">
+    window.ATTRVAL_CONTROLLER_URL = "<?= $attrValueControllerUrl; ?>";
+</script>
