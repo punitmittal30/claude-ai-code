@@ -45,6 +45,8 @@
         <column xsi:type="boolean" name="status" nullable="false" default="1" comment="Is Slider Active"/>
         <column xsi:type="varchar" name="page" length="50" nullable="false"
                 comment="Page assignment: homepage, pdp, plp"/>
+        <column xsi:type="text" name="product" nullable="true" comment="Comma-separated Product SKUs"/>
+        <column xsi:type="text" name="category" nullable="true" comment="Category"/>
         <column xsi:type="varchar" name="title" length="255" comment="Slider Title"/>
         <column xsi:type="varchar" name="sub_title" length="255" comment="Slider Sub Title"/>
         <column xsi:type="varchar" name="description" length="255" comment="Slider Description"/>

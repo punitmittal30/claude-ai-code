@@ -98,6 +98,48 @@ class FilterService
                     $optionValueTable = $connection->getTableName('eav_attribute_option_value');
                     $optionTable = $connection->getTableName('eav_attribute_option');
 
+                    // Special handling for boolean attributes (is_hm_verified, is_hl_verified)
+                    if ($attribute->getFrontendInput() === 'boolean' || in_array($attributeCode, ['is_hm_verified', 'is_hl_verified'])) {
+                        $select = $connection->select()
+                            ->from(
+                                ['attr' => $attributeTable],
+                                [
+                                    'value',
+                                    'count' => new Zend_Db_Expr('COUNT(DISTINCT attr.entity_id)')
+                                ]
+                            )
+                            ->where('attr.attribute_id = ?', $attributeId)
+                            ->where('attr.entity_id IN (?)', $productIds)
+                            ->where('attr.value IS NOT NULL')
+                            ->group('attr.value');
+
+                        $booleanValues = $connection->fetchAll($select);
+
+                        if (!empty($booleanValues)) {
+                            $options = [];
+                            foreach ($booleanValues as $boolValue) {
+                                if ($boolValue['count'] > 0) {
+                                    $value = $boolValue['value'];
+                                    $options[] = [
+                                        'value' => $value,
+                                        'label' => $value == '1' ? 'Yes' : 'No',
+                                        'count' => (int)$boolValue['count']
+                                    ];
+                                }
+                            }
+
+                            if (!empty($options)) {
+                                $filters[] = [
+                                    'label' => $attribute->getStoreLabel(),
+                                    'attribute_code' => $attributeCode,
+                                    'options' => $options
+                                ];
+                            }
+                        }
+                        continue;
+                    }
+
+                    // Standard handling for non-boolean attributes
                     // Get all option values used by these products
                     $select = $connection->select()
                         ->distinct()

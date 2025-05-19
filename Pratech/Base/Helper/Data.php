@@ -37,8 +37,8 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Pratech\Base\Logger\Logger;
 use Pratech\Catalog\Helper\Eav;
-use Pratech\Order\Model\ShipmentStatusFactory;
 use Pratech\Order\Model\ResourceModel\ShipmentTrackUpdates\CollectionFactory as TrackDetailsCollectionFactory;
+use Pratech\Order\Model\ShipmentStatusFactory;
 use Pratech\Return\Helper\OrderReturn as OrderReturnHelper;
 
 /**
@@ -83,8 +83,8 @@ class Data
      * @param Eav $eavHelper
      * @param ShipmentStatusFactory $shipmentStatusFactory
      * @param TrackDetailsCollectionFactory $trackDetailsCollectionFactory
-     * @param OrderReturnHelper             $orderReturnHelper
-     * @param OrderItemRepositoryInterface  $orderItemRepository
+     * @param OrderReturnHelper $orderReturnHelper
+     * @param OrderItemRepositoryInterface $orderItemRepository
      */
     public function __construct(
         private TimezoneInterface             $timezone,
@@ -339,7 +339,9 @@ class Data
                 "slug" => $slug,
                 "primary_l1_category" => $primaryL1Category,
                 "primary_l2_category" => $primaryL2Category,
-                "brand" => $brand
+                "brand" => $brand,
+                "estimated_delivery_time" => $item->getEstimatedDeliveryTime(),
+                "warehouse_code" => $item->getWarehouseCode()
             ];
         }
 
@@ -566,7 +568,9 @@ class Data
                 "price" => (float)$item->getPrice(),
                 "product_type" => $item->getProductType(),
                 "image" => $this->getProductImage($item->getSku()),
-                "slug" => $productSlug
+                "slug" => $productSlug,
+                "estimated_delivery_time" => (int)$item->getEstimatedDeliveryTime(),
+                "warehouse_code" => $item->getWarehouseCode()
             ];
             if ((int)$qtyRemaining > 0) {
                 $itemInfo['qty'] = (int)$qtyRemaining;
@@ -740,8 +744,8 @@ class Data
         $trackDetails = [];
 
         $trackCollection = $this->trackDetailsCollectionFactory->create()
-                    ->addFieldToFilter('parent_id', $shipment->getId())
-                    ->setOrder('created_at', 'DESC');
+            ->addFieldToFilter('parent_id', $shipment->getId())
+            ->setOrder('created_at', 'DESC');
         if ($trackCollection->getSize() > 0) {
             foreach ($trackCollection as $trackItem) {
                 $status = $this->shipmentStatusFactory->create()->load($trackItem->getStatusId());

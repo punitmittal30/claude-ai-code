@@ -201,7 +201,6 @@ class PincodeRepository implements PincodeRepositoryInterface
                 CacheServiceInterface::CACHE_LIFETIME_1_WEEK
             );
         } catch (NoSuchEntityException $e) {
-            $this->inventorySyncLogger->error($e->getMessage());
             throw new NoSuchEntityException(__('Pincode with id "%1" is not serviceable.', $pincode));
         }
         return $result;

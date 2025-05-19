@@ -276,9 +276,10 @@ class CustomerCart
             foreach ($cartDetails->getItems() as $item) {
                 $product = $this->getProduct($item->getSku());
                 $productStock = $this->getProductStockInfo($product->getId());
+                $isDropship = (int)$product->getCustomAttribute('is_dropship')?->getValue();
                 if ($pincode !== null) {
                     $estimatedDeliveryTime = $this->deliveryDateCalculator
-                        ->getEstimatedDelivery($product->getSku(), $pincode);
+                        ->getEstimatedDelivery($product->getSku(), $pincode, $isDropship);
                 }
 
                 if ($item->getAppliedRuleIds()) {

@@ -38,9 +38,10 @@ interface VideoManagementInterface
      * @param string $page
      * @param string $platform
      * @param int $pincode
+     * @param string $identifier
      * @return array
      * @throws NoSuchEntityException
      * @throws LocalizedException
      */
-    public function getVideosCarousel(string $page, string $platform, int $pincode): array;
+    public function getVideosCarousel(string $page, string $platform, int $pincode, string $identifier = ''): array;
 }

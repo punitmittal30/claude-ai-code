@@ -29,8 +29,6 @@ use Psr\Log\LoggerInterface;
  */
 class DeliveryDateCalculator
 {
-    private const BATCH_SIZE = 50;
-
     /**
      * @param InventoryCollectionFactory $inventoryCollectionFactory
      * @param SlaCollectionFactory $slaCollectionFactory
@@ -54,12 +52,23 @@ class DeliveryDateCalculator
      *
      * @param string $sku
      * @param int|null $customerPincode
+     * @param int $isDropship
      * @return array|null
      */
-    public function getEstimatedDelivery(string $sku, int $customerPincode = null): ?array
+    public function getEstimatedDelivery(string $sku, int $customerPincode = null, int $isDropship = 0): ?array
     {
         if ($customerPincode === null) {
             return null;
+        }
+
+        $dropshipDeliveryEta = (int)$this->warehouseConfig->getDropshipDeliveryEta();
+
+        if ($isDropship) {
+            return [
+                'warehouse_code' => 'DRS',
+                'delivery_time' => $dropshipDeliveryEta,
+                'quantity' => 0
+            ];
         }
 
         // Generate cache key for this request
@@ -74,9 +83,8 @@ class DeliveryDateCalculator
 
         // If no specific warehouse available, use default dropship estimate
         if (!$result) {
-            $dropshipDeliveryEta = (int)$this->warehouseConfig->getDropshipDeliveryEta();
             $result = [
-                'warehouse_code' => '',
+                'warehouse_code' => 'NA',
                 'delivery_time' => $dropshipDeliveryEta,
                 'quantity' => 0
             ];

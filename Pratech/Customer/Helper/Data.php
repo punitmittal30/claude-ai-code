@@ -176,7 +176,9 @@ class Data
                 "quote_item_id" => $orderItem->getQuoteItemId(),
                 "original_price" => $orderItem->getOriginalPrice(),
                 "price" => $orderItem->getPrice(),
-                "row_total" => $orderItem->getRowTotal()
+                "row_total" => $orderItem->getRowTotal(),
+                "estimated_delivery_time" => $orderItem->getEstimatedDeliveryTime(),
+                "warehouse_code" => $orderItem->getWarehouseCode()
             ];
         }
         return $items;

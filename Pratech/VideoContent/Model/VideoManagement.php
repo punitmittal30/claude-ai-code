@@ -55,13 +55,13 @@ class VideoManagement implements VideoManagementInterface
     /**
      * @inheritDoc
      */
-    public function getVideosCarousel(string $page, string $platform, int $pincode): array
+    public function getVideosCarousel(string $page, string $platform, int $pincode, string $identifier = ''): array
     {
         return $this->response->getResponse(
             200,
             'success',
             self::VIDEO_API_RESOURCE,
-            $this->videoHelper->getVideosCarousel($page, $platform, $pincode)
+            $this->videoHelper->getVideosCarousel($page, $platform, $pincode, $identifier)
         );
     }
 }

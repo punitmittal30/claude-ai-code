@@ -435,8 +435,9 @@ class RestApiProductAttributeService
         if ($pincode) {
             try {
                 $product = $this->productRepository->getById($productId);
+                $isDropship = (int)$product->getCustomAttribute('is_dropship')?->getValue();
                 $attributes['estimated_delivery_time'] = $this->deliveryDateCalculator
-                    ->getEstimatedDelivery($product->getSku(), $pincode);
+                    ->getEstimatedDelivery($product->getSku(), $pincode, $isDropship);
             } catch (Exception $e) {
                 $this->productApiLogger->error('Error getting delivery time: ' . $e->getMessage());
             }

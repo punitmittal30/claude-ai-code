@@ -344,8 +344,9 @@ class Product
         $estimatedDeliveryTime = null;
 
         if (!($pincode === null)) {
+            $isDropship = (int)$product->getCustomAttribute('is_dropship')?->getValue();
             $estimatedDeliveryTime = $this->deliveryDateCalculator
-                ->getEstimatedDelivery($product->getSku(), $pincode);
+                ->getEstimatedDelivery($product->getSku(), $pincode, $isDropship);
             try {
                 if ($product->getCustomAttribute('is_dropship')?->getValue()) {
                     $isInventoryInStock = $productStock->getIsInStock() && $product->getStatus() == 1;

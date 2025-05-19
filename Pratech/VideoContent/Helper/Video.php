@@ -82,6 +82,7 @@ class Video
         try {
             $videoCollection = $this->videoCollectionFactory->create()
                 ->addFieldToFilter('is_active', 1)
+                ->addFieldToFilter('used_for_carousel', 0)
                 ->addFieldToFilter('platform', ['finset' => $platform])
                 ->addFieldToFilter(
                     'cities',
@@ -118,10 +119,11 @@ class Video
      * @param string $page
      * @param string $platform
      * @param int $pincode
+     * @param string $identifier
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getVideosCarousel(string $page, string $platform, string $pincode): array
+    public function getVideosCarousel(string $page, string $platform, string $pincode, string $identifier = ''): array
     {
         $pincodeCollection = $this->pincodeCollectionFactory->create()
             ->addFieldToFilter('pincode', $pincode)
@@ -140,7 +142,12 @@ class Video
         try {
             $sliderCollection = $this->sliderCollectionFactory->create()
                 ->addFieldToFilter('status', 1)
-                ->addFieldToFilter('page', ['finset' => $page]);
+                ->addFieldToFilter('page', ['eq' => $page]);
+            if ($page == 'plp') {
+                $sliderCollection->addFieldToFilter('category', ['eq' => $identifier]);
+            } elseif ($page == 'pdp') {
+                $sliderCollection->addFieldToFilter('product', ['finset' => $identifier]);
+            }
 
             foreach ($sliderCollection as $slider) {
                 $videoIds = $slider->getVideoIds();

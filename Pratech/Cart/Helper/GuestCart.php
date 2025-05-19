@@ -187,7 +187,9 @@ class GuestCart
         }
 
         if ($pincode !== null) {
-            $estimatedDeliveryTime = $this->deliveryDateCalculator->getEstimatedDelivery($product->getSku(), $pincode);
+            $isDropship = (int)$product->getCustomAttribute('is_dropship')?->getValue();
+            $estimatedDeliveryTime = $this->deliveryDateCalculator
+                ->getEstimatedDelivery($product->getSku(), $pincode, $isDropship);
         }
 
         $itemData = [

@@ -36,18 +36,19 @@ class StockStatus implements ResolverInterface
         $product = $value['model'];
 
         $stockStatus = $this->stockRegistry->getStockItem($product->getId());
-        $pincode = $context->getExtensionAttributes()->getPincode();
-        $productData = $this->productRepository->getById($product->getId());
+//        $pincode = $context->getExtensionAttributes()->getPincode();
+//        $productData = $this->productRepository->getById($product->getId());
+//
+//        if ($productData->getCustomAttribute('is_dropship')?->getValue()) {
+//            $isInventoryInStock = $stockStatus->getIsInStock() && $productData->getStatus() == 1;
+//        } else {
+//            $inventoryQty = $this->inventoryLocatorService
+//                ->getInventoryQtyByPincode($productData->getSku(), $pincode);
+//            $isInventoryInStock = $inventoryQty > 0 && $stockStatus->getIsInStock()
+//                && $productData->getStatus() == 1;
+//        }
 
-        if ($productData->getCustomAttribute('is_dropship')?->getValue()) {
-            $isInventoryInStock = $stockStatus->getIsInStock() && $productData->getStatus() == 1;
-        } else {
-            $inventoryQty = $this->inventoryLocatorService
-                ->getInventoryQtyByPincode($productData->getSku(), $pincode);
-            $isInventoryInStock = $inventoryQty > 0 && $stockStatus->getIsInStock()
-                && $productData->getStatus() == 1;
-        }
-
-        return $isInventoryInStock ? 'IN_STOCK' : 'OUT_OF_STOCK';
+        return $stockStatus->getIsInStock() ? 'IN_STOCK' : 'OUT_OF_STOCK';
+//        return $isInventoryInStock ? 'IN_STOCK' : 'OUT_OF_STOCK';
     }
 }

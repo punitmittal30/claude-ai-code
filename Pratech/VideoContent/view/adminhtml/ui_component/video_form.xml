@@ -382,6 +382,7 @@
                 <item name="label" xsi:type="string" translate="true">Products Fieldset</item>
                 <item name="collapsible" xsi:type="boolean">true</item>
                 <item name="sortOrder" xsi:type="number">30</item>
+                <item name="opened" xsi:type="boolean">true</item>
             </item>
         </argument>
         <container name="assign_products_container" >

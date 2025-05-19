@@ -47,7 +47,8 @@ class EstimatedDeliveryTime implements ResolverInterface
         if (empty($args['pincode'])) {
             throw new GraphQlInputException(__('Pincode must be specified'));
         }
-        $context->getExtensionAttributes()->setPincode($args['pincode']);
+
+//        $context->getExtensionAttributes()->setPincode($args['pincode']);
         return $this->deliveryDateCalculator->getEstimatedDelivery($value['sku'], $args['pincode']);
     }
 }

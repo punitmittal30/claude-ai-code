@@ -84,4 +84,10 @@
             <column name="pincode"/>
         </constraint>
     </table>
+
+    <table name="sales_order_item" resource="sales" engine="innodb" comment="Sales Order Item">
+        <column xsi:type="int" name="estimated_delivery_time" unsigned="true" nullable="true" padding="10"
+                comment="Estimated Delivery Time"/>
+        <column xsi:type="varchar" name="warehouse_code" length="50" nullable="true" comment="Warehouse Code"/>
+    </table>
 </schema>

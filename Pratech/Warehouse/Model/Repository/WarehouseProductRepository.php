@@ -131,10 +131,11 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             /** @var Collection $collection */
             $collection = $this->productCollectionFactory->create();
             $collection->addAttributeToFilter('status', Status::STATUS_ENABLED);
+            $collection->addAttributeToFilter('is_dropship', ['eq' => 0]);
             $collection->addCategoriesFilter(['eq' => $categoryId]);
 
             // Join with warehouse inventory and filter for active products with stock
-            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode, false);
+            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode);
 
             // Add other needed attributes and conditions
             $collection->getSelect()->columns(['inventory_quantity' => 'inventory.quantity']);
@@ -296,6 +297,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             // Create a collection with the category filter
             $collection = $this->productCollectionFactory->create();
             $collection->addAttributeToFilter('status', Status::STATUS_ENABLED);
+            $collection->addAttributeToFilter('is_dropship', ['eq' => 0]);
             $collection->addCategoriesFilter(['eq' => $categoryId]);
             $collection->addAttributeToSelect('*');
 
@@ -309,7 +311,7 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
 
             // Join with warehouse inventory but DO NOT filter for stock
             // This allows us to get all products, then sort by stock status later
-            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode, false);
+            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode);
 
             // Add inventory quantity as a field we can sort on later
             $collection->getSelect()->columns(['inventory_quantity' => 'inventory.quantity']);
@@ -513,10 +515,11 @@ class WarehouseProductRepository implements WarehouseProductRepositoryInterface
             // Create a collection filtered by the category
             $collection = $this->productCollectionFactory->create();
             $collection->addAttributeToFilter('status', Status::STATUS_ENABLED);
+            $collection->addAttributeToFilter('is_dropship', ['eq' => 0]);
             $collection->addCategoriesFilter(['eq' => $categoryId]);
 
             // Join with warehouse inventory and filter for products with stock
-            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode, false);
+            $this->collectionService->joinWithWarehouseInventory($collection, $warehouseCode);
 
             // Return the count
             return $collection->getSize();

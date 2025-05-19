@@ -36,8 +36,8 @@ use Magento\Sales\Api\Data\OrderStatusHistoryInterface;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order as SalesOrder;
-use Magento\Sales\Model\OrderFactory as SalesOrderFactory;
 use Magento\Sales\Model\Order\Address;
+use Magento\Sales\Model\OrderFactory as SalesOrderFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Pratech\Base\Helper\Data;
@@ -51,6 +51,7 @@ use Pratech\RedisIntegration\Model\CustomerRedisCache;
 use Pratech\Refund\Helper\Data as RefundHelper;
 use Pratech\SqsIntegration\Model\SqsEvent;
 use Pratech\StoreCredit\Helper\Data as StoreCreditHelper;
+use Pratech\Warehouse\Service\WarehouseInventoryService;
 
 /**
  * Order Helper Class to power order api.
@@ -129,6 +130,7 @@ class Order
      * @param BlockedCustomersResource $blockedCustomersResource
      * @param Database $databaseLocker
      * @param SalesOrderFactory $salesOrderFactory
+     * @param WarehouseInventoryService $warehouseInventoryService
      */
     public function __construct(
         private GuestCartManagementInterface      $guestCartManagement,
@@ -152,7 +154,8 @@ class Order
         private RevertStoreCreditForOrder         $revertStoreCreditForOrder,
         private BlockedCustomersResource          $blockedCustomersResource,
         private Database                          $databaseLocker,
-        private SalesOrderFactory                 $salesOrderFactory
+        private SalesOrderFactory                 $salesOrderFactory,
+        private WarehouseInventoryService         $warehouseInventoryService
     ) {
     }
 
@@ -238,7 +241,8 @@ class Order
         int|null          $customerId,
         PaymentInterface  $paymentMethod = null,
         CampaignInterface $campaign = null
-    ): array {
+    ): array
+    {
         $mageCustomerId = null;
         $eligibleCashbackAmount = 0;
         $isCustomerBlock = false;
@@ -384,7 +388,8 @@ class Order
         int               $cartId,
         PaymentInterface  $paymentMethod = null,
         CampaignInterface $campaign = null
-    ): array {
+    ): array
+    {
         $isCustomerBlock = false;
         try {
             $customer = $this->quoteRepository->get($cartId)->getCustomer();
@@ -407,6 +412,7 @@ class Order
             switch ($paymentMethod->getMethod()) {
                 case "free":
                 case "cashondelivery":
+                    $hasNonStandardWarehouse = $this->checkForNonStandardWarehouse($order);
                     $isEnable = $this->scopeConfig->getValue(
                         self::COD_VERIFICATION_STATUS,
                         ScopeInterface::SCOPE_STORE
@@ -415,10 +421,16 @@ class Order
                         self::COD_CONFIRM_THRESHOLD,
                         ScopeInterface::SCOPE_STORE
                     );
-                    if (!$isEnable || $orderTotal < $codThreshold) {
+
+                    // If non-standard warehouse OR below threshold OR verification disabled, set to processing
+                    if ($hasNonStandardWarehouse || !$isEnable || $orderTotal < $codThreshold) {
+                        $statusMessage = $hasNonStandardWarehouse ?
+                            "System: Processing(processing) - Non-standard warehouse item" :
+                            "System: Processing(processing)";
+
                         $order->setStatus(SalesOrder::STATE_PROCESSING)
                             ->setState(SalesOrder::STATE_PROCESSING);
-                        $order->addCommentToStatusHistory("System: Processing(processing)");
+                        $order->addCommentToStatusHistory($statusMessage);
                     } else {
                         $order->setStatus(self::STATUS_PENDING)
                             ->setState(self::STATUS_PENDING);
@@ -454,6 +466,28 @@ class Order
         throw new LocalizedException(__(
             'Your account is suspended due to suspicious activity. Contact customer support for help.'
         ));
+    }
+
+    /**
+     * Check if any order item has a warehouse code other than W01, W02, W03, 'NA', or 'DRS'
+     *
+     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @return bool
+     */
+    private function checkForNonStandardWarehouse(\Magento\Sales\Api\Data\OrderInterface $order): bool
+    {
+        $standardWarehouses = ['W01', 'W02', 'W03', 'NA', 'DRS'];
+
+        foreach ($order->getAllItems() as $item) {
+            $warehouseCode = $item->getWarehouseCode();
+
+            // If warehouse code is set and is not in the standard list
+            if ($warehouseCode && !in_array($warehouseCode, $standardWarehouses)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -568,7 +602,8 @@ class Order
         ConfirmOrderRequestItemInterface $confirmOrderRequest,
         OrderInterface                   $order,
         string                           $classification
-    ): void {
+    ): void
+    {
         try {
             /** @var RazorpayLogs $razorpayLogs */
             $razorpayLogs = $this->razorpayLogsFactory->create();
@@ -696,6 +731,7 @@ class Order
                 case 'payment_review':
                     try {
                         $failedOrder = $this->cancelOrderItems($order);
+                        $this->restoreWarehouseInventory($order);
                         $failedOrder->addCommentToStatusHistory(
                             "API : Payment Failed(payment_failed)"
                             . " | Source : " . $confirmOrderRequest->getSource()
@@ -784,6 +820,55 @@ class Order
             $this->logger->error($exception->getMessage() . __METHOD__);
         }
         return $order;
+    }
+
+    /**
+     * Restore warehouse inventory for order items
+     *
+     * @param OrderInterface $order
+     * @return void
+     */
+    private function restoreWarehouseInventory(OrderInterface $order): void
+    {
+        try {
+            foreach ($order->getAllItems() as $item) {
+                if ($item->getProductType() == 'configurable' || $item->getHasChildren()) {
+                    continue;
+                }
+
+                if ($item->getProductType() == 'bundle') {
+                    continue;
+                }
+
+                $sku = $item->getSku();
+                $qtyToRestore = $item->getQtyOrdered() - $item->getQtyShipped();
+                $warehouseCode = $item->getWarehouseCode();
+
+                // Skip if no warehouse code or using special codes like NA or DRS
+                if (!$warehouseCode || $warehouseCode == 'NA' || $warehouseCode == 'DRS') {
+                    continue;
+                }
+
+                // Only process if there's actually quantity to restore
+                if ($qtyToRestore <= 0) {
+                    continue;
+                }
+
+                // Use the service to update inventory (positive qty for addition)
+                $this->warehouseInventoryService->updateInventory(
+                    $sku,
+                    $warehouseCode,
+                    $qtyToRestore,
+                    'payment_failed_' . $order->getIncrementId(),
+                    'payment_failed'
+                );
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error restoring warehouse inventory on payment failure: ' . $e->getMessage(), [
+                'order_id' => $order->getIncrementId(),
+                'exception' => $e
+            ]);
+        }
     }
 
     /**

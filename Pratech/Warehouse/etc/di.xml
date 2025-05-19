@@ -183,4 +183,18 @@
     <type name="Magento\Framework\Webapi\ServiceOutputProcessor">
         <plugin name="warehouse_product_result_plugin" type="Pratech\Warehouse\Plugin\WarehouseProductResultPlugin"/>
     </type>
+
+    <!-- Plugin to add estimated delivery time to order items -->
+    <type name="Magento\Quote\Model\Quote\Item\ToOrderItem">
+        <plugin name="pratech_warehouse_add_estimated_delivery_time"
+                type="Pratech\Warehouse\Plugin\Model\Quote\Item\AddEstimatedDeliveryTimeAndWarehouseCode" />
+    </type>
+
+    <type name="Magento\CatalogGraphQl\Model\Resolver\Products">
+        <plugin name="pratech_warehouse_products_resolver_pincode"
+                type="Pratech\Warehouse\Plugin\CatalogGraphQl\Model\Resolver\ProductsPlugin" />
+    </type>
+
+    <preference for="Magento\CatalogGraphQl\Model\Resolver\Products\DataProvider\ProductSearch"
+                type="Pratech\Warehouse\Model\Resolver\Products\DataProvider\ProductSearch" />
 </config>

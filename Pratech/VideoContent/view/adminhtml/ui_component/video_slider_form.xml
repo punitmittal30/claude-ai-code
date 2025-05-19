@@ -160,17 +160,109 @@
             </argument>
         </field>
 
-        <field name="page">
+        <field name="page" formElement="select">
             <argument name="data" xsi:type="array">
-                <item name="options" xsi:type="object">Pratech\VideoContent\Model\OptionSource\PageOptions</item>
                 <item name="config" xsi:type="array">
-                    <item name="dataType" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Pages</item>
+                    <item name="source" xsi:type="string">slider</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Page</label>
+                <dataScope>page</dataScope>
+                <switcherConfig>
+					<rules>
+						<rule name="0">
+                            <value>homepage</value>
+                            <actions>
+                                <action name="0">
+                                    <target>video_slider_form.video_slider_form.general.product</target>
+									<callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>video_slider_form.video_slider_form.general.category</target>
+									<callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>plp</value>
+                            <actions>
+                                <action name="0">
+                                    <target>video_slider_form.video_slider_form.general.product</target>
+									<callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>video_slider_form.video_slider_form.general.category</target>
+									<callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="2">
+                            <value>pdp</value>
+                            <actions>
+                                <action name="0">
+                                    <target>video_slider_form.video_slider_form.general.product</target>
+									<callback>show</callback>
+                                </action>
+                                <action name="1">
+                                    <target>video_slider_form.video_slider_form.general.category</target>
+									<callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+					</rules>
+					<enabled>true</enabled>
+				</switcherConfig>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Pratech\VideoContent\Model\OptionSource\PageOptions"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="product">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Comma-separated Product SKUs</item>
                     <item name="visible" xsi:type="boolean">true</item>
-                    <item name="formElement" xsi:type="string">multiselect</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">input</item>
                     <item name="source" xsi:type="string">slider</item>
                     <item name="validation" xsi:type="array">
-                        <item name="required-entry" xsi:type="boolean">true</item>
+                        <item name="required-entry" xsi:type="boolean">false</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+
+        <field name="category">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Magento\Catalog\Ui\Component\Product\Form\Categories\Options
+                </item>
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Category</item>
+                    <item name="componentType" xsi:type="string">field</item>
+                    <item name="formElement" xsi:type="string">select</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/form/element/ui-select</item>
+                    <item name="elementTmpl" xsi:type="string">ui/grid/filters/elements/ui-select</item>
+                    <item name="dataScope" xsi:type="string">category</item>
+                    <item name="filterOptions" xsi:type="boolean">true</item>
+                    <item name="showCheckbox" xsi:type="boolean">true</item>
+                    <item name="disableLabel" xsi:type="boolean">true</item>
+                    <item name="multiple" xsi:type="boolean">false</item>
+                    <item name="levelsVisibility" xsi:type="number">1</item>
+                    <item name="sortOrder" xsi:type="number">70</item>
+                    <item name="required" xsi:type="boolean">false</item>
+                    <item name="validation" xsi:type="array">
+                        <item name="required-entry" xsi:type="boolean">false</item>
+                    </item>
+                    <item name="listens" xsi:type="array">
+                        <item name="${ $.namespace }.${ $.namespace }:responseData" xsi:type="string">setParsed</item>
                     </item>
                 </item>
             </argument>

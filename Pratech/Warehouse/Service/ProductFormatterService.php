@@ -136,6 +136,7 @@ class ProductFormatterService
 
         // Get stock information
         $stockInfo = $this->getProductStockInfo($productId);
+        $isDropship = (int)$product->getCustomAttribute('is_dropship')?->getValue();
 
         $inventoryQuantity = (int)$product->getData('inventory_quantity');
         $inventoryStockStatus = ($stockInfo['is_in_stock'] ?? false)
@@ -172,7 +173,7 @@ class ProductFormatterService
             'stock_status' => ($stockInfo['is_in_stock'] ?? false) ? 'IN_STOCK' : 'OUT_OF_STOCK',
             'inventory_stock_status' => $inventoryStockStatus,
             'estimated_delivery_time' => $this->deliveryDateCalculator
-                ->getEstimatedDelivery($product->getSku(), $pincode)
+                ->getEstimatedDelivery($product->getSku(), $pincode, $isDropship)
         ], $pricePerAttributes);
     }
 
