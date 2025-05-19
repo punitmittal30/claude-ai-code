@@ -11,8 +11,6 @@
  * @link      https://pratechbrands.com/
  **/
 
-declare(strict_types=1);
-
 namespace Pratech\Warehouse\Service;
 
 use Exception;
@@ -63,6 +61,46 @@ class InventoryLocatorService
         } catch (Exception $e) {
             $this->logger->error('Error getting inventory quantity: ' . $e->getMessage());
             return 0;
+        }
+    }
+
+    /**
+     * Get inventory quantities for multiple products at a specific pincode
+     *
+     * @param array $skus Array of product SKUs
+     * @param int $pincode
+     * @return array Associative array with SKUs as keys and inventory quantities as values
+     */
+    public function getBatchInventoryQtyByPincode(array $skus, int $pincode): array
+    {
+        if (empty($skus)) {
+            return [];
+        }
+
+        try {
+            // Check if pincode is serviceable
+            $pincodeData = $this->pincodeRepository->getByCode($pincode);
+            if (!$pincodeData->getIsServiceable()) {
+                // Return zero inventory for all SKUs
+                return array_fill_keys($skus, 0);
+            }
+
+            // Get warehouses for this pincode
+            $warehouseCodes = $this->getWarehouseCodesByPincode($pincode);
+            if (empty($warehouseCodes)) {
+                // Return zero inventory for all SKUs
+                return array_fill_keys($skus, 0);
+            }
+
+            // Get inventory for all SKUs in one query
+            return $this->getTotalInventoryForSkuBatch($skus, $warehouseCodes);
+        } catch (Exception $e) {
+            $this->logger->error('Error getting batch inventory: ' . $e->getMessage(), [
+                'pincode' => $pincode,
+                'sku_count' => count($skus)
+            ]);
+            // Return zero inventory for all SKUs on error
+            return array_fill_keys($skus, 0);
         }
     }
 
@@ -143,6 +181,52 @@ class InventoryLocatorService
         } catch (Exception $e) {
             $this->logger->error('Error getting total inventory: ' . $e->getMessage());
             return 0;
+        }
+    }
+
+    /**
+     * Get total inventory quantities for multiple SKUs across multiple warehouses
+     *
+     * @param array $skus
+     * @param array $warehouseCodes
+     * @return array Associative array with SKUs as keys and inventory quantities as values
+     */
+    private function getTotalInventoryForSkuBatch(array $skus, array $warehouseCodes): array
+    {
+        if (empty($warehouseCodes) || empty($skus)) {
+            return array_fill_keys($skus, 0);
+        }
+
+        try {
+            $connection = $this->resourceConnection->getConnection();
+
+            // Get all inventory data in a single query, grouped by SKU
+            $select = $connection->select()
+                ->from(
+                    ['i' => $this->resourceConnection->getTableName('pratech_warehouse_inventory')],
+                    [
+                        'sku',
+                        'total_qty' => 'SUM(quantity)'
+                    ]
+                )
+                ->where('i.sku IN (?)', $skus)
+                ->where('i.warehouse_code IN (?)', $warehouseCodes)
+                ->group('i.sku');
+
+            $results = $connection->fetchPairs($select);
+
+            // Ensure all SKUs are in the result array, even if they have no inventory
+            $inventoryData = array_fill_keys($skus, 0);
+
+            // Update with actual quantities for SKUs that have inventory
+            foreach ($results as $sku => $qty) {
+                $inventoryData[$sku] = (int)$qty;
+            }
+
+            return $inventoryData;
+        } catch (Exception $e) {
+            $this->logger->error('Error getting batch inventory: ' . $e->getMessage());
+            return array_fill_keys($skus, 0);
         }
     }
 }
