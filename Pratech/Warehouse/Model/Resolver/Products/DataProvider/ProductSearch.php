@@ -181,11 +181,8 @@ class ProductSearch extends OriginalProductSearch
                 $sku = $product->getSku();
                 $qty = $inventoryData[$sku] ?? 0;
 
-                $product->setData('warehouse_inventory_qty', $qty);
+                $product->setData('inventory_qty', $qty);
                 $product->setData('inventory_is_in_stock', $qty > 0 ? 1 : 0);
-
-                // Set the special attribute that will be used for sorting in the CustomSortOrder plugin
-//                $product->setData('item_stock_status', $qty > 0 ? 1 : 0);
             }
 
             $this->logger->debug('BATCH_INVENTORY_ADDED', [
