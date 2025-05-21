@@ -90,10 +90,12 @@ class ReviewSaveAfter implements ObserverInterface
                     'phonenumber' => $phoneNumber,
                     'ratings' => $ratings,
                     'items' => [
-                        'image' => $mediaBaseUrl . 'catalog/product' . $product->getImage(),
-                        'name' => $product->getName(),
-                        'price' => $product->getPrice() ? number_format($product->getPrice(), 2) : 0,
-                        'sku' => $product->getSku()
+                        [
+                            'image' => $mediaBaseUrl . 'catalog/product' . $product->getImage(),
+                            'name' => $product->getName(),
+                            'price' => $product->getPrice() ? number_format($product->getPrice(), 2) : 0,
+                            'sku' => $product->getSku()
+                        ]
                     ]
                 ];
 

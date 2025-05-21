@@ -46,6 +46,25 @@ class Buttons extends \Magento\Sales\Block\Adminhtml\Order\View
                 ],
             );
         }
+
+        if ($this->_isAllowedAction('Magento_Sales::cancel')) {
+            $onClick = "setLocation('{$this->getPartialCancelUrl()}')";
+            $this->addButton(
+                'order_partial_cancel',
+                ['label' => __('Partial Cancel'), 'onclick' => $onClick, 'class' => 'partial-cancel']
+            );
+        }
+
         return $this;
+    }
+
+    /**
+     * Order Partial Cancel URL getter
+     *
+     * @return string
+     */
+    public function getPartialCancelUrl()
+    {
+        return $this->getUrl('sales/order_partialcancel/create');
     }
 }

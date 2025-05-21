@@ -1230,7 +1230,7 @@ class OrderReturn
      * @param float $storeCreditPoints
      * @return void
      */
-    private function revertStoreCreditForReturnRequest(Order $order, float $storeCreditPoints): void
+    public function revertStoreCreditForReturnRequest(Order $order, float $storeCreditPoints): void
     {
         try {
             if ($storeCreditPoints > 0) {

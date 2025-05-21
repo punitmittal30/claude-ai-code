@@ -29,6 +29,7 @@ class SqsEvent
      */
     public const GROUP_ID = [
         'ORDER_CONFIRMED' => 'hyuga-order-confirmed',
+        'PARTIAL_ORDER_CANCELLED' => 'hyuga-partial-order-cancelled',
         'ORDER_CANCELLED' => 'hyuga-order-cancelled',
         'ORDER_SHIPPED' => 'hyuga-order-shipped',
         'ORDER_CLOSED' => 'hyuga-order-closed',
@@ -51,7 +52,8 @@ class SqsEvent
         'AWB_REGISTERED' => 'hyuga-awb-registered',
         'CRON_ORDER_PAYMENT_FAILED' => 'hyuga-cron-order-payment-failed',
         'CATALOG_PRODUCT_UPDATED' => 'hyuga-catalog-product-updated',
-        'CATALOG_PRODUCT_DELETED' => 'hyuga-catalog-product-deleted'
+        'CATALOG_PRODUCT_DELETED' => 'hyuga-catalog-product-deleted',
+        'REVIEW_APPROVED' => 'hyuga-review-approved'
     ];
 
     /**

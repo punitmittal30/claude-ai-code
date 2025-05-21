@@ -114,4 +114,14 @@ interface OrderRepositoryInterface
      * @return array
      */
     public function packedOrder(int $orderId): array;
+
+    /**
+     * Cancel Order Items
+     *
+     * @param int $orderId The order ID.
+     * @param \Pratech\Order\Api\Data\CancelOrderRequestItemInterface[] $items
+     * @return array
+     * @throws \Exception
+     */
+    public function cancelPartialOrder(int $orderId, array $items): array;
 }

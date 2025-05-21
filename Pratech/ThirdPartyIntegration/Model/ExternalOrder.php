@@ -185,11 +185,16 @@ class ExternalOrder implements ExternalOrderInterface
      */
     public function getOrdersByCustomerMobileNumber(string $mobileNumber, string $platform, string $orderId = ''): array
     {
+        list($message, $orderData) = $this->externalOrderHelper->getOrdersByCustomerMobileNumber(
+            $mobileNumber,
+            $platform,
+            $orderId
+        );
         return $this->response->getResponse(
             200,
-            'success',
+            $message,
             self::ORDER_API_RESOURCE,
-            $this->externalOrderHelper->getOrdersByCustomerMobileNumber($mobileNumber, $platform, $orderId)
+            $orderData
         );
     }
 }

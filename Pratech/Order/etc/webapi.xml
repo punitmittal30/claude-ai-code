@@ -124,4 +124,12 @@
             <resource ref="Magento_Sales::packed"/>
         </resources>
     </route>
+
+    <!-- Cancel Order Items By Vinculum (Partial Order Cancellation) -->
+    <route url="/V1/order/:orderId/cancelOrderItems" method="POST">
+        <service class="Pratech\Order\Api\OrderRepositoryInterface" method="cancelPartialOrder"/>
+        <resources>
+            <resource ref="Magento_Sales::cancel"/>
+        </resources>
+    </route>
 </routes>

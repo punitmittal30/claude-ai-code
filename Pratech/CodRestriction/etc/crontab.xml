@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CodRestriction
+ *
+ * @category  XML
+ * @package   Pratech\CodRestriction
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="codrestriction_reset_counts" instance="Pratech\CodRestriction\Cron\ResetCodCounts" method="execute">
+            <schedule>30 0 * * *</schedule>
+        </job>
+    </group>
+</config>

@@ -40,6 +40,7 @@ use Magento\Store\Model\ScopeInterface;
 use Pratech\Base\Helper\Data as BaseHelper;
 use Pratech\Base\Logger\Logger;
 use Pratech\Cart\Api\CustomerPaymentManagementInterface;
+use Pratech\CodRestriction\Helper\Data as CodRestrictionHelper;
 use Pratech\Warehouse\Service\DeliveryDateCalculator;
 
 /**
@@ -67,6 +68,7 @@ class CustomerCart
      * @param Configurable $configurableType
      * @param DeliveryDateCalculator $deliveryDateCalculator
      * @param ScopeConfigInterface $scopeConfig
+     * @param CodRestrictionHelper $codRestrictionHelper
      */
     public function __construct(
         private CartManagementInterface            $customerCartManagement,
@@ -85,7 +87,8 @@ class CustomerCart
         private QuoteFactory                       $quoteFactory,
         private Configurable                       $configurableType,
         private DeliveryDateCalculator             $deliveryDateCalculator,
-        private ScopeConfigInterface               $scopeConfig
+        private ScopeConfigInterface               $scopeConfig,
+        private CodRestrictionHelper               $codRestrictionHelper
     )
     {
     }
@@ -271,6 +274,10 @@ class CustomerCart
         $estimatedDeliveryTime = null;
         $cartDetails = $this->customerCartManagement->getCartForCustomer($customerId);
         $isCodAvailableForCart = 1;
+        $isCodAllowed = $this->codRestrictionHelper->isCodAllowedForCustomer($customerId);
+        if (!$isCodAllowed) {
+            $isCodAvailableForCart = 0;
+        }
         $items = [];
         if (!empty($cartDetails->getItems())) {
             foreach ($cartDetails->getItems() as $item) {

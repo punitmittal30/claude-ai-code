@@ -39,6 +39,7 @@ use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\State\InputMismatchException;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Quote\Api\Data\PaymentInterface;
@@ -884,6 +885,7 @@ class ExternalOrder
      * @param int $id
      * @return bool
      * @throws AuthorizationException
+     * @throws NoSuchEntityException
      * @throws Exception
      */
     public function cancelOrder(string $platform, int $id): bool
@@ -901,6 +903,10 @@ class ExternalOrder
 
         $order = $this->salesOrderFactory->create()
             ->loadByIncrementId($id);
+        
+        if (!$order->getId()) {
+            throw new NoSuchEntityException(__('Order doesn\'t exist'));
+        }
 
         return $this->orderHelper->cancelOrder(
             $order->getEntityId(),
@@ -970,6 +976,16 @@ class ExternalOrder
             throw new AuthorizationException(__('Unauthorized'));
         }
 
+        // To extract only the last 10 digits from a mobile number string
+        preg_match('/(\d{10})\D*$/', preg_replace('/\D/', '', $mobileNumber), $matches);
+        if (isset($matches[1])) {
+            $mobileNumber = $matches[1];
+        } else {
+            throw new InputMismatchException(__('The mobile number is not valid.'));
+        }
+
+        $message = 'success';
+        $orderData = [];
         $customerCollection = $this->customerCollectionFactory->create();
         $customerCollection->addAttributeToSelect(['entity_id'])
             ->addAttributeToFilter('mobile_number', ['eq' => $mobileNumber])
@@ -985,12 +1001,15 @@ class ExternalOrder
             if ($orderId) {
                 $orders->addFieldToFilter('increment_id', $orderId)
                     ->setPageSize(1);
+
+                if ($orders->getSize() < 1) {
+                    $message = 'No order found for the given order number.';
+                }
             } else {
                 $orders->setOrder('created_at', 'DESC')
                     ->setPageSize(5);
             }
-            
-            $orderData = [];
+
             foreach ($orders->getItems() as $order) {
                 $orderStatus = "";
                 try {
@@ -1022,10 +1041,11 @@ class ExternalOrder
                     )
                 ];
             }
-            return $orderData;
+        } else {
+            $message = 'No customer found for the given mobile number.';
         }
 
-        return [];
+        return [$message, $orderData];
     }
 
     /**

@@ -82,26 +82,27 @@ class OrderService extends \Magento\Sales\Model\Service\OrderService
     public function cancel($id): bool
     {
         try {
+            $request = \Magento\Framework\App\ObjectManager::getInstance()
+                ->get(\Magento\Framework\Webapi\Rest\Request::class);
+            $headers = $request->getHeaders()->toArray();
+            $params = $request->getParams();
+            $content = $request->getContent();
+            $logData = [
+                'endpoint' => '/V1/orders/' . $id . '/cancel',
+                'method' => $request->getMethod(),
+                'order_id' => $id,
+                'headers' => json_encode($headers),
+                'params' => json_encode($params),
+                'content' => $content,
+                'request_time' => date('Y-m-d H:i:s')
+            ];
+            $this->apiLogger->info('Order Cancel Request Body: ' . json_encode($logData));
+
             $cancellableStatus = ['processing', 'packed'];
             $order = $this->orderRepository->get($id);
             if ($order->canCancel() && in_array($order->getStatus(), $cancellableStatus)) {
                 $order->cancel();
                 if ($this->appState->getAreaCode() == "webapi_rest") {
-                    $request = \Magento\Framework\App\ObjectManager::getInstance()
-                        ->get(\Magento\Framework\Webapi\Rest\Request::class);                
-                    $headers = $request->getHeaders()->toArray();
-                    $params = $request->getParams();
-                    $content = $request->getContent();
-                    $logData = [
-                        'endpoint' => '/V1/orders/' . $id . '/cancel',
-                        'method' => $request->getMethod(),
-                        'order_id' => $id,
-                        'headers' => json_encode($headers),
-                        'params' => json_encode($params),
-                        'content' => $content,
-                        'request_time' => date('Y-m-d H:i:s')
-                    ];
-                    $this->apiLogger->info('Order Cancel Request Body: ' . json_encode($logData));
                     $order->addCommentToStatusHistory("Vinculum: Order Canceled");
                 }
                 $this->orderRepository->save($order);

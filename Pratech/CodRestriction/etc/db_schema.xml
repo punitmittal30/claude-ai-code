@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CodRestriction
+ *
+ * @category  XML
+ * @package   Pratech\CodRestriction
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="cod_order_counter" resource="default" engine="innodb" comment="Track COD Orders by Customer">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="customer_id" nullable="false" unsigned="true" comment="Customer ID"/>
+        <column xsi:type="int" name="daily_count" nullable="false" default="0" comment="Daily COD Count"/>
+        <column xsi:type="int" name="weekly_count" nullable="false" default="0" comment="Weekly COD Count"/>
+        <column xsi:type="int" name="monthly_count" nullable="false" default="0" comment="Monthly COD Count"/>
+        <column xsi:type="boolean" name="is_cod_disabled" nullable="false" default="0" comment="Is COD Permanently Disabled"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="COD_COUNTER_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+    </table>
+</schema>

@@ -17,6 +17,7 @@ use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Sales\Api\Data\OrderStatusHistoryInterface;
 use Pratech\Base\Model\Data\Response;
 use Pratech\Order\Api\Data\CampaignInterface;
+use Pratech\Order\Api\Data\CancelOrderRequestItemInterface;
 use Pratech\Order\Api\Data\ConfirmOrderRequestItemInterface;
 use Pratech\Order\Api\OrderRepositoryInterface;
 use Pratech\Order\Helper\Order;
@@ -185,6 +186,21 @@ class OrderRepository implements OrderRepositoryInterface
             self::ORDER_API_RESOURCE,
             [
                 "is_packed" => $this->orderHelper->packedOrder($orderId)
+            ]
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function cancelPartialOrder(int $orderId, array $items): array
+    {
+        return $this->response->getResponse(
+            200,
+            'success',
+            self::ORDER_API_RESOURCE,
+            [
+                'is_cancelled' => $this->orderHelper->cancelPartialOrder($orderId, $items)
             ]
         );
     }

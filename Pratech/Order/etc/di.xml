@@ -26,6 +26,8 @@
                 type="Pratech\Order\Model\Data\ProductReview"/>
     <preference for="Magento\Sales\Model\Service\OrderService"
                 type="Pratech\Order\Model\Service\OrderService"/>
+    <preference for="Pratech\Order\Api\Data\CancelOrderRequestItemInterface"
+                type="Pratech\Order\Model\Data\CancelOrderRequestItem"/>
     <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
         <arguments>
             <argument name="columns" xsi:type="array">

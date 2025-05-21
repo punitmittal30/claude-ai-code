@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CodRestriction
+ *
+ * @category  XML
+ * @package   Pratech\CodRestriction
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="codrestriction" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>COD Restriction</label>
+            <tab>pratech</tab>
+            <resource>Pratech_CodRestriction::cod_restriction</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General Settings</label>
+                <field id="status" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1">
+                    <label>Enable COD Restriction</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="daily_limit" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1">
+                    <label>Max COD Orders Per Day</label>
+                    <depends>
+                        <field id="status">1</field>
+                    </depends>
+                </field>
+                <field id="weekly_limit" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1">
+                    <label>Max COD Orders Per Week</label>
+                    <depends>
+                        <field id="status">1</field>
+                    </depends>
+                </field>
+                <field id="monthly_limit" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1">
+                    <label>Max COD Orders Per Month</label>
+                    <depends>
+                        <field id="status">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+        <section id="cron_schedule" translate="label" sortOrder="10" showInDefault="1"
+                 showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Cron Schedule</label>
+            <tab>pratech</tab>
+            <resource>Pratech_CodRestriction::cod_restriction</resource>
+            <group id="update_cod_order_count" translate="label" sortOrder="30" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Reset COD Order Count</label>
+                <field id="status" translate="label" type="select" sortOrder="1" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

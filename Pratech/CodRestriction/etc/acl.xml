@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CodRestriction
+ *
+ * @category  XML
+ * @package   Pratech\CodRestriction
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Pratech_Banners::pratech">
+                    <resource id="Pratech_CodRestriction::cod_restriction" title="COD Restriction" translate="title" sortOrder="50"/>
+                    <resource id="Pratech_CodRestriction::cod_order_counter" title="Manage COD Counters" translate="title"
+                              sortOrder="51"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

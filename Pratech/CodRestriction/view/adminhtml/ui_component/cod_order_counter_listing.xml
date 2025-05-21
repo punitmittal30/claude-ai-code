@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CodRestriction
+ *
+ * PHP version 8.x
+ *
+ * @category  PHP
+ * @package   Pratech\CodRestriction
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ **/
+ -->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+	<argument name="data" xsi:type="array">
+		<item name="js_config" xsi:type="array">
+			<item name="provider" xsi:type="string">cod_order_counter_listing.cod_order_counter_listing_data_source</item>
+		</item>
+	</argument>
+	<settings>
+		<spinner>cod_order_counter_columns</spinner>
+		<deps>
+			<dep>cod_order_counter_listing.cod_order_counter_listing_data_source</dep>
+		</deps>
+	</settings>
+    <dataSource name="cod_order_counter_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">CodOrderCounterGridDataProvider</argument>
+            <argument name="name" xsi:type="string">cod_order_counter_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">entity_id</argument>
+            <argument name="requestFieldName" xsi:type="string">entity_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                </item>
+            </argument>
+        </argument>
+        <settings>
+            <storageConfig>
+                <param name="cacheRequests" xsi:type="boolean">false</param>
+            </storageConfig>
+        </settings>
+    </dataSource>
+	<listingToolbar name="listing_top">
+		<settings>
+			<sticky>true</sticky>
+		</settings>
+		<bookmark name="bookmarks"/>
+		<columnsControls name="columns_controls"/>
+		<filters name="listing_filters"/>
+		<paging name="listing_paging"/>
+	</listingToolbar>
+	<columns name="cod_order_counter_columns">
+		<selectionsColumn name="ids">
+			<settings>
+				<indexField>entity_id</indexField>
+			</settings>
+		</selectionsColumn>
+		<column name="entity_id">
+			<settings>
+				<filter>text</filter>
+				<sorting>asc</sorting>
+				<label translate="true">ID</label>
+			</settings>
+		</column>
+		<column name="customer" class="Pratech\CodRestriction\Ui\Component\Listing\Column\CustomerLink">
+			<settings>
+				<filter>text</filter>
+				<bodyTmpl>ui/grid/cells/html</bodyTmpl>
+				<label translate="true">Customer Id</label>
+			</settings>
+		</column>
+		<column name="daily_count">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Daily COD Count</label>
+            </settings>
+        </column>
+        <column name="weekly_count">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Weekly COD Count</label>
+            </settings>
+        </column>
+        <column name="monthly_count">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Monthly COD Count</label>
+            </settings>
+        </column>
+        <column name="cod_allowed" class="Pratech\CodRestriction\Ui\Component\Listing\Column\CodStatus">
+            <settings>
+                <dataType>text</dataType>
+                <sortable>true</sortable>
+                <visible>true</visible>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <label translate="true">COD Allowed</label>
+            </settings>
+        </column>
+        <column name="updated_at">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Updated At</label>
+                <timezone>true</timezone>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Pratech\CodRestriction\Ui\Component\Listing\Column\Actions">
+            <settings>
+                <indexField>entity_id</indexField>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+	</columns>
+</listing>

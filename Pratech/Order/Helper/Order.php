@@ -49,6 +49,7 @@ use Pratech\RazorpayLogs\Model\RazorpayLogs;
 use Pratech\RazorpayLogs\Model\RazorpayLogsFactory;
 use Pratech\RedisIntegration\Model\CustomerRedisCache;
 use Pratech\Refund\Helper\Data as RefundHelper;
+use Pratech\Return\Helper\OrderReturn as OrderReturnHelper;
 use Pratech\SqsIntegration\Model\SqsEvent;
 use Pratech\StoreCredit\Helper\Data as StoreCreditHelper;
 use Pratech\Warehouse\Service\WarehouseInventoryService;
@@ -131,6 +132,7 @@ class Order
      * @param Database $databaseLocker
      * @param SalesOrderFactory $salesOrderFactory
      * @param WarehouseInventoryService $warehouseInventoryService
+     * @param OrderReturnHelper $orderReturnHelper
      */
     public function __construct(
         private GuestCartManagementInterface      $guestCartManagement,
@@ -155,7 +157,8 @@ class Order
         private BlockedCustomersResource          $blockedCustomersResource,
         private Database                          $databaseLocker,
         private SalesOrderFactory                 $salesOrderFactory,
-        private WarehouseInventoryService         $warehouseInventoryService
+        private WarehouseInventoryService         $warehouseInventoryService,
+        private OrderReturnHelper                 $orderReturnHelper
     ) {
     }
 
@@ -996,5 +999,342 @@ class Order
             return true;
         }
         return false;
+    }
+
+    /**
+     * Cancel Partial Order.
+     *
+     * @param int $orderId
+     * @param array $items
+     * @return bool
+     */
+    public function cancelPartialOrder(int $orderId, array $items): bool
+    {
+        if (empty($items)) {
+            return false;
+        }
+
+        $commentText = '';
+        $itemsCancelData = [];
+        try {
+            foreach ($items as $requestItem) {
+                $orderItemId = $requestItem['order_item_id'];
+                $reason = $requestItem['reason'] ?? '';
+                $itemsCancelData['items'][$orderItemId] = [
+                    'cancel' => 1,
+                    'cancel_qty' => $requestItem['cancel_qty'],
+                    'reason' => $reason
+                ];
+                if (!empty($reason)) {
+                    $commentText .= (' ' . $reason);
+                }
+            }
+            $itemsCancelData['comment_text'] = trim($commentText);
+            $this->processPartialOrderCancellation($orderId, $itemsCancelData);
+
+            return true;
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage() . __METHOD__);
+        }
+
+        return false;
+    }
+
+    /**
+     * Process Partial Order Cancellation.
+     *
+     * @param int $orderId
+     * @param array $itemsCancelData
+     * @return void
+     */
+    public function processPartialOrderCancellation(int $orderId, array $itemsCancelData): void
+    {
+        $order = $this->orderRepository->get($orderId);
+        if ($this->cancelPartialOrderItems($order, $itemsCancelData)) {
+            $smsData = $this->getPartialOrderDataForSQS($order, 'sms', $itemsCancelData);
+            $this->sqsEvent->sentSmsEventToSqs($smsData);
+            $emailData = $this->getPartialOrderDataForSQS($order, 'email', $itemsCancelData);
+            $this->sqsEvent->sentEmailEventToSqs($emailData);
+
+            $this->triggerRefundForCancelledItems($orderId, $itemsCancelData);
+        }
+    }
+
+    /**
+     * Cancel Partial Order Items.
+     *
+     * @param SalesOrder $order
+     * @param array $itemsCancelData
+     * @return bool
+     */
+    public function cancelPartialOrderItems(SalesOrder $order, array $itemsCancelData): bool
+    {
+        try {
+            $comment = $itemsCancelData['comment_text'] ?? '';
+            $itemsToCancel = $this->getCancelItemIds($itemsCancelData);
+            if ($order->canCancel() || $order->isPaymentReview() || $order->isFraudDetected()) {
+                $itemsRowCanceled = $itemsBaseRowCanceled = 0;
+                $itemsTaxCanceled = $itemsBaseTaxCanceled = 0;
+                $itemsDiscountCanceled = $itemsBaseDiscountCanceled = 0;
+
+                foreach ($order->getAllItems() as $item) {
+                    if (!in_array($item->getItemId(), $itemsToCancel)) {
+                        continue;
+                    }
+                    $qtyOrdered = $item->getQtyOrdered() ?? 0;
+                    $qtyCanceled = $item->getQtyCanceled() ?? 0;
+                    $canCancelItem = $qtyOrdered - $qtyCanceled > 0 ? true : false;
+                    if (!$canCancelItem) {
+                        continue;
+                    }
+
+                    $itemsRowCanceled += ($item->getRowTotal() - $item->getRowInvoiced());
+                    $itemsBaseRowCanceled += ($item->getBaseRowTotal() - $item->getBaseRowInvoiced());
+                    $itemsTaxCanceled += ($item->getTaxAmount() - $item->getTaxInvoiced());
+                    $itemsBaseTaxCanceled += ($item->getBaseTaxAmount() - $item->getBaseTaxInvoiced());
+                    $itemsDiscountCanceled += (abs($item->getDiscountAmount() ?? 0) - $item->getDiscountInvoiced());
+                    $itemsBaseDiscountCanceled +=
+                    (abs($item->getBaseDiscountAmount() ?? 0) - $item->getBaseDiscountInvoiced());
+
+                    $item->cancel();
+                }
+
+                $order->setSubtotalCanceled($order->getSubtotalCanceled() + $itemsRowCanceled);
+                $order->setBaseSubtotalCanceled($order->getBaseSubtotalCanceled() + $itemsBaseRowCanceled);
+
+                $order->setTaxCanceled($order->getTaxCanceled() + $itemsTaxCanceled);
+                $order->setBaseTaxCanceled($order->getBaseTaxCanceled() + $itemsBaseTaxCanceled);
+
+                $order->setDiscountCanceled(abs($order->getDiscountCanceled() ?? 0) + $itemsDiscountCanceled);
+                $order->setBaseDiscountCanceled(
+                    abs($order->getBaseDiscountCanceled() ?? 0) + $itemsBaseDiscountCanceled
+                );
+
+                $order->setTotalCanceled($order->getTotalCanceled() + $itemsRowCanceled - $itemsDiscountCanceled);
+                $order->setBaseTotalCanceled(
+                    $order->getBaseTotalCanceled() + $itemsBaseRowCanceled - $itemsBaseDiscountCanceled
+                );
+
+                if (!empty($comment)) {
+                    $order->addStatusHistoryComment($comment, false);
+                }
+                $this->orderRepository->save($order);
+            }
+            return true;
+        } catch (Exception $exception) {
+            $this->logger->error(
+                "Partial Order Cancellation Issue From Core"
+                . " | Order Entity ID: " . $order->getId()
+                . " | Order Item IDs: " . implode(',', $itemsToCancel)
+                . " | " . $exception->getMessage()
+            );
+        }
+        return false;
+    }
+
+    /**
+     * Get Cancel Item Ids
+     *
+     * @param array $itemsCancelData
+     * @return array
+     */
+    private function getCancelItemIds(array $itemsCancelData)
+    {
+        $items = $itemsCancelData['items'];
+        $itemsToCancel = [];
+        foreach ($items as $key => $itemArray) {
+            if (!empty($itemArray['cancel'])) {
+                $itemsToCancel[] = $key;
+            }
+        }
+        return $itemsToCancel;
+    }
+
+    /**
+     * Get Order Data For Sqs Event
+     *
+     * @param SalesOrder $order
+     * @param string $type
+     * @param array $itemsCancelData
+     * @return array
+     */
+    private function getPartialOrderDataForSQS(SalesOrder $order, string $type, array $itemsCancelData): array
+    {
+        $cancelledItemsArray = [];
+        $comment = $itemsCancelData['comment_text'] ?? '';
+        $itemsToCancel = $this->getCancelItemIds($itemsCancelData);
+        foreach ($order->getAllItems() as $item) {
+            if (!in_array($item->getItemId(), $itemsToCancel)) {
+                continue;
+            }
+            $cancelledItemsArray[] = [
+                'order_item_id' => (int)$item->getItemId(),
+                'name' => $item->getName(),
+                'sku' => $item->getSku(),
+                'qty' => (int)$item->getQtyOrdered(),
+                'product_id' => (int)$item->getProductId(),
+                'reason' => $itemsCancelData['items'][$item->getItemId()]['reason'] ?? $comment
+            ];
+        }
+        $shippingAddress = $order->getShippingAddress();
+        $paymentInformation = [
+            'method' => $order->getPayment()->getMethod(),
+            'title' => $order->getPayment()->getMethodInstance()->getTitle()
+        ];
+        return [
+            'type' => $type,
+            'event_name' => 'PARTIAL_ORDER_CANCELLED',
+            'name' => $shippingAddress->getFirstname() . " " . $shippingAddress->getLastname(),
+            'order_id' => $order->getIncrementId(),
+            'phone_number' => $shippingAddress->getTelephone(),
+            'email' => $shippingAddress->getEmail(),
+            'items' => $cancelledItemsArray,
+            'cancellation_reason' => $comment,
+            'payment_information' => $paymentInformation
+        ];
+    }
+
+    /**
+     * Trigger Refund for Cancelled Items.
+     *
+     * @param int $orderId
+     * @param array $itemsCancelData
+     * @return float
+     */
+    public function triggerRefundForCancelledItems(int $orderId, array $itemsCancelData): float
+    {
+        try {
+            $order = $this->orderRepository->get($orderId);
+
+            if ($order->getPayment()->getMethod() === 'cashondelivery') {
+                return false;
+            }
+
+            $refundTotal = 0;
+            $comment = $itemsCancelData['comment_text'] ?? '';
+            $cancelledItemsData = [];
+            $itemsToRefund = $this->getCancelItemIds($itemsCancelData);
+            foreach ($order->getAllItems() as $item) {
+                if (!in_array($item->getItemId(), $itemsToRefund)) {
+                    continue;
+                }
+
+                $refundTotal += ($item->getRowTotal() - $item->getDiscountAmount());
+                $cancelledItemsData[] = [
+                    'order_item_id' => (int)$item->getItemId(),
+                    'name' => $item->getName(),
+                    'sku' => $item->getSku(),
+                    'cancelled_qty' => (int)$item->getQtyOrdered(),
+                    'product_id' => (int)$item->getProductId(),
+                    'reason' => $itemsCancelData['items'][$item->getItemId()]['reason'] ?? $comment
+                ];
+            }
+            $orderTotalWithoutShipping = $order->getGrandTotal() - $order->getDeliveryCharges();
+            $refundedStoreCredit = ($refundTotal / $orderTotalWithoutShipping) * $order->getCustomerBalanceAmount();
+
+            $refundAmount = $this->updateOrderRefundTotals($order, $itemsToRefund);
+
+            // Revert H Cash for return
+            $this->orderReturnHelper->revertStoreCreditForReturnRequest($order, $refundedStoreCredit);
+
+            $this->refundHelper->addToRefundLogs($order, "refund.triggered");
+            $refundPayload = $this->getRefundDataForCancelledItems($cancelledItemsData, $order, $refundAmount);
+            $this->logger->info(
+                "Partial Cancellation Refund for Order ID: " . $order->getIncrementId(),
+                [
+                    'refund_amount' => $refundAmount,
+                    'refund_payload' => $refundPayload
+                ]
+            );
+            $this->sqsEvent->initiateRefundOnSqs($refundPayload, 'INITIATE_REFUND');
+
+            return true;
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage() . __METHOD__);
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculate Refund Amount for Partial Cancel Request.
+     *
+     * @param SalesOrder $order
+     * @param array $itemsToRefund
+     * @return float|int
+     */
+    private function updateOrderRefundTotals(SalesOrder $order, array $itemsToRefund): float|int
+    {
+        try {
+            $refundTotal = 0;
+            foreach ($order->getAllItems() as $item) {
+                if (!in_array($item->getItemId(), $itemsToRefund)) {
+                    continue;
+                }
+
+                $qtyToRefund = (int)$item->getQtyOrdered();
+                $itemRefundAmount = $this->getRefundedAmountByItemId($order, (int)$item->getItemId(), $qtyToRefund);
+                $refundTotal += $itemRefundAmount;
+
+                $item->setQtyRefunded($item->getQtyRefunded() + $qtyToRefund)
+                    ->setAmountRefunded(
+                        $item->getAmountRefunded() + $itemRefundAmount
+                    )
+                    ->setBaseAmountRefunded(
+                        $item->getBaseAmountRefunded() + $itemRefundAmount
+                    );
+            }
+
+            // Update order refund values
+            $order->setTotalRefunded($order->getTotalRefunded() + $refundTotal)
+                ->setBaseTotalRefunded($order->getBaseTotalRefunded() + $refundTotal);
+
+            $this->orderRepository->save($order);
+            return $refundTotal;
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage() . __METHOD__);
+            return 0;
+        }
+    }
+
+    /**
+     * Get the refunded amount for a specific order item ID.
+     *
+     * @param SalesOrder $order
+     * @param int $orderItemId
+     * @param int $qtyToRefund
+     * @return float
+     */
+    private function getRefundedAmountByItemId(SalesOrder $order, int $orderItemId, int $qtyToRefund): float
+    {
+        foreach ($order->getAllItems() as $orderItem) {
+            if ((int)$orderItem->getId() === $orderItemId) {
+                $totalAfterDiscount = max(0, $orderItem->getRowTotal() - $orderItem->getDiscountAmount());
+                $refundedAmount = ($totalAfterDiscount * $qtyToRefund) / max(1, $orderItem->getQtyOrdered());
+                return round($refundedAmount, 2);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Prepare refund data for cancelled items.
+     *
+     * @param array $cancelledItemsData
+     * @param SalesOrder $order
+     * @param float $refundAmount
+     * @return array
+     */
+    private function getRefundDataForCancelledItems(
+        array $cancelledItemsData,
+        SalesOrder $order,
+        float $refundAmount
+    ): array {
+        $orderDataForRefund = $this->refundHelper->getOrderDataForRefund($order);
+        $orderDataForRefund['payment_information']['refund_amount'] = $refundAmount;
+        $orderDataForRefund['cancel_request'] = [
+            'items' => $cancelledItemsData
+        ];
+        return $orderDataForRefund;
     }
 }
