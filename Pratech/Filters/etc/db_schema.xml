@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyugalife_CatalogAttributes
+ *
+ * @category  XML
+ * @package   Hyugalife\CatalogAttributes
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="pratech_filters_position" resource="default" engine="innodb" comment="Filters Position Table">
+        <column xsi:type="int" name="entity_id" identity="true" nullable="false" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="smallint" name="attribute_id" unsigned="true" nullable="false" padding="10"
+                comment="Attribute Id"/>
+        <column xsi:type="varchar" name="attribute_code" length="255" comment="Attribute Code"/>
+        <column xsi:type="varchar" name="attribute_name" length="255" comment="Attribute Name"/>
+        <column xsi:type="int" name="position" unsigned="true" nullable="false" padding="10" comment="Position"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="PRATECH_FILTERS_POS_ATTR_ID_EAV_ATTR_ATTR_ID"
+                    table="pratech_filters_position" column="attribute_id"
+                    referenceTable="eav_attribute" referenceColumn="attribute_id" onDelete="CASCADE"/>
+    </table>
+    <table name="quick_filters" resource="default" engine="innodb" comment="Quick Filters Table">
+        <column xsi:type="int" name="entity_id" identity="true" nullable="false" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="false" comment="Category Id"/>
+        <column xsi:type="varchar" name="category_name" length="255" comment="Category Name"/>
+        <column xsi:type="text" name="filters_data" nullable="true" comment="Filters Data"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="QUICK_FILTER_FOREIGN_KEY_CATEGORY_ID"
+                    table="quick_filters" column="category_id" referenceTable="catalog_category_entity"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="INDEX_CATEGORY_ID" indexType="btree">
+            <column name="category_id"/>
+        </index>
+    </table>
+</schema>

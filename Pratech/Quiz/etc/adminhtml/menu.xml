@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Quiz
+ *
+ * @category  XML
+ * @package   Pratech\Quiz
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+          <add id="Pratech_Quiz::growth" title="Growth" module="Pratech_Quiz"
+             resource="Pratech_Quiz::growth" sortOrder="60" translate="true"/>
+          <add id="Pratech_Quiz::quiz" title="Manage Quizzes" module="Pratech_Quiz"
+             resource="Pratech_Quiz::quiz" parent="Pratech_Quiz::growth"
+             sortOrder="10" translate="true"/>
+          <add id="Pratech_Quiz::manage_quiz" title="Manage Quiz" module="Pratech_Quiz"
+             resource="Pratech_Quiz::manage_quiz" parent="Pratech_Quiz::quiz"
+             action="quiz/quiz/index" sortOrder="10" translate="true"/>
+          <add id="Pratech_Quiz::quiz_question" title="Manage Questions" module="Pratech_Quiz"
+             resource="Pratech_Quiz::quiz_question" parent="Pratech_Quiz::quiz"
+             action="quiz/quizquestion/index" sortOrder="20" translate="true"/>
+          <add id="Pratech_Quiz::quiz_user_attempt" title="User Attempt" module="Pratech_Quiz"
+             resource="Pratech_Quiz::quiz_user_attempt" parent="Pratech_Quiz::quiz"
+             action="quiz/userattempts/index" sortOrder="30" translate="true"/>
+    </menu>
+</config>

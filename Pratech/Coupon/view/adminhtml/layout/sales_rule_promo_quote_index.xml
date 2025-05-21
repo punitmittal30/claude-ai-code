@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_Coupon
+ *
+ * @category  XML
+ * @package   Pratech\Coupon
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2024 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <referenceBlock name="adminhtml.block.promo.quote.grid.container">
+                <referenceBlock name="adminhtml.block.promo.quote.grid">
+                    <referenceBlock name="adminhtml.promo.quote.grid.columnSet">
+                        <block class="Magento\Backend\Block\Widget\Grid\Column"
+                               name="adminhtml.promo.quote.grid.columnSet.show_in_coupon_listing"
+                               as="show_in_coupon_listing">
+                            <arguments>
+                                <argument name="header" xsi:type="string" translate="true">Show In Coupon Listing
+                                </argument>
+                                <argument name="index" xsi:type="string">show_in_coupon_listing</argument>
+                                <argument name="type" xsi:type="string">options</argument>
+                                <argument name="options" xsi:type="array">
+                                    <item name="active" xsi:type="array">
+                                        <item name="value" xsi:type="string">1</item>
+                                        <item name="label" xsi:type="string" translate="true">Yes</item>
+                                    </item>
+                                    <item name="inactive" xsi:type="array">
+                                        <item name="value" xsi:type="string">0</item>
+                                        <item name="label" xsi:type="string" translate="true">No</item>
+                                    </item>
+                                </argument>
+                            </arguments>
+                        </block>
+                        <block class="Magento\Backend\Block\Widget\Grid\Column"
+                               name="adminhtml.promo.quote.grid.columnSet.is_stackable"
+                               as="is_stackable">
+                            <arguments>
+                                <argument name="header" xsi:type="string" translate="true">Is Stackable</argument>
+                                <argument name="index" xsi:type="string">is_stackable</argument>
+                                <argument name="type" xsi:type="string">options</argument>
+                                <argument name="options" xsi:type="array">
+                                    <item name="active" xsi:type="array">
+                                        <item name="value" xsi:type="string">1</item>
+                                        <item name="label" xsi:type="string" translate="true">Yes</item>
+                                    </item>
+                                    <item name="inactive" xsi:type="array">
+                                        <item name="value" xsi:type="string">0</item>
+                                        <item name="label" xsi:type="string" translate="true">No</item>
+                                    </item>
+                                </argument>
+                            </arguments>
+                        </block>
+                        <block class="Magento\Backend\Block\Widget\Grid\Column"
+                               name="adminhtml.promo.quote.grid.columnSet.stackable_rule_ids" as="stackable_rule_ids">
+                            <arguments>
+                                <argument name="header" xsi:type="string" translate="true">Stackable Rule IDs</argument>
+                                <argument name="index" xsi:type="string">stackable_rule_ids</argument>
+                            </arguments>
+                        </block>
+                    </referenceBlock>
+                </referenceBlock>
+            </referenceBlock>
+        </referenceContainer>
+    </body>
+</page>

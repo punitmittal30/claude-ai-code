@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Pratech_ReviewRatings
+ *
+ * @category  XML
+ * @package   Pratech\ReviewRatings
+ * @author    Vivek Kumar <vivek.kumar@pratechbrands.com>
+ * @copyright 2022 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="review_columns" class="Magento\Ui\Component\Listing\Columns">
+        <column name="power_review" sortOrder="45">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="nl2br" xsi:type="boolean">true</item>
+                    <item name="escape" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Power Review</label>
+            </settings>
+        </column>
+        <column name="position" sortOrder="46">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="nl2br" xsi:type="boolean">true</item>
+                    <item name="escape" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <settings>
+                <filter>select</filter>
+                <options class="Pratech\ReviewRatings\Model\Config\Source\Position"/>
+                <dataType>select</dataType>
+                <label translate="true">Position</label>
+            </settings>
+        </column>
+        <column name="keywords" sortOrder="45">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="nl2br" xsi:type="boolean">true</item>
+                    <item name="escape" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Keywords</label>
+            </settings>
+        </column>
+    </columns>
+</listing>

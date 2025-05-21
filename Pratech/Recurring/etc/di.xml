@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * Pratech_Recurring
+ *
+ * @category  XML
+ * @package   Pratech\Recurring
+ * @author    Akash Panwar <akash.panwar@pratechbrands.com>
+ * @copyright 2025 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<preference for="Pratech\Recurring\Api\SubscriptionRepositoryInterface" type="Pratech\Recurring\Model\SubscriptionRepository"/>
+	<preference for="Pratech\Recurring\Api\Data\SubscriptionInterface" type="Pratech\Recurring\Model\Subscription"/>
+	<preference for="Pratech\Recurring\Api\Data\SubscriptionSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+	<virtualType name="Pratech\Recurring\Model\ResourceModel\Subscription\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">pratech_recurring_subscription</argument>
+			<argument name="resourceModel" xsi:type="string">Pratech\Recurring\Model\ResourceModel\Subscription\Collection</argument>
+		</arguments>
+	</virtualType>
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="pratech_recurring_subscription_listing_data_source" xsi:type="string">Pratech\Recurring\Model\ResourceModel\Subscription\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+	<preference for="Pratech\Recurring\Api\SubscriptionMappingRepositoryInterface" type="Pratech\Recurring\Model\SubscriptionMappingRepository"/>
+	<preference for="Pratech\Recurring\Api\Data\SubscriptionMappingInterface" type="Pratech\Recurring\Model\SubscriptionMapping"/>
+	<preference for="Pratech\Recurring\Api\Data\SubscriptionMappingSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+
+	<preference for="Pratech\Recurring\Api\SubscriptionManagementInterface" type="Pratech\Recurring\Model\SubscriptionManagement"/>
+	<preference for="Pratech\Recurring\Api\Data\SubscriptionRequestItemInterface" type="Pratech\Recurring\Model\Data\SubscriptionRequestItem"/>
+
+	<!-- plugin to remove discount on creating subscription order -->
+    <type name="Magento\SalesRule\Model\RulesApplier">
+        <plugin name="remove_discount_on_order" type="Pratech\Recurring\Plugin\SalesRule\Model\RulesApplier" sortOrder="1" disabled="false"/>
+    </type>
+</config>

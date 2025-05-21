@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Pratech_CustomDeliveryCharges
+ *
+ * @category  XML
+ * @package   Pratech\CustomDeliveryCharges
+ * @author    Puneet Mittal <puneet.mittal@pratechbrands.com>
+ * @copyright 2023 Copyright (c) Pratech Brands Private Limited
+ * @link      https://pratechbrands.com/
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/sales.xsd">
+    <section name="quote">
+        <group name="totals">
+            <item name="delivery_charges" instance="Pratech\CustomDeliveryCharges\Model\Total\DeliveryCharges"
+                  sort_order="525"/>
+        </group>
+    </section>
+    <section name="order_invoice">
+        <group name="totals">
+            <item name="delivery_charges" instance="Pratech\CustomDeliveryCharges\Model\Invoice\Total\DeliveryCharges"
+                  sort_order="250"/>
+        </group>
+    </section>
+    <section name="order_creditmemo">
+        <group name="totals">
+            <item name="delivery_charges"
+                  instance="Pratech\CustomDeliveryCharges\Model\CreditMemo\Total\DeliveryCharges" sort_order="250"/>
+        </group>
+    </section>
+</config>

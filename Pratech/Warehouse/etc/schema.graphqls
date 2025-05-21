@@ -1,0 +1,32 @@
+# Copyright © Magento, Inc. All rights reserved.
+# See COPYING.txt for license details.
+
+type Query {
+    products(
+        pincode: Int @doc(description: "Customer pincode for availability and delivery estimation")
+    ): Products
+}
+
+interface ProductInterface {
+    stock_status: ProductStock @doc(description: "The stock status of the product.") @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\WarehouseInventory")
+    warehouse_inventory: WarehouseInventory @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\WarehouseInventory")
+    estimated_delivery_time(
+    pincode: String! @doc(description: "Customer pincode for delivery estimation")
+    ): EstimatedDeliveryTime @doc(description: "Estimated delivery time information") @resolver(class: "Pratech\\Warehouse\\Model\\Resolver\\EstimatedDeliveryTime")
+}
+
+type EstimatedDeliveryTime @doc(description: "Represents estimated delivery time") {
+    warehouse_code: String @doc(description: "Warehouse code.")
+    delivery_time: Int @doc(description: "Delivery time taken for the product.")
+    quantity: Int @doc(description: "The quantity of the product.")
+}
+
+type WarehouseInventory {
+    inventory_qty: Int
+    inventory_is_in_stock: Boolean
+}
+
+enum ProductStock @doc(description: "States whether a product stock status is in stock or out of stock.") {
+    IN_STOCK
+    OUT_OF_STOCK
+}
