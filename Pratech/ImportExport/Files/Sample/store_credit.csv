@@ -1,3 +1,0 @@
-customer_id,amount,comment,is_refund,order_id
-10,99,Test 1,0,1000000001
-10,199,Test 2,0,0,1000000002
